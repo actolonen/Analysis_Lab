@@ -14,4 +14,4 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 2. The rate of product formation is constant
 3. The reaction only goes forward.  
 
-(renz)[https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4] is an R package.
+[renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package.
