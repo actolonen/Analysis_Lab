@@ -1,0 +1,93 @@
+---
+title: "Hierarchial clustering example"
+author: "Andrew Tolonen"
+date: "apr22"
+output:
+  html_document:
+    code_folding: hide
+---
+
+# References
+https://www.youtube.com/watch?v=MAUs4484TG8
+
+# Introduction
+
+* Hierarchial clustering = unsupervised learning, K-means alternative that does not require specifying number of clusters.
+* Clustering can be top-down or bottom-up (agglomerative, AGNES)
+* Distance metrics
+
+** Euclidean
+** Manhattan
+** Max distance
+
+# Methods
+
+## 1. Setup and file I/O
+
+```{r setup, echo=TRUE, message = FALSE, warning=FALSE}
+
+library(factoextra);
+library(tidyverse);
+
+```
+
+## 2. Clustering 
+```{r clustering, echo=TRUE, message = FALSE, warning=FALSE}
+
+# iris data set: 150 obs of 5 variables
+iris_data = select(iris, -Species);
+
+# scale observbations into z-scores. normalize for distance matrix
+iris_data_sc = scale(iris_data); 
+
+# calc euclidean dist between each of 150 obs: yields 150x150 distance matrix
+iris.dist = dist(iris_data_sc, method="euclidean");
+
+# hierarchial clustering
+iris.clust = hclust(iris.dist, method="complete");
+
+```
+
+## 3. Dendrogram
+```{r dendrogram, echo=TRUE, message = FALSE, warning=FALSE}
+
+# plot dendrogram
+iris.plot = plot(iris.clust);
+
+# draw rectangular diagram around clusters
+rect.hclust(iris.clust, k=3, border=2:5);
+
+```
+
+## 3. Clusters
+```{r clusters, echo=TRUE, message = FALSE, warning=FALSE}
+
+# cut tree into clusters. output=vector assigning each obs to a cluster
+iris.cutree = cutree(iris.clust, k=3);
+
+# add unique row names to each obs containing species info
+rownames(iris_data_sc) = paste(iris$Species, 1:dim(iris)[1], sep ="_");
+
+# visualize clusters
+# provides ggplot2 visualization. Observations are represented by # # points in the plot, using principal components if ncol(data) > 2. An # ellipse is drawn around each cluster.
+
+# arguments are data to be clustered, and cluster membership.
+
+iris.clust.plot = fviz_cluster(list(data=iris_data_sc, cluster = iris.cutree));
+
+iris.clust.plot
+
+```
+
+## 4. Table
+
+```{r table, echo=TRUE, message = FALSE, warning=FALSE}
+
+# frequency table comparing species and clusters
+
+table.out = table(iris.cutree, iris$Species);
+
+table.out
+
+```
+
