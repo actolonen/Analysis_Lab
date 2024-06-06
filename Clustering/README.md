@@ -11,10 +11,10 @@ Steps:
 5. Perform hierarchial clustering usign hclust(). Returns a list of 7 elts.    
 
 hclust() list:
-1. merge
+1. merge: describes merging of clusters at each step of clustering.
 2. height
 3. order
 4. labels
 5. method
 6. call: command used to run hclust()
-7. dist.method: method used to cluster data.
+7. dist.method Distance metric for hierarchial clustering: Euclidean, Manhattan, Max distance.
