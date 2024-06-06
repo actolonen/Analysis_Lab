@@ -12,10 +12,10 @@ https://www.youtube.com/watch?v=MAUs4484TG8
 
 # Introduction
 
-* Hierarchial clustering = unsupervised learning, K-means alternative that does not require specifying number of clusters.
+* Hierarchial clustering = unsupervised learning. It is a K-means alternative that does not require specifying number of clusters.
+
 * Clustering can be top-down or bottom-up (agglomerative, AGNES)
 * Distance metrics
-
 ** Euclidean
 ** Manhattan
 ** Max distance
@@ -26,18 +26,20 @@ https://www.youtube.com/watch?v=MAUs4484TG8
 
 ```{r setup, echo=TRUE, message = FALSE, warning=FALSE}
 
-library(factoextra);
+library(factoextra); # includes functions to extract and visualize the output of multivariate data analyses (PCA)
 library(tidyverse);
+
+rm(list = ls());
 
 ```
 
 ## 2. Clustering 
 ```{r clustering, echo=TRUE, message = FALSE, warning=FALSE}
 
-# iris data set: 150 obs of 5 variables
-iris_data = select(iris, -Species);
+# iris data set: 150 obs of 5 variables: sepal length, sepal width, petal length, petal width, species
+iris_data = select(iris, -Species); # remove non-numeric variable
 
-# scale observbations into z-scores. normalize for distance matrix
+# scale each column into z-scores (mean = 0, sd = 1). normalize for distance matrix.
 iris_data_sc = scale(iris_data); 
 
 # calc euclidean dist between each of 150 obs: yields 150x150 distance matrix
@@ -48,7 +50,7 @@ iris.clust = hclust(iris.dist, method="complete");
 
 ```
 
-## 3. Dendrogram
+## 3. Visualize data as dendrogram
 ```{r dendrogram, echo=TRUE, message = FALSE, warning=FALSE}
 
 # plot dendrogram
@@ -59,7 +61,7 @@ rect.hclust(iris.clust, k=3, border=2:5);
 
 ```
 
-## 3. Clusters
+## 3. Visualize data as clusters
 ```{r clusters, echo=TRUE, message = FALSE, warning=FALSE}
 
 # cut tree into clusters. output=vector assigning each obs to a cluster
@@ -72,7 +74,6 @@ rownames(iris_data_sc) = paste(iris$Species, 1:dim(iris)[1], sep ="_");
 # provides ggplot2 visualization. Observations are represented by # # points in the plot, using principal components if ncol(data) > 2. An # ellipse is drawn around each cluster.
 
 # arguments are data to be clustered, and cluster membership.
-
 iris.clust.plot = fviz_cluster(list(data=iris_data_sc, cluster = iris.cutree));
 
 iris.clust.plot
@@ -83,8 +84,7 @@ iris.clust.plot
 
 ```{r table, echo=TRUE, message = FALSE, warning=FALSE}
 
-# frequency table comparing species and clusters
-
+# frequency table showing the number of each species in each cluster
 table.out = table(iris.cutree, iris$Species);
 
 table.out
