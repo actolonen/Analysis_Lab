@@ -1,7 +1,7 @@
 # Clustering
 
 ## Hierarchial clustering
-(https://www.youtube.com/watch?v=MAUs4484TG8)[Here] is a nice tutorial on hierachial clustering.
+[Here](https://www.youtube.com/watch?v=MAUs4484TG8)is a nice tutorial on hierachial clustering.
 
 Hierarchial clustering is an unsupervised clustering method. It is an alternative to K-means that does not require specifying number of clusters. Clustering can be top-down or bottom-up (agglomerative, AGNES). Distance metrics for hierarchial clustering: Euclidean, Manhattan, Max distance.
 
