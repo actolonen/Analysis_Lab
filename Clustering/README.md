@@ -1,4 +1,4 @@
-# Clustering
+# Data Clustering
 
 ## Hierarchial clustering in R
 [Here](https://www.youtube.com/watch?v=MAUs4484TG8) is a nice tutorial on hierachial clustering.
