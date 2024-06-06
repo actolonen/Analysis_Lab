@@ -5,7 +5,7 @@
 
 Hierarchial clustering is an unsupervised clustering method (observations are unlabeled) that does not require specifying number of clusters. Clustering can be top-down or bottom-up (agglomerative, AGNES). Distance metrics for hierarchial clustering: Euclidean, Manhattan, Max distance.
 
-Steps:
+Steps for hierarchical clustering of iris dataset
 1. organize data into data.frame: rows = n observations, cols = m variables
 2. Remove any non-numeric variables
 3. Normalize each variable to Z-scores (mean = 0, sd = 1) using scale(). Returns n x m matrix
