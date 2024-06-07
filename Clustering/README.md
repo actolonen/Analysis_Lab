@@ -1,7 +1,7 @@
 # Data Clustering
 
 ## Hierarchial clustering in R
-[Here](https://www.youtube.com/watch?v=MAUs4484TG8) is a nice tutorial on hierachial clustering.
+Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/hierarchicalClustering_method.html) and a nice [video tutorial](https://www.youtube.com/watch?v=MAUs4484TG8) on implementation of hierarchical clustering in R.
 
 Hierarchial clustering is an unsupervised clustering method (observations are unlabeled) that does not require specifying number of clusters. Clustering can be top-down or bottom-up (agglomerative, AGNES). Distance metrics for hierarchial clustering: Euclidean, Manhattan, Max distance.
 
