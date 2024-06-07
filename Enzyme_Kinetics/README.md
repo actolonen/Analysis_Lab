@@ -18,4 +18,7 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 
 ## Calculate the initial reaction rate of an enzyme (vmax)
 
-As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/reactionRate_method.html) provides a method to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) during this period.
+As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/reactionRate_method.html) provides two methods to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) during this period:
+
+1. Method 1: points are selected starting from t=0. Each time a point is added, the linear model is recalculated and the slope is captured. The slopes are clustered and the points that cluster together with the highest reaction rate are selected for the linear regression.
+2. Method 2: points are selected based on a sliding window of size = n, slopes are calculated and clustered, points belowing to the cluster with the highest slopes are included in the linear correlation.
