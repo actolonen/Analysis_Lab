@@ -16,6 +16,6 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 
 [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. 
 
-## Calculate the initial reaction rate of an enzyme based on accumulation of substrate
+## Calculate the initial reaction rate of an enzyme (vmax)
 
 As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [Script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/reactionRate_method.html) provides a method to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) during this period.
