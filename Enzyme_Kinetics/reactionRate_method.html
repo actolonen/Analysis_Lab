@@ -447,10 +447,12 @@ display: none;
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>This notebook describes how to calculate the initial reaction rate of
-an enzyme based on the accumulation of product. As product accumulation
-saturates, the calculation of reaction rate requires the identification
-of the initial, linear portion of a curve.</p>
+<p>This notebook describes how to calculate the initial reaction rate
+(vmax) of an enzyme. Initially, the accumulation of product is linear.
+However, as the substrate becomes limiting, the reaction rate decreases.
+This script provides a method to identify the initial points
+corresponding to the linear portion of the curve. These points are used
+to calculate vmax of the enzyme.</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <p>Knitr options</p>
