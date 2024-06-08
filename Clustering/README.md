@@ -22,7 +22,7 @@ hclust() list:
 
 ## K-means clustering in R
 
-Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/kmeans_method.html) and nice [video tutorial](https://www.youtube.com/watch?v=NKQpVU1LTm8) on implementation of K-means clustering in R.
+Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/kmeans_method.md) and nice [video tutorial](https://www.youtube.com/watch?v=NKQpVU1LTm8) on implementation of K-means clustering in R.
 
 K-means is an unsupervised clustering method that groups observations into a user-defined number of clusters. The goal of k-means is to partition the data into 
 k groups such that Euclidean distance from points to the assigned cluster centres is minimized. It is an iterative method whereby K centroids are placed in the data space and each data point is assigned to the nearest cluster based on Euclidean distance. The centroids are then moved to the centers of the new clusters and the observations are reassigned. This process is iterated until either the centroids no longer move or the number of iterations are reached.
