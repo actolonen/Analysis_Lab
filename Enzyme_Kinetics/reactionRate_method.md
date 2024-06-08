@@ -1,29 +1,28 @@
----
-title: "Calculate enzyme vmax based on initial reaction rate"
-author: "Andrew Tolonen"
-date: '2024'
-output:
-  github_document:
-    html_preview: false
-urlcolor: blue
----
+Calculate enzyme vmax based on initial reaction rate
+================
+Andrew Tolonen
+2024
 
 # Introduction
 
-This notebook describes how to calculate the initial reaction rate (vmax) of an enzyme. Initially, the accumulation of product is linear. However, as the substrate becomes limiting, the reaction rate decreases. This script provides a method to identify the initial points corresponding to the linear portion of the curve. These points are used to calculate vmax of the enzyme.
+This notebook describes how to calculate the initial reaction rate
+(vmax) of an enzyme. Initially, the accumulation of product is linear.
+However, as the substrate becomes limiting, the reaction rate decreases.
+This script provides a method to identify the initial points
+corresponding to the linear portion of the curve. These points are used
+to calculate vmax of the enzyme.
 
 ## Setup
 
 Knitr options
-```{r knit options}
 
+``` r
 knitr::opts_chunk$set(warning = F, message = F);
-
 ```
 
 File setup
-```{r setup}
 
+``` r
 rm(list = ls());
 
 library(tidyverse);
@@ -43,12 +42,11 @@ mytheme = theme(axis.text.x = element_text(size = 4),
                legend.position = "none", 
                aspect.ratio =1,
                plot.caption=element_textbox_simple(padding = margin(10,0,10,0), hjust=0, size=10));
-
 ```
 
 Function to calculate slope of linear model
-```{r function slope}
 
+``` r
 getSlope = function(d) # function to calc the slope of a linear regression
 {
   d = as.data.frame(d);
@@ -56,22 +54,20 @@ getSlope = function(d) # function to calc the slope of a linear regression
   myslope = m$coefficient[2];
   return(myslope);
 }
-
 ```
 
-Load data 
-```{r load data}
+Load data
 
+``` r
 # load reaction data
 datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/reactionRate.xlsx";
 input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
-
 ```
 
+Method 1: calculate linear model from t=0 using increasing numbers of
+points
 
-Method 1: calculate linear model from t=0 using increasing numbers of points
-```{r calc linear model 1, fig.cap = "Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected starting from t=0 and selecting increasing numbers of points."}
-
+``` r
 # Goal: select the number of initial data points composing the initial, linear portion of the curve. This method assumes the curve is composed of two parts: the linear part and the non-linear part. 
 
 # 1. Calc the slopes of linear models of increasing numbers of data points
@@ -134,13 +130,22 @@ myplot1 = ggplot(mydata, aes(x=Minutes, y=Product)) +
   theme_classic();
 
 myplot1
-
 ```
 
+<figure>
+<img
+src="reactionRate_method_files/figure-gfm/calc%20linear%20model%201-1.png"
+alt="Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected starting from t=0 and selecting increasing numbers of points." />
+<figcaption aria-hidden="true">Fig: Enzyme catalyzed accumulation of
+product. Data points show product concentration and the black line shows
+the rate of product formation for the initial, linear portion of the
+curve. Points were selected starting from t=0 and selecting increasing
+numbers of points.</figcaption>
+</figure>
 
-Method 2: calculate linear model using sliding window 
-```{r calc linear model 2, fig.cap = "Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected based on sliding window."}
+Method 2: calculate linear model using sliding window
 
+``` r
 # Goal: select the number of initial data points composing the initial, linear portion of the curve. This method assumes the curve is composed of two parts: the linear part and the non-linear part. 
 
 # 1. Calc the slopes of linear models of increasing numbers of data points
@@ -198,6 +203,14 @@ myplot2 = ggplot(mydata, aes(x=Minutes, y=Product)) +
   theme_classic();
 
 myplot2
-
 ```
 
+<figure>
+<img
+src="reactionRate_method_files/figure-gfm/calc%20linear%20model%202-1.png"
+alt="Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected based on sliding window." />
+<figcaption aria-hidden="true">Fig: Enzyme catalyzed accumulation of
+product. Data points show product concentration and the black line shows
+the rate of product formation for the initial, linear portion of the
+curve. Points were selected based on sliding window.</figcaption>
+</figure>
