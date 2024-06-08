@@ -14,7 +14,11 @@ apr22
 
 - Clustering can be top-down or bottom-up (agglomerative, AGNES)
 
-- Distance metrics \*\* Euclidean \*\* Manhattan \*\* Max distance
+- Distance metrics
+
+1.  Euclidean
+2.  Manhattan
+3.  Max distance
 
 # Methods
 

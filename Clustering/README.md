@@ -1,7 +1,7 @@
 # Data Clustering
 
 ## Hierarchial clustering in R
-Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/hierarchicalClustering_method.md) and a nice [video tutorial](https://www.youtube.com/watch?v=MAUs4484TG8) on implementation of hierarchical clustering in R.
+Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/hierarchicalClustering_method.html) and a nice [video tutorial](https://www.youtube.com/watch?v=MAUs4484TG8) on implementation of hierarchical clustering in R.
 
 Hierarchial clustering is an unsupervised clustering method (observations are unlabeled) that does not require specifying number of clusters. Clustering can be top-down or bottom-up (agglomerative, AGNES). Distance metrics for hierarchial clustering: Euclidean, Manhattan, Max distance.
 
@@ -22,7 +22,7 @@ hclust() list:
 
 ## K-means clustering in R
 
-Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/kmeans_method.md) and nice [video tutorial](https://www.youtube.com/watch?v=NKQpVU1LTm8) on implementation of K-means clustering in R.
+Here is a [script](https://github.com/actolonen/Analysis_Lab/blob/main/Clustering/kmeans_method.html) and nice [video tutorial](https://www.youtube.com/watch?v=NKQpVU1LTm8) on implementation of K-means clustering in R.
 
 K-means is an unsupervised clustering method that groups observations into a user-defined number of clusters. The goal of k-means is to partition the data into 
 k groups such that Euclidean distance from points to the assigned cluster centres is minimized. It is an iterative method whereby K centroids are placed in the data space and each data point is assigned to the nearest cluster based on Euclidean distance. The centroids are then moved to the centers of the new clusters and the observations are reassigned. This process is iterated until either the centroids no longer move or the number of iterations are reached.
