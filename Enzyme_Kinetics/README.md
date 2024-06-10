@@ -1,6 +1,6 @@
 # Methods for analysis of enzyme kinetics
 
-**Michaelis-Menton equation** is a simple way to calculate enzyme activities using this equation:
+**Michaelis-Menton equation** is enables us to relate enzyme velocity (v) to substrate concentration using a simple equation:
 
 $v = {vmax * S \over (S + Km)}$ where
 
@@ -14,9 +14,21 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 2. The rate of product formation is constant (the product has no effect on the catalyzed reaction rate).
 3. The reaction only goes forward (substrate concentration drops as it is converted into a product by the direct unidirectional reaction catalyzed by our enzyme).
 
-[renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. 
+To apply the michaelis-menton equation, we need to calculate the Km and the Vmax for an enzyme. [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. 
 
-## Calculate the initial reaction rate of an enzyme (vmax)
+# Three methods to calculate Km and Vmax from enzyme data
+
+### Method 1: calculate Km, Vmax directly from substrate versus time curves using the fE.progress() in the renz package
+
+fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. 
+
+### Method 2: calculate V vs S curves at different initial substrate concentrations, then calculate Km, Vmax using dir.MM() in renz package.
+
+We first need to calculate the enzyme initial velocities at a range of substrate concentrations (see below). We then can use dir.MM() from the renz package to perform a non-linear least square fitting of kinetic data to the Michaelis-Menten equation.
+
+### Method 3: calculate V vs S curves at different initial substrate concentration, then calculate Km, Vmax by a linear transformation using Lineweaver-Burke.
+
+### Methods 2 and 3 require the calculation of the initial reaction rate of an enzyme at different intial substrate concentrations.
 
 As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/reactionRate_method.md) provides two methods to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) during this period:
 
