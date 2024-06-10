@@ -16,7 +16,7 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 
 To apply the michaelis-menton equation, we need to calculate the Km and the Vmax for an enzyme. [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. 
 
-# Three methods to calculate enzyme kinetic paramters (Km and Vmax)
+## Three methods to calculate enzyme kinetic paramters (Km and Vmax)
 
 ### Method 1: calculate Km, Vmax directly from substrate versus time curves using the fE.progress() in the renz package
 
