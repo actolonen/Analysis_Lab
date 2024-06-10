@@ -16,19 +16,19 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 
 To apply the michaelis-menton equation, we need to calculate the Km and the Vmax for an enzyme. [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is an R package available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. 
 
-## Three methods to calculate enzyme kinetic paramters (Km and Vmax)
+To use the Michaelis-Menton equation, we need to calculate two enzyme kinetic parameters: Km and Vmax. Below, we discuss three methods to calculate them.
 
-### Method 1: calculate Km, Vmax directly from substrate versus time curves using the fE.progress() in the renz package
+## Method 1: calculate Km, Vmax directly from substrate versus time curves using the fE.progress() in the renz package
 
 fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. 
 
-### Method 2: calculate V vs S curves at different initial substrate concentrations, then calculate Km, Vmax using dir.MM() in renz package.
+## Method 2: calculate V vs S curves at different initial substrate concentrations, then calculate Km, Vmax using dir.MM() in renz package.
 
 We first need to calculate the enzyme initial velocities at a range of substrate concentrations (see below). We then can use dir.MM() from the renz package to perform a non-linear least square fitting of kinetic data to the Michaelis-Menten equation.
 
-### Method 3: calculate V vs S curves at different initial substrate concentration, then calculate Km, Vmax by a linear transformation using Lineweaver-Burke.
+## Method 3: calculate V vs S curves at different initial substrate concentration, then calculate Km, Vmax by a linear transformation using Lineweaver-Burke.
 
-### Methods 2 and 3 require the calculation of the initial reaction rate of an enzyme at different intial substrate concentrations.
+## Methods 2 and 3 require the calculation of the initial reaction rate of an enzyme at different intial substrate concentrations.
 
 As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/reactionRate_method.md) provides two methods to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) during this period:
 
