@@ -2,7 +2,7 @@
 
 **Michaelis-Menton equation** is enables us to relate enzyme velocity (v) to substrate concentration using a simple equation:
 
-$v = {vmax * S \over (S + Km)}$ where
+$v = {vmax * S \over (S + Km)}$ 
 
 * v = reaction rate
 * vmax = max reaction rate (substrate not limiting)
