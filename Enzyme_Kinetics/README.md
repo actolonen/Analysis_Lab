@@ -18,11 +18,11 @@ To apply the michaelis-menton equation, we need to calculate the Km and the Vmax
 
 To use the Michaelis-Menton equation, we need to calculate two enzyme kinetic parameters: Km and Vmax. Below, we discuss three methods to calculate them.
 
-## Method 1: calculate Km, Vmax directly from substrate versus time curves using the fE.progress() in the renz package
+## Method 1: calculate Km, Vmax directly from substrate versus time curves using fE.progress() in the renz package
 
 fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. 
 
-## Method 2: calculate V vs S curves at different initial substrate concentrations, then calculate Km, Vmax using dir.MM() in renz package.
+## Method 2: calculate V vs S curves at different initial substrate concentrations, then calculate Km, Vmax using dir.MM() in the renz package.
 
 We first need to calculate the enzyme initial velocities at a range of substrate concentrations (see below). We then can use dir.MM() from the renz package to perform a non-linear least square fitting of kinetic data to the Michaelis-Menten equation.
 
