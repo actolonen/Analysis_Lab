@@ -1,28 +1,26 @@
-Calculate enzyme vmax based on initial reaction rate
-================
-Andrew Tolonen
-2024
+---
+title: "Calculate initial reaction rate"
+author: "Andrew Tolonen"
+date: '2024'
+output:
+  github_document:
+    toc: True
+---
 
 # Introduction
 
-This notebook describes how to calculate the initial reaction rate
-(vmax) of an enzyme. Initially, the accumulation of product is linear.
-However, as the substrate becomes limiting, the reaction rate decreases.
-This script provides a method to identify the initial points
-corresponding to the linear portion of the curve. These points are used
-to calculate vmax of the enzyme.
+This notebook describes how to calculate the initial reaction rate (vmax) of an enzyme. Initially, the accumulation of product is linear. However, as the substrate becomes limiting, the reaction rate decreases. This script provides a method to identify the initial points corresponding to the linear portion of the curve. These points are used to calculate vmax of the enzyme.
 
-## Setup
+# Setup
 
-Knitr options
+```{r knit options}
 
-``` r
 knitr::opts_chunk$set(warning = F, message = F);
+
 ```
 
-File setup
+```{r setup}
 
-``` r
 rm(list = ls());
 
 library(tidyverse);
@@ -42,11 +40,13 @@ mytheme = theme(axis.text.x = element_text(size = 4),
                legend.position = "none", 
                aspect.ratio =1,
                plot.caption=element_textbox_simple(padding = margin(10,0,10,0), hjust=0, size=10));
+
 ```
 
-Function to calculate slope of linear model
+# Functions
 
-``` r
+```{r function slope}
+
 getSlope = function(d) # function to calc the slope of a linear regression
 {
   d = as.data.frame(d);
@@ -54,25 +54,31 @@ getSlope = function(d) # function to calc the slope of a linear regression
   myslope = m$coefficient[2];
   return(myslope);
 }
+
 ```
 
-Load data
+# Results
 
-``` r
+```{r load data}
+
 # load reaction data
 datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/reactionRate.xlsx";
 input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
+
+head(input, 10)
+
 ```
 
-Method 1: calculate linear model from t=0 using increasing numbers of
-points
 
-``` r
-# Goal: select the number of initial data points composing the initial, linear portion of the curve. This method assumes the curve is composed of two parts: the linear part and the non-linear part. 
+## Method 1
+Calculate linear model from t=0 using increasing numbers of points. This method assumes the curve is composed of two parts: the linear part and the non-linear part.  The points are divided into the linear vs non-linear groups by K-means and the cluster containing the greater slope is selected.
 
-# 1. Calc the slopes of linear models of increasing numbers of data points
-# 2. Cluster the slopes into two clusters by K-means
-# 3. Select datapoints in cluster with high initial reaction rate.
+1. Calc the slopes of linear models of increasing numbers of data points
+2. Cluster the slopes into two clusters by K-means
+3. Select datapoints in cluster with high initial reaction rate.
+
+
+```{r calc linear model 1, fig.cap = "Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected starting from t=0 and calculating the slope for increasing numbers of points. The slopes were clustered by K-means and all points that cluster with the intial slopes are included for calculating the linear regression."}
 
 mydata = input;
 slopes.all = numeric(0); # delcare empty vector
@@ -114,7 +120,7 @@ my.ylim = max(mydata$Product);
 my.xlim = max(mydata$Minutes);
 
 # regression line
-regline = paste("Product = ", round(myslope, 2), "* minutes + ", yintercept, sep = "");
+regline = paste("Product = ", round(myslope, 2), "* minutes + ", round(yintercept, 2), sep = "");
 
 # plot data (red points) and regression line (black line)
 myplot1 = ggplot(mydata, aes(x=Minutes, y=Product)) +
@@ -130,48 +136,40 @@ myplot1 = ggplot(mydata, aes(x=Minutes, y=Product)) +
   theme_classic();
 
 myplot1
+
 ```
 
-<figure>
-<img
-src="reactionRate_method_files/figure-gfm/calc%20linear%20model%201-1.png"
-alt="Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected starting from t=0 and selecting increasing numbers of points." />
-<figcaption aria-hidden="true">Fig: Enzyme catalyzed accumulation of
-product. Data points show product concentration and the black line shows
-the rate of product formation for the initial, linear portion of the
-curve. Points were selected starting from t=0 and selecting increasing
-numbers of points.</figcaption>
-</figure>
+## Method 2
 
-Method 2: calculate linear model using sliding window
+Calculate linear model using sliding window. Here, instead of assuming the data is divided into two parts (linear and non-linear), we identify the set of n contiguous points with the greatest slope. These points are used to define the slope (max reaction rate).
 
-``` r
-# Goal: select the number of initial data points composing the initial, linear portion of the curve. This method assumes the curve is composed of two parts: the linear part and the non-linear part. 
+```{r calc linear model 2, fig.cap = "Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected based on sliding window on n points. The sliding window with the greatest slope was used to calculate the linear regression."}
 
-# 1. Calc the slopes of linear models of increasing numbers of data points
-# 2. Cluster the slopes into two clusters by K-means
-# 3. Select datapoints in cluster with high initial reaction rate.
+# define size of sliding window.
+window.width = 4; 
 
+# Goal: select the number of initial data points composing the initial, linear portion of the curve. 
 mydata = input;
 slopes.all = numeric(0); # delcare empty vector
 
-# Method 2: calculate slope across rolling window  data points  
-co = rollapply(mydata, width = 3, getSlope, by.column=F); # apply a function across a rolling window. 
+# Method 2: calculate slope across rolling window of data points  
+co = rollapply(mydata, width = window.width, getSlope, by.column=F); # apply a function across a rolling window. 
 
-co = c(0, 0, co); # add 2 initial zeros
+# add zeros corresponding to final datapoints for which we can't calculate a slope
+final.zeros = rep(0, window.width-1);
+co = c(co, final.zeros); # add 2 initial zeros
 
-# # add col of slopes to data.
+# add col of slopes and row numbers to data.
 mydata = mydata %>%
-  mutate(Slopes = co);
+  mutate(Slopes = co) %>%
+  mutate(rownum = 1:nrow(mydata));
 
-# cluster the slopes of the linear regression (cluster 1 = good and cluster 2 = bad)
-co.cl = kmeans(mydata$Slopes, 2); 
-
-# b.points are points included in linear part of curve
-b.points = which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers));
-
-# RES is positions of points in data with indices in b.points
-RES = mydata[b.points,];
+# find datapoints with greatest slope
+max.slope = max(mydata$Slopes);
+getrow = mydata %>%
+  filter(Slopes == max.slope);
+firstrow = getrow$rownum;
+RES = slice(mydata, firstrow:(firstrow+(window.width-1)));
 
 # calc lin regression for points in linear portion of curve
 test = lm(Product ~ Minutes, RES);
@@ -187,7 +185,7 @@ my.ylim = max(mydata$Product);
 my.xlim = max(mydata$Minutes);
 
 # regression line
-regline = paste("Product = ", round(myslope, 2), "* minutes + ", yintercept, sep = "");
+regline = paste("Product = ", round(myslope, 2), "* minutes + ", round(yintercept, 2), sep = "");
 
 # plot data (red points) and regression line (black line)
 myplot2 = ggplot(mydata, aes(x=Minutes, y=Product)) +
@@ -203,14 +201,6 @@ myplot2 = ggplot(mydata, aes(x=Minutes, y=Product)) +
   theme_classic();
 
 myplot2
+
 ```
 
-<figure>
-<img
-src="reactionRate_method_files/figure-gfm/calc%20linear%20model%202-1.png"
-alt="Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected based on sliding window." />
-<figcaption aria-hidden="true">Fig: Enzyme catalyzed accumulation of
-product. Data points show product concentration and the black line shows
-the rate of product formation for the initial, linear portion of the
-curve. Points were selected based on sliding window.</figcaption>
-</figure>
