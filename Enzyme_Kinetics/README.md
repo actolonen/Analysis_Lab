@@ -14,7 +14,7 @@ Michaelis-menton kinetics requires that a few basic assumptions are met:
 2. The rate of product formation is constant (the product has no effect on the catalyzed reaction rate).
 3. The reaction only goes forward (substrate concentration drops as it is converted into a product by the direct unidirectional reaction catalyzed by our enzyme).
 
-To apply the michaelis-menton equation, we need to calculate the Km and the Vmax for an enzyme. The R package [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. Below, we discuss three methods to calculate Km and Vmax.
+To apply the Michaelis-Menton equation to calculate reaction velocity at different substrate concentrations for a given enzyme, we need to calculate the Km and the Vmax for that enzyme. The R package [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is available from the CRAN repository for analysis of Michaelis-Menton enzyme kinetics data. It can be installed in R Studio usiong *install.packages("renz")*. Below, we discuss three methods to calculate Km and Vmax.
 
 ## Method 1: calculate Km, Vmax directly from substrate versus time curves using fE.progress() in the renz package
 
