@@ -4,7 +4,7 @@
 
 $v = {vmax * S \over (S + Km)}$ 
 
-* v = reaction rate
+* v = enzyme velocity (reaction rate)
 * vmax = max reaction rate (substrate not limiting)
 * S = substrate concentration
 * Km = substrate concentration where v = vmax / 2
