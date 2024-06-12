@@ -1,4 +1,4 @@
-Calculate initial reaction rate substrate consumption curve
+Calculate initial reaction rate
 ================
 Andrew Tolonen
 2024
@@ -72,7 +72,7 @@ getSlope = function(d) # function to calc the slope of a linear regression
 
 ``` r
 # load reaction data
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/reactionRate.xlsx";
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/reactionRate.xlsx";
 input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
 
 head(input, 10)
