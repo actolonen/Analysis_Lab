@@ -35,7 +35,7 @@ We first need to calculate the enzyme initial velocities at a range of substrate
 
 ## Method 3: Lineweaver-Burke 
 
-As in method 2, we first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We can then calculate Km and Vmax based on a linear transformation of the Michaelis-Menton equation. We plot the S and V data as 1/V versus 1/S. The 
+As in method 2, we first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We can then calculate Km and Vmax based on a linear transformation of the Michaelis-Menton equation. We plot the S and V data as 1/V versus 1/S. The y-intercept yields 1/Vmax and the slope is Km/Vmax.
 
 ![alt text](![alt text](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/Images/lmTransformation.png)
 
