@@ -29,8 +29,13 @@ fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters o
 
 This yields a linear equation from which the slope can be used to calculate Km and the y-intercept is (Vmax/Km). Since the method does not require calculation of initial rates, it avoid the bias introduced by underestimating initial rates. 
 
-## Method 2: non-linear least squares to calculate V vs S curves at different initial substrate concentrations
+## Method 2: non-linear least squares to fit line to S vs V curve
 
 We first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We then can use dir.MM() from the renz package to perform a non-linear least square fitting of kinetic data to the Michaelis-Menten equation.
 
-## Method 3: Lineweaver-Burke to calculate V vs S curves at different initial substrate concentration
+## Method 3: Lineweaver-Burke 
+
+As in method 2, we first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We can then calculate Km and Vmax based on a linear transformation of the Michaelis-Menton equation. 
+
+![alt text](![alt text](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/Images/lmTransformation.png))
+
