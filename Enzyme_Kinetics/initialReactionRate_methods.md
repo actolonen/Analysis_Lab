@@ -1,4 +1,4 @@
-Calculate initial reaction rate
+Calculate initial reaction rate substrate consumption curve
 ================
 Andrew Tolonen
 2024
@@ -13,11 +13,20 @@ Andrew Tolonen
 # Introduction
 
 This notebook describes how to calculate the initial reaction rate
-(vmax) of an enzyme. Initially, the accumulation of product is linear.
+(vmax) of an enzyme. Initially, the consumption of substrate is linear.
 However, as the substrate becomes limiting, the reaction rate decreases.
-This script provides a method to identify the initial points
+This script provides two methods to identify the initial points
 corresponding to the linear portion of the curve. These points are used
-to calculate vmax of the enzyme.
+to calculate a linear model for which the slope describes the vmax of
+the enzyme.
+
+In method 1, the slopes are calculated for varying number of points
+starting from t=0 and the slopes are clustered. All points clustering
+with the initial slope are included in the linear regression. In method
+2, the slopes of all set of n points are calculated. The set with the
+greatest slope is used for a linear regression. If desired, the
+clustering approach used in method 1 could be applied to method 2 to
+group points.
 
 # Setup
 
@@ -53,7 +62,7 @@ mytheme = theme(axis.text.x = element_text(size = 4),
 getSlope = function(d) # function to calc the slope of a linear regression
 {
   d = as.data.frame(d);
-  m = lm(Product ~ Minutes, d);
+  m = lm(Substrate ~ Minutes, d);
   myslope = m$coefficient[2];
   return(myslope);
 }
@@ -70,18 +79,18 @@ head(input, 10)
 ```
 
     ## # A tibble: 10 × 2
-    ##    Minutes Product
-    ##      <dbl>   <dbl>
-    ##  1     0     0    
-    ##  2     0.1   0.178
-    ##  3     0.2   0.269
-    ##  4     0.3   0.336
-    ##  5     0.4   0.376
-    ##  6     0.5   0.412
-    ##  7     0.6   0.429
-    ##  8     0.7   0.462
-    ##  9     0.8   0.488
-    ## 10     0.9   0.51
+    ##    Minutes Substrate
+    ##      <dbl>     <dbl>
+    ##  1     0       0.689
+    ##  2     0.1     0.511
+    ##  3     0.2     0.42 
+    ##  4     0.3     0.353
+    ##  5     0.4     0.313
+    ##  6     0.5     0.277
+    ##  7     0.6     0.26 
+    ##  8     0.7     0.227
+    ##  9     0.8     0.201
+    ## 10     0.9     0.179
 
 ## Method 1
 
@@ -118,34 +127,34 @@ mydata = mydata %>%
 co.cl = kmeans(mydata$Slopes, 2); 
 
 # b.points are points included in linear part of curve
-b.points = which(co.cl$cluster == match(max(co.cl$centers), co.cl$centers));
+b.points = which(co.cl$cluster == match(min(co.cl$centers), co.cl$centers));
 
 # RES is positions of points in data with indices in b.points
 RES = mydata[b.points,];
 
 # calc lin regression for points in linear portion of curve
-test = lm(Product ~ Minutes, RES);
+test = lm(Substrate ~ Minutes, RES);
 
 # calc regression line
 yintercept = test$coefficients[1];
 myslope = test$coefficients[2];
-Product_calc = myslope * mydata$Minutes + yintercept;
-RES = cbind(mydata, Product_calc);
+Substrate_calc = myslope * mydata$Minutes + yintercept;
+RES = cbind(mydata, Substrate_calc);
 
 # calc max vals for axes
-my.ylim = max(mydata$Product);
+my.ylim = max(mydata$Substrate);
 my.xlim = max(mydata$Minutes);
 
 # regression line
 regline = paste("Product = ", round(myslope, 2), "* minutes + ", round(yintercept, 2), sep = "");
 
 # plot data (red points) and regression line (black line)
-myplot1 = ggplot(mydata, aes(x=Minutes, y=Product)) +
+myplot1 = ggplot(mydata, aes(x=Minutes, y=Substrate)) +
   ggtitle("Method 1: data and linear regression line")+
   geom_point(size=1, color = "red") +
   xlab("Minutes") + 
-  ylab("Product") +
-  geom_line(aes(x=Minutes, y=Product_calc))+
+  ylab("Substrate") +
+  geom_line(aes(x=Minutes, y=Substrate_calc))+
   coord_cartesian(xlim=c(0,my.xlim), ylim = c(0, my.ylim))+
  scale_x_continuous(breaks=seq(0, my.xlim, my.xlim/10))+
  scale_y_continuous(breaks=seq(0, my.ylim, my.ylim/10))+
@@ -196,35 +205,35 @@ mydata = mydata %>%
   mutate(rownum = 1:nrow(mydata));
 
 # find datapoints with greatest slope
-max.slope = max(mydata$Slopes);
+min.slope = min(mydata$Slopes);
 getrow = mydata %>%
-  filter(Slopes == max.slope);
+  filter(Slopes == min.slope);
 firstrow = getrow$rownum;
 RES = slice(mydata, firstrow:(firstrow+(window.width-1)));
 
 # calc lin regression for points in linear portion of curve
-test = lm(Product ~ Minutes, RES);
+test = lm(Substrate ~ Minutes, RES);
 
 # calc regression line
 yintercept = test$coefficients[1];
 myslope = test$coefficients[2];
-Product_calc = myslope * test.data$Minutes + yintercept;
-RES = cbind(mydata, Product_calc);
+Substrate_calc = myslope * test.data$Minutes + yintercept;
+RES = cbind(mydata, Substrate_calc);
 
 # calc max vals for axes
-my.ylim = max(mydata$Product);
+my.ylim = max(mydata$Substrate);
 my.xlim = max(mydata$Minutes);
 
 # regression line
 regline = paste("Product = ", round(myslope, 2), "* minutes + ", round(yintercept, 2), sep = "");
 
 # plot data (red points) and regression line (black line)
-myplot2 = ggplot(mydata, aes(x=Minutes, y=Product)) +
+myplot2 = ggplot(mydata, aes(x=Minutes, y=Substrate)) +
   ggtitle("Method 2: data and linear regression line")+
   geom_point(size=1, color = "red") +
   xlab("Minutes") + 
-  ylab("Product") +
-  geom_line(aes(x=Minutes, y=Product_calc))+
+  ylab("Substrate") +
+  geom_line(aes(x=Minutes, y=Substrate_calc))+
   coord_cartesian(xlim=c(0,my.xlim), ylim = c(0, my.ylim))+
  scale_x_continuous(breaks=seq(0, my.xlim, my.xlim/10))+
  scale_y_continuous(breaks=seq(0, my.ylim, my.ylim/10))+
