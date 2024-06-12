@@ -20,7 +20,9 @@ Methods 2 and 3 below rely upon first calculating the intial reaction rate at a 
 
 ## Method 1: calculate Km, Vmax directly from substrate versus time curves 
 
-fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. 
+fE.progress uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. In this method, we relate the variation in the concentration of substrate over time integrating the velocity equation as follows: 
+
+![alt text](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/Images/integration_MM.png)
 
 ## Method 2: non-linear least squares to calculate V vs S curves at different initial substrate concentrations
 
