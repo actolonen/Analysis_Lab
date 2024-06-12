@@ -12,11 +12,11 @@ $v = {vmax * S \over (S + Km)}$
 ![alt text](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/Images/plotMM.png)
 
 Michaelis-Menten kinetics requires that a few basic assumptions are met:
-1. Substrate concentration is higher than the enzyme concentration (substrate not limiting).
-2. The rate of product formation is constant (the product has no effect on the catalyzed reaction rate).
-3. The reaction only goes forward (substrate concentration drops as it is converted into a product by the direct unidirectional reaction catalyzed by our enzyme).
+1. Substrate concentration is higher than the enzyme concentration (all enzyme molecules occupied).
+2. No product inhibition (the product has no effect on the catalyzed reaction rate).
+3. The reaction only goes forward (substrate concentration drops as it is converted into a product by the unidirectional reaction catalyzed by our enzyme).
 
-Typically, we can measure the consumption of substrate or accumulation of product from an enzymatic reaction. However, to apply the Michaelis-Menten equation to calculate reaction velocity at different substrate concentrations, we need to calculate the Km and the Vmax for that enzyme. The R package [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is available from the CRAN repository to calculate paramters for Michaelis-Menten enzyme kinetics data. It can be installed in R Studio as *install.packages("renz")*. Below, we discuss three methods to calculate Km and Vmax using functions in the renz package.
+In lab, we typically measure the consumption of substrate or accumulation of product over time (substrate/product versus time. However, to apply the Michaelis-Menten equation we need the reaction velocity at different substrate concentrations. The R package [renz](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04729-4) is available from the CRAN repository to calculate paramters for Michaelis-Menten enzyme kinetics data. It can be installed in R Studio as *install.packages("renz")*. Below, we discuss three methods to calculate Km and Vmax using functions in the renz package.
 
 Methods 2 and 3 below rely upon first calculating the intial reaction rate at a range of substrate concentrations. As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity. The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/initialReactionRate_methods.md) provides two methods to identify the points corresponding to the initial, linear reaction and to calculate the reaction rate (substrate/min/enzyme) from measurement of substrate (or product) changes over time.
 
