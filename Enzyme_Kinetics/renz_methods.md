@@ -7,11 +7,15 @@ Andrew Tolonen
 - [Setup](#setup)
 - [renz functions](#renz-functions)
   - [fE.progress()](#feprogress)
+    - [fE.progress(): toy data](#feprogress-toy-data)
+    - [fE.progress(): lab data](#feprogress-lab-data)
   - [dir.MM()](#dirmm)
-  - [Lineweaver-Burke: linear
-    regression](#lineweaver-burke-linear-regression)
-  - [Lineweaver-Burke: weighted linear
-    regreassion](#lineweaver-burke-weighted-linear-regreassion)
+    - [dir.MM(): toy data](#dirmm-toy-data)
+    - [dir.MM(): lab data](#dirmm-lab-data)
+  - [Lineweaver-Burke (LB)](#lineweaver-burke-lb)
+    - [LB linear regression: toy data](#lb-linear-regression-toy-data)
+    - [LB weighted regression: toy
+      data](#lb-weighted-regression-toy-data)
   - [se.Progress()](#seprogress)
 
 # Introduction
@@ -54,20 +58,43 @@ knitr::opts_chunk$set(warning = F, message = F);
 ## fE.progress()
 
 fE.progress() enables us to calculate Km, Vmax directly from a single
-curve of substrate versus time.
+curve of substrate versus time. We get a nice linear curve and
+calculations of Km and Vmax when we use the toy data provided with the
+renz vignette:
+
+### fE.progress(): toy data
 
 ``` r
 # fE.progress, which makes use of the Schnell-Mendoza equation, allows us to obtain, from one single progress curve, the kinetic parameters of the enzyme.
 
-# load reaction data
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/reactionRate.xlsx";
-mydata = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
-
-mydata = as.data.frame(mydata); 
+# Test 1: toy data provided with renz
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/data_feprogress.tsv";
+mydata = read.csv(datafile, header = TRUE, skip = 0, sep="\t");
 output = fE.progress(mydata)
 ```
 
-![](renz_methods_files/figure-gfm/fE.progress-1.png)<!-- -->
+![](renz_methods_files/figure-gfm/fE.progress%20toy-1.png)<!-- -->
+
+    ## 8.612173e-05 (2.13e-01): par = (2.131 0.105)
+    ## 8.239429e-05 (4.17e-03): par = (2.181271 0.1068344)
+    ## 8.239286e-05 (4.90e-06): par = (2.182213 0.1068685)
+
+![](renz_methods_files/figure-gfm/fE.progress%20toy-2.png)<!-- -->
+
+### fE.progress(): lab data
+
+However, we get a non-linear function and negative values for Km and
+Vmax when we use fE.progress() on actual data from lab:
+
+``` r
+# Test 2: actual data from lab
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/reactionRate.xlsx";
+mydata = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
+mydata = as.data.frame(mydata);
+output = fE.progress(mydata)
+```
+
+![](renz_methods_files/figure-gfm/fE.progress%20lab-1.png)<!-- -->
 
     ## 0.01185121  (1.39e+00): par = (-0.742 -0.608)
     ## 0.004461124 (4.09e-01): par = (-0.8875759 -0.8455525)
@@ -77,13 +104,22 @@ output = fE.progress(mydata)
     ## 0.003787421 (3.27e-05): par = (-0.9809979 -0.9932789)
     ## 0.003787421 (2.27e-06): par = (-0.9810052 -0.9932895)
 
-![](renz_methods_files/figure-gfm/fE.progress-2.png)<!-- -->
+![](renz_methods_files/figure-gfm/fE.progress%20lab-2.png)<!-- -->
 
 ## dir.MM()
 
-calculate Km and Vmax from substrate versus velocity curves
+If we calculate the initial velocity of the reaction at different
+substrate concentrations, we can generate an S vs V curve (velocity at
+different initial substrate concentrations). We can use this data to
+calculate Km and Vmax from substrate versus velocity curves using
+dir.MM().
+
+### dir.MM(): toy data
+
+Here is the output of dir.MM() using toy data provided with renz.
 
 ``` r
+# laod toy data provided with renz
 data(ONPG, package = "renz"); # load ONPG data
 
 # Calc mean velocity of ONPG dataset
@@ -98,7 +134,7 @@ ONPG.data = ONPG.data %>%
 dir.MM(ONPG.data, unit_v = "mM/min")
 ```
 
-![](renz_methods_files/figure-gfm/dir.mm-1.png)<!-- -->
+![](renz_methods_files/figure-gfm/dir.MM%20toy%20data-1.png)<!-- -->
 
     ## $parameters
     ##     Km     Vm 
@@ -119,12 +155,29 @@ dir.MM(ONPG.data, unit_v = "mM/min")
     ##  9 20    71.3     69.7 
     ## 10 30    76.4     73.4
 
-## Lineweaver-Burke: linear regression
+### dir.MM(): lab data
+
+Here is the output of dir.MM() for our lab data.
 
 ``` r
-# Lineweaver-burke enables the calculation of Km and Vmax. Input data is the initial
-# reaction velocity (V0) at various initial substrate concentrations (Vinitial vs Sinitial)
+# Test 2: lab data
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/data_sv.csv";
+mydata = read.csv(datafile, header = TRUE, skip = 0, sep="\t");
 
+output = dir.MM(mydata, unit_v = "mM/min")
+```
+
+![](renz_methods_files/figure-gfm/dir.MM%20lab%20data-1.png)<!-- -->
+
+## Lineweaver-Burke (LB)
+
+Lineweaver-burke enables the calculation of Km and Vmax. Input data is
+the initial reaction velocity (V0) at various initial substrate
+concentrations (Vinitial vs Sinitial)
+
+### LB linear regression: toy data
+
+``` r
 data(ONPG, package = "renz"); # load ONPG data
 ONPG[ , 4:7] <- 1000 * ONPG[ , 4:7]; # put all data on same scale
 
@@ -178,7 +231,7 @@ p3
 
 ![](renz_methods_files/figure-gfm/Lineweaver-Burke%20method%201-1.png)<!-- -->
 
-## Lineweaver-Burke: weighted linear regreassion
+### LB weighted regression: toy data
 
 ``` r
 # Method 2: calc weighted linear regression for each sample, then take means
@@ -197,7 +250,70 @@ for (i in 2:9)
 ``` r
 Km.calc = mean(na.omit(Km.all));
 Vmax.calc = mean(na.omit(Vmax.all));
+
+Km.out = paste("The mean Km from weighted linear regression = ", Km.calc, sep = "");
+Vmax.out = paste("The mean Vmax from weighted linear regression = ", Vmax.calc, sep = "");
+
+Km.out
 ```
+
+    ## [1] "The mean Km from weighted linear regression = 2.8125"
+
+``` r
+Vmax.out
+```
+
+    ## [1] "The mean Vmax from weighted linear regression = 179.3375"
+
+``` r
+# lab data
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/data_sv.csv";
+mydata = read.csv(datafile, header = TRUE, skip = 0, sep="\t");
+
+# check data looks OK
+p1=ggplot(mydata, aes(x=Substrate_mM, y=Rate))+
+  geom_point(size = 2)+
+  xlab("Substrate")+
+  ylab("Velocity")+
+  theme_classic();
+
+mydata = mydata %>%
+  mutate(Substrate.inverse = 1/Substrate_mM) %>%
+  mutate(Rate.inverse = 1/Rate);
+
+# remove row with inf (Substrate = 0)
+mydata = mydata %>% 
+  filter_all(all_vars(!is.infinite(.)));
+     
+# fit linear model
+lm.lin = lm(Rate.inverse ~ Substrate.inverse, mydata);
+
+# calc regression line
+yintercept = lm.lin$coefficients[1];
+myslope = lm.lin$coefficients[2];
+Rate.inverse.calc = myslope * mydata$Substrate.inverse + yintercept;
+temp = data.frame(Rate.inverse.calc = Rate.inverse.calc)
+mydata = cbind(mydata, temp);
+
+# calc Vmax and Km
+Vmax = 1/yintercept;
+Km = Vmax * myslope;
+text.out = paste("Vmax = ", round(Vmax, 5), " Km = ", round(Km, 2), sep = "");
+
+# plot data (red points) and regression line (black line)
+plotlb.data1 = ggplot(mydata, aes(x=Substrate.inverse, y=Rate.inverse)) +
+ ggtitle("Data and linear regression line")+
+ geom_point(size=1, color = "red") +
+ xlab("1/Substrate") +
+ ylab("1/Velocity") +
+ geom_line(aes(x=Substrate.inverse, y=Rate.inverse.calc))+
+ geom_text(x=0.5, y=1200, label=text.out)+
+ theme_classic();
+
+plotlb.data1
+```
+
+![](renz_methods_files/figure-gfm/LB%20linear%20regression%20lab%20data-1.png)<!-- -->
 
 ## se.Progress()
 
