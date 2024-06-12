@@ -23,7 +23,7 @@ Methods 2 and 3 below rely upon first calculating the intial reaction rate at a 
 1. Method 1: points are selected starting from t=0 into windows of increasing size. Each time a point is added, the slope of the linear model is re-calculated. The slopes are clustered. Points that cluster together with slopes are selected for the linear regression.
 2. Method 2: points are selected based on a sliding window of size = n, slopes are calculated and points belowing to the window with the highest slope are included in the linear correlation.
 
-This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/initialReactionRate_methods.md) demonstrates the calculation of enzyme kinetic parameters Km and Vmax using the below three methods using functions in the renz package. For each method, the script compares results using toy data provided with the renz package and actual data from our lab.
+This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/renz_methods.md) demonstrates the calculation of enzyme kinetic parameters Km and Vmax using the below three methods using functions in the renz package. For each method, the script compares results using toy data provided with the renz package and actual data from our lab.
 
 ## Method 1: calculate Km, Vmax directly from substrate versus time curves 
 
