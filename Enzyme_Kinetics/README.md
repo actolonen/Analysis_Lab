@@ -1,6 +1,6 @@
 # Methods for analysis of enzyme kinetics
 
-**Michaelis-Menten equation** relates enzyme velocity (v) to substrate concentration using a simple equation:
+**Michaelis-Menten equation** relates enzyme velocity (v) to substrate concentration (S) using this equation:
 
 $v = {vmax * S \over (S + Km)}$ 
 
