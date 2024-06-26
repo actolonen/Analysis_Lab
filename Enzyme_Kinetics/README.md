@@ -37,7 +37,7 @@ This yields a linear equation from which the slope can be used to calculate Km a
 
 We first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We then can use dir.MM() from the renz package to perform a non-linear least square fitting of kinetic data to the Michaelis-Menten equation.
 
-## Method 3: Lineweaver-Burke 
+## Method 3: Lineweaver-Burk
 
 As in method 2, we first need to calculate the enzyme initial velocities at a range of substrate concentrations (S vs V curve). We can then calculate Km and Vmax based on a linear transformation of the Michaelis-Menton equation. We plot the S and V data as 1/V versus 1/S. The y-intercept yields 1/Vmax and the slope is Km/Vmax.
 
