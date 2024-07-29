@@ -1,0 +1,30 @@
+---
+title: "HPLC file conversion"
+author: "Andrew Tolonen"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+The goal of this script is to convert .lcd files from the Shimadzu HPLC to text files that can be used for analysis.
+
+```{r import LCD files}
+
+library(chromConverter);
+path = 
+dat <- read_chroms(path, format_in = "chemstation_uv")
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
