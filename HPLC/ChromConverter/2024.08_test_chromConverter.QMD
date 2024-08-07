@@ -9,7 +9,7 @@ embed-resources: TRUE
 
 ## Introduction
 
-The objective of this notebook is to evaluate if the new version of chromConverter produced by Ethan Bass can extract the chromatograms as .txt from .lcd files produced by the [HPLC at Genoscope-CEA](https://github.com/actolonen/Analysis_Lab/tree/main/HPLC).
+The objective of this notebook is to evaluate if a new version of chromConverter produced by Ethan Bass can extract the chromatograms as .txt from .lcd files produced by the [HPLC at Genoscope-CEA](https://github.com/actolonen/Analysis_Lab/tree/main/HPLC).
 
 This notebooks was inspired by [this discussion with Ethan Bass](%5Bhttps://github.com/ethanbass/chromConverter/issues/29) in which he explains that the photodiode array (PDA) stream is empty in the .lcd files produced by our HPLC. This is because the our HPLC lacks a PDA. The two detectors on our HPLC are are refractive index RID-10A (Detector B) and UV/VIS SPD-20A (Detector A).
 
@@ -143,9 +143,15 @@ input.dir.cc = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromCon
 # get list of files in chromConverter directory
 files.cc = list.files(path = input.dir.cc, pattern = "txt");
 
+# initialize empty data.frame of peak.ratios
+peak.table = data.frame(
+  inputfile.cc.base = character(),
+  max.peak.ls = double(),
+  max.peak.cc = double(),
+  peak.ratio = double());
+
 for (file in files.cc) 
 {
-  print(file);
   path.cc = paste(input.dir.cc, file, sep = "/");
   inputfile.cc.base = str_match(string=file, pattern="^[\\d_b]+");
   file.ls = paste(inputfile.cc.base, "detectorB.txt", sep = "");
@@ -167,10 +173,15 @@ data.ls = data.ls %>%
   drop_na();
 
 # scale data
-data.ratio = max(data.ls$Intensity) / max(data.cc$Intensity);
-data.cc = data.cc %>%
-  mutate(Intensity = data.ratio * Intensity);
+peak.ratio = max(data.ls$Intensity) / max(data.cc$Intensity);
+peak.sample = data.frame(inputfile.cc.base, max(data.ls$Intensity), max(data.cc$Intensity), peak.ratio);
 
+peak.table = rbind(peak.table, peak.sample);
+
+data.cc = data.cc %>%
+  mutate(Intensity = peak.ratio * Intensity);
+
+# concatenate data from two files
 data.all = rbind(data.cc, data.ls);
 
 title.ls = paste("Sample ", inputfile.cc.base, " LabSolutions", sep="");
@@ -203,4 +214,11 @@ bothplots = grid.arrange(myplot.ls, myplot.cc, ncol = 1);
 bothplots
 }
 
+table1 = kable(peak.table, caption = "Max peak heights from Lab Solutions (column 2), chromConverter (column 3), and the peak height ratio (column 4)"); 
+table1
+
 ```
+
+# Conclusions
+
+Based on the samples analyzed in this script, the read_shimadzu_lcd() function of chromConverter appears to produce identical chromatograms to those made by LabSolutions. One caveat is that the peak heights in the chromConverter chromatograms needed to be scaled to match those of the LabSolutions chromatograms.
