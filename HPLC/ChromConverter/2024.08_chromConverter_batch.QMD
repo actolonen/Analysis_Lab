@@ -1,0 +1,247 @@
+---
+title: "2024.08_test_chromConverter"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+## Introduction
+
+The objective of this notebook is apply chromConverter, an R package produced by Ethan Bass to extract the chromatograms as .txt from .lcd files produced by the [HPLC at Genoscope-CEA](https://github.com/actolonen/Analysis_Lab/tree/main/HPLC).
+
+This notebooks was inspired by [this discussion with Ethan Bass](%5Bhttps://github.com/ethanbass/chromConverter/issues/29) in which he explains that the photodiode array (PDA) stream is empty in the .lcd files produced by our HPLC. This is because the our HPLC lacks a PDA. The two detectors on our HPLC are are UV/VIS SPD-20A (Detector A) and refractive index RID-10A (Detector B). Detector A has two channels: channel 1 is at 260 nm and channel 2 is at 210 nm. Acids (ie acetate) are visible using channel 2.
+
+### Methods
+
+```{r r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+               axis.title.x = element_text(size = 8), 
+               axis.title.y = element_text(size = 8),
+               strip.text.x = element_text(size = 6),
+               legend.position = "bottom", 
+               aspect.ratio =0.25);
+
+```
+
+On 06 aug 2024, Ethan updated the master branch of chromConverter to read 2D chromatograms, like those produced by our HPLC. I thus downloaded the updated chromConverter from github:
+
+```         
+# install.packages("remotes")
+# remotes::install_github("https://github.com/ethanbass/chromConverter/")
+```
+
+remotes::install_github("https://github.com/ethanbass/chromConverter/"
+
+Run chromConverter function read_shimadzu_lcd() to convert .lcd files to .txt files
+
+```{r convert .lcd file to .txt files}
+
+# get a list of .lcd files in the working directory and convert them to data.frames, 
+# then print the data.frmes as .txt files.
+
+input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_LabSolutions";
+files.lcd = list.files(path = input.dir, pattern = "lcd");
+output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_chromConverter/";
+
+for (file in files.lcd) 
+{
+  inputfile = paste(input.dir, file, sep = "/");
+  inputfile.base = str_replace(string=file, pattern=".lcd", replacement = "");
+  data = read_shimadzu_lcd(
+     path = inputfile, 
+     format_out = "data.frame", 
+     data_format = "long", 
+     read_metadata = TRUE);
+  # print out data for each detector separately
+  for (detectors in data) 
+  {
+    my.instrument = attr(detectors, which = "instrument");
+    my.detector = attr(detectors, which = "detector");
+    my.wavelength = attr(detectors, which = "wavelength");
+    if (my.instrument == "Detector A")
+    {
+      my.instrument = "Detector_A";
+      detector.out = paste(my.detector, my.wavelength, my.instrument, sep = "_");
+    }
+   if (my.instrument == "Detector B")
+   {
+      my.instrument = "Detector_B";
+      detector.out = paste(my.detector, my.instrument, sep = "_");
+   }
+    outputfile = paste(output.dir, inputfile.base, "_chromConverter_", detector.out, ".txt", sep = "");
+    write.csv(detectors, file = outputfile);
+  }
+}  
+
+
+```
+
+Extract chromatrograms for detector A (UV) and detector B (RID) from LabSolutions .txt files (perl code)
+
+```{perl format programs, eval = F, engine.path = "/usr/bin/perl"}
+
+# perl code to extract detector B chromatograms from LabSolutions .txt files.
+
+$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_LabSolutions";
+
+# get list of .txt files
+opendir(DIR, $dirpath) or die "cannot open directory $dirpath\n";
+@allfiles = grep(/\.txt$/, readdir(DIR));
+
+# remove cleaned files from previous runs
+foreach $file (@allfiles)
+{
+ if ($file =~ /detector/)
+ {
+  $inputfile = "$dirpath"."/"."$file";
+  unlink($inputfile);
+ }
+}
+
+# extract detector B (RID) chromatogram
+LOOP:foreach $file (@allfiles)
+{
+ $inputfilepath = "$dirpath"."/"."$file";
+ $file =~ /(.*).txt/;
+ $inputfilebase = $1;
+ $outputfile = "$inputfilebase"."_detectorB.txt";
+ $outputfilepath = "$dirpath"."/"."$outputfile";
+ open(IN, "<$inputfilepath") or die "cant open IN\n";
+ open(OUT, ">$outputfilepath") or die "cant open OUT\n";
+ while ($line = <IN>)
+ {
+  chomp($line);
+  $line =~ s/\r//g;
+  unless ($line =~ /LC Chromatogram\(Detector B-Ch1\)/)
+  {
+   next;
+  }
+  until ($line =~ /^R.Time/)
+  {
+    $line = <IN>;
+    chomp($line);
+    $line =~ s/\r//g;
+  }
+  print OUT "$line\n";
+  $line = <IN>;
+  until($line =~ /[a-z]/)
+ {
+  chomp($line);
+  $line =~ s/\r//g;
+  print OUT "$line\n";
+  $line = <IN>;
+ }
+next LOOP;
+}
+close IN;
+close OUT;
+}
+
+```
+
+Compare chromatograms produced by chromConverter() to those produced by LabSolutions (Shimadzu software) using headerless files.
+
+```{r Compare Chromatograms}
+
+# foreach headerless .txt file in LabSolutions directory, grab file base name, open filehandles to LabSolutions and chromConverter files base file name, plot both files on same plot.
+
+# directories of input files
+input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_LabSolutions";
+input.dir.cc = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_chromConverter";
+
+# get list of files in chromConverter directory
+files.cc = list.files(path = input.dir.cc, pattern = "Detector_B.txt");
+
+# initialize empty data.frame of peak.ratios
+peak.table = data.frame(
+  inputfile.cc.base = character(),
+  max.peak.ls = double(),
+  max.peak.cc = double(),
+  peak.ratio = double());
+
+for (file in files.cc) 
+{
+  path.cc = paste(input.dir.cc, file, sep = "/");
+  inputfile.cc.base = str_replace(string=file, pattern="_chromConverter_RID-10A_Detector_B.txt", replacement = "");
+  file.ls = paste(inputfile.cc.base, "_detectorB.txt", sep = "");
+  path.ls = paste(input.dir.ls, file.ls, sep = "/");
+  data.ls = read.csv(file = path.ls, header=TRUE, sep = "\t");
+  data.cc = read.csv(file = path.cc, header=TRUE);
+
+# cleanup input data
+data.cc = data.cc %>%
+  select(X, int) %>%
+  rename(R.Time = X, Intensity = int) %>%
+  mutate(Format = "ChromConverter");
+
+data.ls = data.ls %>%
+  rename(R.Time = R.Time..min.) %>%
+  mutate(Format = "LabSolutions") %>%
+  mutate(R.Time = as.numeric(R.Time)) %>%
+  mutate(Intensity = as.numeric(Intensity)) %>%
+  drop_na();
+
+# scale data
+peak.ratio = max(data.ls$Intensity) / max(data.cc$Intensity);
+peak.sample = data.frame(inputfile.cc.base, max(data.ls$Intensity), max(data.cc$Intensity), peak.ratio);
+
+peak.table = rbind(peak.table, peak.sample);
+
+data.cc = data.cc %>%
+  mutate(Intensity = peak.ratio * Intensity);
+
+# concatenate data from two files
+data.all = rbind(data.cc, data.ls);
+
+title.ls = paste("Sample ", inputfile.cc.base, " LabSolutions", sep="");
+title.cc = paste("Sample ", inputfile.cc.base, " chromConverter", sep="");
+
+# plot comparison
+myplot.ls = ggplot(data.ls, aes(x=R.Time, y=Intensity, group = Format, color = Format)) +
+  ggtitle(title.ls)+
+  geom_point(size=0.5, color = "red") +
+  xlab("Time") + 
+  ylab("Intensity") +
+  theme_classic() +
+  coord_cartesian(xlim=c(0, max(data.ls$R.Time)), ylim=c(0, max(data.ls$Intensity)))+
+  scale_x_continuous(breaks=seq(0, max(data.ls$R.Time), max(data.ls$R.Time/10)))+
+  scale_y_continuous(breaks=seq(0, max(data.ls$Intensity), max(data.ls$Intensity/8)))+
+  mytheme;
+
+myplot.cc = ggplot(data.cc, aes(x=R.Time, y=Intensity, group = Format, color = Format)) +
+  ggtitle(title.cc)+
+  geom_point(size=0.5, color = "blue") +
+  xlab("Time") + 
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(0, max(data.cc$R.Time)), ylim=c(0, max(data.cc$Intensity)))+
+  scale_x_continuous(breaks=seq(0, max(data.cc$R.Time), max(data.cc$R.Time/10)))+
+  scale_y_continuous(breaks=seq(0, max(data.cc$Intensity), max(data.cc$Intensity/8)))+
+  theme_classic() +
+  mytheme;
+
+bothplots = grid.arrange(myplot.ls, myplot.cc, ncol = 1);
+bothplots
+}
+
+table1 = kable(peak.table, caption = "Max peak heights from Lab Solutions (column 2), chromConverter (column 3), and the peak height ratio (column 4)"); 
+table1
+
+```
+
+# Conclusions
+
+Based on the samples analyzed in this script, the read_shimadzu_lcd() function of chromConverter appears to produce identical chromatograms to those made by LabSolutions. One caveat is that the peak heights in the chromConverter chromatograms needed to be scaled to match those of the LabSolutions chromatograms.

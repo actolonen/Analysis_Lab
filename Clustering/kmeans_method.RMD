@@ -1,0 +1,93 @@
+---
+title: "K-means clustering example"
+author: "Andrew Tolonen"
+date: "june 2024"
+output:
+  github_document:
+    html_preview: false
+urlcolor: blue
+---
+
+# References
+https://www.youtube.com/watch?v=NKQpVU1LTm8
+
+# Introduction
+
+K-means is an unsupervised clustering method that groups observations into a user-defined number of clusters. It is an iterative method whereby K centroids are placed in the data space and each data point is assigned to the nearest cluster based on Euclidean distance. The centroids are then moved to the centers of the new clusters and the observations are reassigned. This process is iterated until either the centroids no longer move or the number of iterations are reached.
+
+
+# Methods
+
+## 1. Setup and file I/O
+
+```{r setup, echo=TRUE, message = FALSE, warning=FALSE}
+
+library(factoextra); #  functions to extract and visualize the output of multivariate data analyses (PCA)
+library(tidyverse);
+
+rm(list = ls());
+
+```
+
+## 2. Euclidean distances of normalized data 
+```{r clustering, echo=TRUE, message = FALSE, warning=FALSE}
+
+# iris data set: 150 obs of 5 variables: sepal length, sepal width, petal length, petal width, species
+iris_labels = iris$Species; # save labels 
+iris_data = select(iris, -Species); # remove non-numeric species variable
+
+# scale each column into z-scores (mean = 0, sd = 1). normalize for distance matrix.
+iris_data_sc = scale(iris_data); 
+
+# calc euclidean dist between each of 150 obs: yields 150x150 distance matrix
+iris.dist = factoextra::get_dist(iris_data_sc, method="euclidean");
+
+```
+
+## 3. Elbow plot to select number of cluster
+
+The elbow method involves finding the optimal k via a graphical representation. It works by finding the within-cluster sum of square (wss), i.e. the sum of the square distance between points in a cluster and the cluster centroid. 
+
+```{r Elbow}
+
+# wss = total within sum of square.
+factoextra::fviz_nbclust(iris_data_sc, kmeans, method = "wss");
+
+```
+
+
+## 4. Perform K-means clustering
+```{r dendrogram, echo=TRUE, message = FALSE, warning=FALSE}
+
+# set seed for reproducibility
+set.seed(86);
+
+# k-means
+km.out = kmeans(iris_data_sc, centers = 3, nstart = 100);
+
+```
+
+## 3. Visualize data as clusters
+```{r view clusters, echo=TRUE, message = FALSE, warning=FALSE}
+
+# get cluster membership of each point
+km.clusters = km.out$cluster; 
+
+# add unique species label to normalized data
+uniquenames = paste(iris$Species, 1:length(iris$Species), sep = "_");
+rownames(iris_data_sc) = uniquenames;
+
+# plot clusters. Observations are represented by points in the plot, using principal components if ncol(data) > 2. An ellipse is drawn around each cluster.
+fviz_cluster(list(data = iris_data_sc, cluster = km.clusters))
+
+```
+
+## 4. Table showing how well clusters correspond with species
+
+```{r table, echo=TRUE, message = FALSE, warning=FALSE}
+
+# contingency table showing the number of each species in each cluster
+table(km.clusters, iris$Species); # count the number of species in each cluster
+
+```
+

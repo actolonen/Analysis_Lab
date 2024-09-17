@@ -1,0 +1,123 @@
+---
+title: "Methods to compare qRT-PCR Ct values"
+author: "Andrew Tolonen"
+date: "apr22"
+output:
+  html_document:
+    code_folding: hide
+---
+
+# Introduction
+
+This is a method to compare mRNA  expression values based on qRT-PCR Ct values. Expression changes are calculated using the delta CT method. For each gene expression measurement, the delta CT is calculated by subtracting the mean 16S expression in that medium treatment. The delta-delta Ct is then calculated by subtracting the mean delta Ct in MS medium from each delta Ct for that gene in the medium of interest. 
+
+Input data is an .xlsx file with the following columns:
+* Well
+* Treatment
+* Replicate number
+* Gene
+* Ct threshold
+* Ct value
+
+# Methods
+
+## 1. Setup and file I/O
+```{r setup, echo=TRUE, message = FALSE, warning=FALSE}
+
+rm(list = ls());
+
+library(tidyverse);
+library(readxl);
+library(stringr);
+library(gridExtra);
+
+mytheme = theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), 
+               axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
+               #legend.position = "none", 
+               #aspect.ratio =1,
+               panel.grid.minor=element_blank(), panel.grid.major=element_blank());
+
+# I/O files
+data = "./ct_values.xlsx";
+datain = read_excel(datafile, sheet = "Ct_vals", col_names = TRUE, skip=0);
+
+
+```
+
+## 2. Calculate expression levels
+```{r calc express, echo=TRUE, message = FALSE, warning=FALSE}
+
+# 1. Calculate delta-CTs for each gene in each medium treatment. Subtract mean Ct for 16S in that medium treatment: Ct(gene) - Ct(16S, mean for that medium treatment). 
+
+# Calc the mean Ct for each gene in each medium treatment
+Ct_sum = data %>%
+  group_by(Treatment, Gene) %>%
+  summarise(Ct_mean = mean(Ct)) %>% # calc mean Cts
+  ungroup();
+
+# Get mean 16S values for each medium treatment
+S16 = Ct_sum %>%
+  filter(grepl("16S", Gene)) %>%
+  mutate(Ct_mean_16S = Ct_mean) %>%
+  select(-Gene, -Ct_mean);
+
+# make Ct_mean_16S column 
+Ct_means = left_join(data, S16, by="Treatment");
+
+# delta_Ct = Ct (gene) - Ct_mean(16S). 16S-normalized expression
+# Subtract 16S mean Ct value for each gene
+delta_Ct = Ct_means %>%
+  mutate(deltaCt = Ct - Ct_mean_16S);
+
+# 2. Calculate the delta-delta-CT for each gene in each medium treatment. Subtract the mean delta_Ct in control medium for each gene: delta_CT-treatment - mean(delta_CT-control medium)
+
+delta_Ct_control = delta_Ct %>%
+  filter(Treatment == "MS") %>% # filter for Control treatment
+  group_by(Gene) %>%
+  summarise(deltaCt_control = mean(deltaCt)) %>%
+  select(Gene, deltaCt_control) %>%
+  ungroup();
+
+# make delta-delta-Cts column 
+delta_Ct = left_join(delta_Ct, delta_Ct_control, by="Gene");
+
+# calculate delta-delta_Ct: subtract delta_Ct from control condition for each gene
+expression_change = mutate(delta_Ct, delta_delta_Ct = deltaCt - deltaCt_control) %>%
+  mutate(Fold_change = log2(2^-delta_delta_Ct));
+
+  
+```
+
+## 3. Plot expression levels
+
+```{r plot 1, echo=TRUE, message = FALSE, warning=FALSE}
+
+sumstats = expression_change %>% 
+group_by(Treatment, Gene) %>% 
+summarise(m = mean(Fold_change), 
+          sd = sd(Fold_change)) %>% 
+ungroup();
+
+# Treatment1 
+expmeans1 = filter(sumstats, Treatment == "Treatment1");
+expvals1 = filter(expression_change, Treatment == "Treatment1");
+
+plot1 = ggplot(expmeans1, aes(x=Gene, y=m))+
+geom_bar(stat = "identity", fill="white",
+         color="black") +
+ geom_errorbar(aes(ymin=expmeans1$m-expmeans1$sd,
+                   ymax=expmeans1$m+expmeans1$sd),
+               width=0, size = .5, color="black",
+               position=position_dodge(0.8))+
+geom_jitter(aes(x=Gene, y=Fold_change), size=2, data = expvals1)+
+theme_bw()+
+xlab("Gene")+
+ylab("log2 Fold Change")+
+ggtitle("Treatment 1")+
+ mytheme;
+
+plot1
+
+```
+
+Fig 1. Relative gene expression in Treatment1 relative to control medium. 

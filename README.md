@@ -1,2 +1,2 @@
 # Analysis_Lab
-Collection of analyses methods we use in lab
+This repo is a collection of useful methods to analyze laboratory data.
