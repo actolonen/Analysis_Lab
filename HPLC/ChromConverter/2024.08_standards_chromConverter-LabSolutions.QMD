@@ -1,5 +1,6 @@
 ---
-title: "2024.09_compareStandards"
+title: "HPLC: compare standards"
+author: "Andrew Tolonen"
 format: html
 editor: visual
 toc: TRUE
@@ -40,6 +41,8 @@ library(stringr);
 library(tidyverse);
 library(readr);
 library(gridExtra);
+library(modeest);
+library(readxl);
 
 mytheme = theme(axis.text.x = element_text(size = 6), 
                 axis.text.y = element_text(size = 6), 
@@ -51,13 +54,32 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 
 ```
 
+## Metabolite concs in standards
+
+```{r metabolite concs}
+
+datafile = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/standards_mM.xlsx";
+standards = read_excel(datafile, sheet = "Sheet1", col_names = TRUE);
+
+# adapt to this dataset with duplicates
+standards1 = standards %>%
+  mutate(samplenum = "-1") %>%
+  unite("Sample", Sample, samplenum, sep="");
+standards2 = standards %>%
+  mutate(samplenum = "-2") %>%
+  unite("Sample", Sample, samplenum, sep="");
+standards = rbind(standards1, standards2);
+
+```
+
 ## LS: extract detector B
 
-Perl to extract detector B chromatograms from Lab Solutions .txt files.
+Perl to extract detector B chromatograms from Lab Solutions .txt files. Prints detector B .txt files
 
 ```{perl to extract detector B chromatograms, eval = F, engine.path = "/usr/bin/perl"}
 
-# perl code to extract detector B chromatograms from LabSolutions .txt files.
+# perl code to extract detector B chromatograms from LabSolutions .txt files. Outputs 
+# detector B chromatograms as .txt files.
 
 $dirpath = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/Lab_Solutions";
 
@@ -116,37 +138,9 @@ close OUT;
 
 ```
 
-## LS: make data.frame
+## CC: convert .lcd to .txt
 
-```{r make data.frame of Lab solutions RID chromatograms}
-
-# dataframe: Time, Intensity, Sample
-
-# get list of all detectorB .txt files in target directory
-input.dir = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/Lab_Solutions/DetectorB";
-
-files.detectorB = list.files(path = input.dir, pattern = "detectorB.txt");
-
-# declare empty data.frame
-data_ls = data.frame(Time = double(),
-                      Intensity = double(),
-                      Sample = character());
-
-# foreach file, load file, add data to data.frame
-for (filename in files.detectorB) 
-{
- inputfile = paste(input.dir, filename, sep="/"); # path to inputfile
- data = read.csv(file=inputfile, header=TRUE, sep="\t"); # read file
- samplename = str_match(string = filename, pattern = "STD[\\d-]+"); # get sample name
- data = data %>%
-   rename(Time = R.Time..min.) %>% # simplify variable name
-   mutate(Sample = samplename);
- data_ls = rbind(data_ls, data);
-}
-  
-```
-
-## CC: convert .lcd
+ChromConverter to read .lcd files and output detector B .txt files.
 
 ```{r Chromconverter: convert .lcd file to .txt files}
 
@@ -158,7 +152,7 @@ files.lcd = list.files(path = input.dir, pattern = "STD");
 output.dir = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/Chromconverter/Output/";
 
 # declare empty data.frame
-data_cc = data.frame(Seconds = double(),
+data_cc = data.frame(Minutes = double(),
                       Intensity = double(),
                       Sample = character());
 
@@ -173,105 +167,278 @@ for (file in files.lcd)
      read_metadata = TRUE);
   mydata = data; # make a personal copy
   mydata = mydata %>%
-    rownames_to_column(var = "Seconds") %>%
+    rownames_to_column(var = "Minutes") %>%
     rename(Intensity = int) %>%
     mutate(Sample=inputfile.base); # add col of sample
   data_cc = rbind(data_cc, mydata); # make df of all samples
-  outputfile = paste(output.dir, inputfile.base, "_chromConverter.txt", sep = "");
+  outputfile = paste(output.dir, inputfile.base, "_chromConverter_RID-10A_Detector_B.txt", sep = "");
   write.csv(data_cc, file = outputfile);
 }
 
 ```
 
-Compare chromatograms produced by chromConverter() to those produced by LabSolutions (Shimadzu software) using headerless files.
+# Results
+
+Make data.frame of chromatograms produced by chromConverter() and LabSolutions
 
 ```{r Compare Chromatograms}
 
 # foreach headerless .txt file in LabSolutions directory, grab file base name, open filehandles to LabSolutions and chromConverter files base file name, plot both files on same plot.
 
 # directories of input files
-input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_LabSolutions";
-input.dir.cc = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/HPLC/ChromConverter/Files_chromConverter";
+input.dir.ls = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/Lab_Solutions/DetectorB";
+input.dir.cc = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_HPLC/HPLC_2024.08/Chromconverter/Output";
 
-# get list of files in chromConverter directory
-files.cc = list.files(path = input.dir.cc, pattern = "Detector_B.txt");
+# read cc data into data frame
+files.cc = list.files(path = input.dir.cc, pattern = "chromConverter_RID-10A_Detector_B.txt");
 
-# initialize empty data.frame of peak.ratios
-peak.table = data.frame(
-  inputfile.cc.base = character(),
-  max.peak.ls = double(),
-  max.peak.cc = double(),
-  peak.ratio = double());
+# declare empty data.frame
+data.all= data.frame(Minutes = double(),
+                     Intensity = double(),
+                     Sample = character(), 
+                     Format = character());
 
 for (file in files.cc) 
 {
   path.cc = paste(input.dir.cc, file, sep = "/");
   inputfile.cc.base = str_replace(string=file, pattern="_chromConverter_RID-10A_Detector_B.txt", replacement = "");
-  file.ls = paste(inputfile.cc.base, "_detectorB.txt", sep = "");
-  path.ls = paste(input.dir.ls, file.ls, sep = "/");
-  data.ls = read.csv(file = path.ls, header=TRUE, sep = "\t");
   data.cc = read.csv(file = path.cc, header=TRUE);
 
 # cleanup input data
 data.cc = data.cc %>%
-  select(X, int) %>%
-  rename(R.Time = X, Intensity = int) %>%
+  select(Minutes, Intensity, Sample) %>%
   mutate(Format = "ChromConverter");
 
-data.ls = data.ls %>%
-  rename(R.Time = R.Time..min.) %>%
-  mutate(Format = "LabSolutions") %>%
-  mutate(R.Time = as.numeric(R.Time)) %>%
-  mutate(Intensity = as.numeric(Intensity)) %>%
-  drop_na();
-
-# scale data
-peak.ratio = max(data.ls$Intensity) / max(data.cc$Intensity);
-peak.sample = data.frame(inputfile.cc.base, max(data.ls$Intensity), max(data.cc$Intensity), peak.ratio);
-
-peak.table = rbind(peak.table, peak.sample);
-
-data.cc = data.cc %>%
-  mutate(Intensity = peak.ratio * Intensity);
-
-# concatenate data from two files
-data.all = rbind(data.cc, data.ls);
-
-title.ls = paste("Sample ", inputfile.cc.base, " LabSolutions", sep="");
-title.cc = paste("Sample ", inputfile.cc.base, " chromConverter", sep="");
-
-# plot comparison
-myplot.ls = ggplot(data.ls, aes(x=R.Time, y=Intensity, group = Format, color = Format)) +
-  ggtitle(title.ls)+
-  geom_point(size=0.5, color = "red") +
-  xlab("Time") + 
-  ylab("Intensity") +
-  theme_classic() +
-  coord_cartesian(xlim=c(0, max(data.ls$R.Time)), ylim=c(0, max(data.ls$Intensity)))+
-  scale_x_continuous(breaks=seq(0, max(data.ls$R.Time), max(data.ls$R.Time/10)))+
-  scale_y_continuous(breaks=seq(0, max(data.ls$Intensity), max(data.ls$Intensity/8)))+
-  mytheme;
-
-myplot.cc = ggplot(data.cc, aes(x=R.Time, y=Intensity, group = Format, color = Format)) +
-  ggtitle(title.cc)+
-  geom_point(size=0.5, color = "blue") +
-  xlab("Time") + 
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(0, max(data.cc$R.Time)), ylim=c(0, max(data.cc$Intensity)))+
-  scale_x_continuous(breaks=seq(0, max(data.cc$R.Time), max(data.cc$R.Time/10)))+
-  scale_y_continuous(breaks=seq(0, max(data.cc$Intensity), max(data.cc$Intensity/8)))+
-  theme_classic() +
-  mytheme;
-
-bothplots = grid.arrange(myplot.ls, myplot.cc, ncol = 1);
-bothplots
+data.all = rbind(data.all, data.cc);
 }
 
-table1 = kable(peak.table, caption = "Max peak heights from Lab Solutions (column 2), chromConverter (column 3), and the peak height ratio (column 4)"); 
+# read ls data into data frame
+files.ls = list.files(path = input.dir.ls, pattern = "detectorB.txt");
+
+for (file in files.ls) 
+{
+  path.ls = paste(input.dir.ls, file, sep = "/");
+  inputfile.ls.base = str_replace(string=file, pattern="_detectorB.txt", replacement="");
+  data.ls = read.csv(file = path.ls, header=TRUE, sep = "\t");
+
+# clean up data 
+data.ls = data.ls %>%
+  rename(Minutes = R.Time..min.) %>%
+  mutate(Format = "LabSolutions") %>%
+  mutate(Minutes = as.numeric(Minutes)) %>%
+  mutate(Intensity = as.numeric(Intensity)) %>%
+  mutate(Sample = inputfile.ls.base) %>%
+  drop_na();
+
+# data.ls = data.ls %>%
+#   mutate(Intensity = (0.1 * Intensity));
+
+# concatenate data from two files
+data.all = rbind(data.all, data.ls);
+
+}
+
+```
+
+## Table comparing max peak heights
+
+```{r table comparing max peak heights}
+
+sample.list = unique(data.all$Sample);
+
+# declare empty data.frame
+data.table.all = data.frame(Sample = character(),
+                     Intensity_cc = double(),
+                     Intensity_ls = double(),
+                     Ratio = double());
+
+for (mysample in sample.list)
+{
+  data.table = data.all %>%
+    filter(Sample == mysample);
+  
+  data.cc.sample = data.table %>%
+    filter(Format == "ChromConverter");
+  max.cc = max(data.cc.sample$Intensity);
+
+  data.ls.sample = data.table %>%
+    filter(Format == "LabSolutions");
+  max.ls = max(data.ls.sample$Intensity);
+  
+  ratio = max.ls/max.cc;
+
+  data.table.sample = data.frame(mysample, max.cc, max.ls, ratio);
+  
+  data.table.all = rbind(data.table.all, data.table.sample);
+}
+
+table1 = kable(data.table.all, caption = "Table: Comparison of max peak heights for each sample analyzed using ChromConverter and LabSolutions. The mean ratio (chromConveter/LabSolutions) was applied to all subsequent ChromConverter analyses.");
 table1
+
+# transform cc intensities by mean ratio
+ratio.mean = mean(data.table.all$ratio);
+data.all = data.all %>%
+  mutate(Intensity = case_when(Format == "ChromConverter" ~ Intensity * ratio.mean, Format == "LabSolutions" ~ Intensity));
+
+```
+
+## Plot chromatograms
+
+```{r plot data foreach sample}
+
+sample.list = unique(data.all$Sample);
+
+for (mysample in sample.list)
+{
+ data.plot = data.all %>%
+   filter(Sample == mysample);
+
+ myplot = ggplot(data.plot, aes(x=Minutes, y=Intensity)) +
+  ggtitle(mysample)+
+  geom_point(size=0.5, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  theme_classic() +
+  facet_wrap(~ Format)+
+  theme_classic()+
+  mytheme;
+
+ bothplots = grid.arrange(myplot, ncol = 1);
+ bothplots
+}
+```
+
+# Peak areas
+
+Calculate the background as the most common chromatogram intensity (mode).
+
+```{r calc background}
+
+# calc background as mode measurement
+data.temp = data.all %>%
+  filter(Format == "LabSolutions");
+background.ls = modeest::mfv(round(data.temp$Intensity, digits = 1));
+
+data.temp = data.all %>%
+  filter(Format == "ChromConverter");
+background.cc = modeest::mfv(round(data.temp$Intensity, digits = 1));
+
+```
+
+## Acetate
+
+Plot acetate peaks and calculate peak areas
+
+```{r calc acetate peak areas}
+
+# define peak range
+peak.start = 17.75;
+peak.end = 18.6;
+
+sample.list = unique(data.all$Sample);
+
+peaks.acetate = data.frame(SampleID = character(),
+                       Area = double(),
+                       Method = character());
+
+for (SampleID in sample.list)
+{
+ data.peak = data.all %>%
+   filter(Sample == SampleID) %>%
+   filter(Minutes > peak.start & Minutes < peak.end);
+ 
+ myplot = ggplot(data.peak, aes(x=Minutes, y=Intensity)) +
+  ggtitle(SampleID)+
+  geom_point(size=0.5, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(data.peak$Intensity), max(data.peak$Intensity)))+
+  theme_classic() +
+  facet_wrap(~ Format)+
+  theme_classic()+
+  mytheme;
+
+# print acetate chromatogram peaks
+ bothplots = grid.arrange(myplot, ncol = 1);
+ bothplots
+ 
+ # calc peak areas: cc and ls
+Method = "ChromConverter";
+data.temp = data.peak %>%
+  filter(Format == Method) %>%
+  mutate(Intensity_diff = Intensity - background.cc);
+Area = sum(data.temp$Intensity_diff);
+peaks.sample = data.frame(SampleID, Area, Method);
+peaks.acetate = rbind(peaks.acetate, peaks.sample);
+
+Method = "LabSolutions";
+data.temp = data.peak %>%
+  filter(Format == Method) %>%
+  mutate(Intensity_diff = Intensity - background.ls);
+Area = sum(data.temp$Intensity_diff);
+peaks.sample = data.frame(SampleID, Area, Method);
+peaks.acetate = rbind(peaks.acetate, peaks.sample);
+}
+
+
+```
+
+Plot regression of acetate conc vs peak area
+
+```{r acetate peak areas}
+
+# add acetate concs
+standards.acetate = standards %>%
+  filter(Metabolite == "Acetate") %>%
+  rename(SampleID = Sample);
+
+peaks.acetate.concs = left_join(peaks.acetate, standards.acetate, by="SampleID");
+
+# plot lab solutions
+plot.ls = peaks.acetate.concs %>%
+  filter(Method == "LabSolutions")
+
+# # calc linear regression
+# lm.ls = lm(Area ~ mM, plot.ls);
+# 
+# # calc regression line
+# yintercept = lm.ls$coefficients[1];
+# myslope = lm.ls$coefficients[2];
+# ycalc = myslope * lm.ls$mM + yintercept;
+# df = cbind(df, ycalc);
+
+plot.acetate.ls = ggplot(plot.ls, aes(x=mM, y=Area))+
+  ggtitle("Acetate (LabSolutions)")+
+  geom_point(size=0.5, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  theme_classic() +
+  theme_classic()+
+  mytheme;
+
+# plot cc
+plot.cc = peaks.acetate.concs %>%
+  filter(Method == "ChromConverter");
+  
+plot.acetate.cc = ggplot(plot.ls, aes(x=mM, y=Area))+
+  ggtitle("Acetate (ChromConverter)")+
+  geom_point(size=0.5, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  theme_classic() +
+  theme_classic()+
+  mytheme;
+
+# print acetate chromatogram peaks
+ bothplots = grid.arrange(plot.acetate.ls, plot.acetate.cc, ncol = 2);
+ bothplots
+
+```
+
+# Peak areas: ethanol
+
+```{r}
 
 ```
 
 # Conclusions
-
-Based on the samples analyzed in this script, the read_shimadzu_lcd() function of chromConverter appears to produce identical chromatograms to those made by LabSolutions. One caveat is that the peak heights in the chromConverter chromatograms needed to be scaled to match those of the LabSolutions chromatograms.
