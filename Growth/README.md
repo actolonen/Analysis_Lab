@@ -9,7 +9,7 @@ Below are methods to extract and plot growth curves from the files produced by t
 
 In addition to plotting the growth curves for different treatments, these scripts also calculate growth paramaters (e.g. intrinsic growth rate, generation time, carrying capacity) using the Growthcurver R package as described [here](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Logistic_Fit/2024.02_growthcurver.md). 
 
-* [Bioscreen C growth curve analysis](https://github.com/actolonen/Analysis_Lab/blob/main/Microbial_Growth/Data/2024.08_cphyWT_butanol.qmd): includes plotting of growth curves from Bioscreen datafile and Growthcurver calculations.
+* [Bioscreen C growth curve analysis](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Data/2024.08_cphyWT_butanol.qmd): includes plotting of growth curves from Bioscreen datafile and Growthcurver calculations.
 * CLario growth curve analysis [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/2024.08_growth_butanol_dec23.qmd) and [output](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/HTML/01_2024.08_growth_butanol_dec23.html): includes plotting of growth curves from Clario datafile and Growthcurver calculations.
 
 
