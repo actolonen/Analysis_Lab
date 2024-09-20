@@ -10,10 +10,10 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 * [UV-VIS detector (SPD-20A)](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Manuals/SPD-20A20AV_IM_EN.pdf)
 * [Aminex HPX-87H column](https://github.com/actolonen/Analysis_Lab/blob/main/HPLC/Metabolites/Manuals/LIT42D.PDF)
 
-## Procedure
+## Experimental procedure
 
 Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
 
-
-
+## Analysis
+* [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Standards/2024.08_standards_chromConverter-LabSolutions.html) to correlate peak areas and metabolite concentrations using standard solutions.
   
