@@ -393,8 +393,10 @@ regressions.out = data.frame(
     Compound = character(),
     Method = character(),
     Slope.reg = double(),
-    Intercept.reg = double()
-)
+    Intercept.reg = double(),
+    peak.start = double(),
+    peak.end = double()
+);
 
 ```
 
@@ -436,7 +438,7 @@ my.lm = lm(mM ~ Area, areas.all.ls);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.ls = data.frame(Compound, target.method, myslope, yint);
+regression.ls = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.ls);
 regtext.ls = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -449,7 +451,7 @@ my.lm = lm(mM ~ Area, areas.all.cc);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.cc = data.frame(Compound, target.method, myslope, yint);
+regression.cc = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.cc);
 regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -549,7 +551,7 @@ my.lm = lm(mM ~ Area, areas.all.ls);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.ls = data.frame(Compound, target.method, myslope, yint);
+regression.ls = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.ls);
 regtext.ls = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -562,7 +564,7 @@ my.lm = lm(mM ~ Area, areas.all.cc);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.cc = data.frame(Compound, target.method, myslope, yint);
+regression.cc = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.cc);
 regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -660,7 +662,7 @@ my.lm = lm(mM ~ Area, areas.all.ls);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.ls = data.frame(Compound, target.method, myslope, yint);
+regression.ls = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.ls);
 regtext.ls = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -673,7 +675,7 @@ my.lm = lm(mM ~ Area, areas.all.cc);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.cc = data.frame(Compound, target.method, myslope, yint);
+regression.cc = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.cc);
 regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -772,7 +774,7 @@ my.lm = lm(mM ~ Area, areas.all.ls);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.ls = data.frame(Compound, target.method, myslope, yint);
+regression.ls = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.ls);
 regtext.ls = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -785,7 +787,7 @@ my.lm = lm(mM ~ Area, areas.all.cc);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.cc = data.frame(Compound, target.method, myslope, yint);
+regression.cc = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.cc);
 regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -884,7 +886,7 @@ my.lm = lm(mM ~ Area, areas.all.ls);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.ls = data.frame(Compound, target.method, myslope, yint);
+regression.ls = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.ls);
 regtext.ls = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -897,7 +899,7 @@ my.lm = lm(mM ~ Area, areas.all.cc);
 yint = my.lm$coefficients[1];
 myslope = my.lm$coefficients[2];
 myslope.text = formatC(myslope, format = "e", digits = 2);
-regression.cc = data.frame(Compound, target.method, myslope, yint);
+regression.cc = data.frame(Compound, target.method, myslope, yint, peak.start, peak.end);
 regressions.out = rbind(regressions.out, regression.cc);
 regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
 
@@ -961,6 +963,9 @@ plot.reg.cc = ggplot(areas.all.cc, aes(x=Area, y=mM))+
 ## Output regression parameters
 
 ```{r print out regression parameters}
+
+table.regression = kable(regressions.out, caption = "Table: regression parameters for each metabolite.");
+table.regression
 
 write.table(regressions.out, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv", row.names=FALSE, sep="\t")
 

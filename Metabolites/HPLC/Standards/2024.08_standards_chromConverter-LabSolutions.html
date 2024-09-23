@@ -3720,8 +3720,10 @@ vertical-align: -.125em;
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Compound =</span> <span class="fu">character</span>(),</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Method =</span> <span class="fu">character</span>(),</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Slope.reg =</span> <span class="fu">double</span>(),</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Intercept.reg =</span> <span class="fu">double</span>()</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Intercept.reg =</span> <span class="fu">double</span>(),</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">peak.start =</span> <span class="fu">double</span>(),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">peak.end =</span> <span class="fu">double</span>()</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="acetate" class="level3">
@@ -3761,7 +3763,7 @@ vertical-align: -.125em;
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.ls);</span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>regtext.ls <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -3774,7 +3776,7 @@ vertical-align: -.125em;
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.cc);</span>
 <span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>regtext.cc <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -3884,7 +3886,7 @@ vertical-align: -.125em;
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.ls);</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>regtext.ls <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
 <span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -3897,7 +3899,7 @@ vertical-align: -.125em;
 <span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.cc);</span>
 <span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>regtext.cc <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -4006,7 +4008,7 @@ vertical-align: -.125em;
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.ls);</span>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>regtext.ls <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -4019,7 +4021,7 @@ vertical-align: -.125em;
 <span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.cc);</span>
 <span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>regtext.cc <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -4129,7 +4131,7 @@ vertical-align: -.125em;
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.ls);</span>
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>regtext.ls <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -4142,7 +4144,7 @@ vertical-align: -.125em;
 <span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.cc);</span>
 <span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>regtext.cc <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -4252,7 +4254,7 @@ vertical-align: -.125em;
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>regression.ls <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.ls);</span>
 <span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>regtext.ls <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
 <span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -4265,7 +4267,7 @@ vertical-align: -.125em;
 <span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>yint <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">1</span>];</span>
 <span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>myslope <span class="ot">=</span> my.lm<span class="sc">$</span>coefficients[<span class="dv">2</span>];</span>
 <span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>myslope.text <span class="ot">=</span> <span class="fu">formatC</span>(myslope, <span class="at">format =</span> <span class="st">&quot;e&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>);</span>
-<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint);</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>regression.cc <span class="ot">=</span> <span class="fu">data.frame</span>(Compound, target.method, myslope, yint, peak.start, peak.end);</span>
 <span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>regressions.out <span class="ot">=</span> <span class="fu">rbind</span>(regressions.out, regression.cc);</span>
 <span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>regtext.cc <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">&quot;mM product = &quot;</span>, myslope.text, <span class="st">&quot;* Area + &quot;</span>, <span class="fu">round</span>(yint, <span class="dv">3</span>), <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -4344,7 +4346,129 @@ vertical-align: -.125em;
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(regressions.out, <span class="at">file =</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv&quot;</span>, <span class="at">row.names=</span><span class="cn">FALSE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>table.regression <span class="ot">=</span> <span class="fu">kable</span>(regressions.out, <span class="at">caption =</span> <span class="st">&quot;Table: regression parameters for each metabolite.&quot;</span>);</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>table.regression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Table: regression parameters for each metabolite.</caption>
+<colgroup>
+<col style="width: 8%">
+<col style="width: 15%">
+<col style="width: 21%">
+<col style="width: 14%">
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Compound</th>
+<th style="text-align: left;">target.method</th>
+<th style="text-align: right;">myslope</th>
+<th style="text-align: right;">yint</th>
+<th style="text-align: right;">peak.start</th>
+<th style="text-align: right;">peak.end</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Area</td>
+<td style="text-align: left;">Acetate</td>
+<td style="text-align: left;">LabSolutions</td>
+<td style="text-align: right;">0.0117433</td>
+<td style="text-align: right;">1.022677</td>
+<td style="text-align: right;">17.75</td>
+<td style="text-align: right;">18.60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area1</td>
+<td style="text-align: left;">Acetate</td>
+<td style="text-align: left;">ChromConverter</td>
+<td style="text-align: right;">0.0117308</td>
+<td style="text-align: right;">1.001077</td>
+<td style="text-align: right;">17.75</td>
+<td style="text-align: right;">18.60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Area2</td>
+<td style="text-align: left;">Ethanol</td>
+<td style="text-align: left;">LabSolutions</td>
+<td style="text-align: right;">0.0177362</td>
+<td style="text-align: right;">5.776612</td>
+<td style="text-align: right;">25.75</td>
+<td style="text-align: right;">27.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area3</td>
+<td style="text-align: left;">Ethanol</td>
+<td style="text-align: left;">ChromConverter</td>
+<td style="text-align: right;">0.0177283</td>
+<td style="text-align: right;">5.719005</td>
+<td style="text-align: right;">25.75</td>
+<td style="text-align: right;">27.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Area4</td>
+<td style="text-align: left;">Lactate</td>
+<td style="text-align: left;">LabSolutions</td>
+<td style="text-align: right;">0.0072152</td>
+<td style="text-align: right;">1.825425</td>
+<td style="text-align: right;">14.75</td>
+<td style="text-align: right;">15.60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area5</td>
+<td style="text-align: left;">Lactate</td>
+<td style="text-align: left;">ChromConverter</td>
+<td style="text-align: right;">0.0071764</td>
+<td style="text-align: right;">1.817722</td>
+<td style="text-align: right;">14.75</td>
+<td style="text-align: right;">15.60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Area6</td>
+<td style="text-align: left;">Glucose</td>
+<td style="text-align: left;">LabSolutions</td>
+<td style="text-align: right;">0.0017906</td>
+<td style="text-align: right;">1.132856</td>
+<td style="text-align: right;">10.50</td>
+<td style="text-align: right;">11.50</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area7</td>
+<td style="text-align: left;">Glucose</td>
+<td style="text-align: left;">ChromConverter</td>
+<td style="text-align: right;">0.0017898</td>
+<td style="text-align: right;">1.130038</td>
+<td style="text-align: right;">10.50</td>
+<td style="text-align: right;">11.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Area8</td>
+<td style="text-align: left;">Cellobiose</td>
+<td style="text-align: left;">LabSolutions</td>
+<td style="text-align: right;">0.0020254</td>
+<td style="text-align: right;">1.124255</td>
+<td style="text-align: right;">8.50</td>
+<td style="text-align: right;">9.50</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area9</td>
+<td style="text-align: left;">Cellobiose</td>
+<td style="text-align: left;">ChromConverter</td>
+<td style="text-align: right;">0.0020245</td>
+<td style="text-align: right;">1.120689</td>
+<td style="text-align: right;">8.50</td>
+<td style="text-align: right;">9.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(regressions.out, <span class="at">file =</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv&quot;</span>, <span class="at">row.names=</span><span class="cn">FALSE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>

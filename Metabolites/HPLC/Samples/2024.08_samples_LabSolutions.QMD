@@ -1,0 +1,328 @@
+---
+title: "HPLC: compare samples (Lab Solutions)"
+author: "Tom Zaplana, Andrew Tolonen"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Setup
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(grid); # for multiplot
+library(modeest);
+library(readxl);
+library(DescTools); # AUC method
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+```
+
+# Introduction
+
+This notebook uses chromConverter to convert .lcd files to .txt file and then calculates the concentrations of metabolites using the parameters calculated from linear regessions of the standards: cellobiose, glucose, lactate, actetate, and ethanol.
+
+1.  Grab linear regression parameters from standards.
+2.  For each sample
+    1.  Visualize chromatogram
+    2.  Calculate sample areas for each metabolite
+    3.  Calculate concentrations using linear regression parameters
+3.  Output table of sample names and metabolite concentrations.
+
+```{r linear regression parameters}
+
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv";
+standards.data = read.table(datafile, header = TRUE);
+
+standards.data = standards.data %>%
+  filter(target.method == "LabSolutions") %>%
+  rename(Slope = myslope, Intercept = yint);
+
+table.standards = kable(standards.data, caption = "Table: Parameters of linear regressions (slope, y-intercept) to calculate metabolite concentrations from HPLC peak areas (compound_mM = slope * area + intercept.");
+table.standards
+
+```
+
+# Functions
+
+## Plot peaks
+
+```{r plot metabolite peaks}
+# plot peaks for all metabolites in standards
+
+plotPeaks = function(chromatogram.sample)
+{
+# get list of metabolites for which we have standards
+  metabolites.list = standards.data$Compound;
+  plot.list = list(); # declare an empty list of plots
+  counter = 1; # counter for list
+  
+  for (my.metabolite in metabolites.list)
+  {
+    # get start and end of peak for metabolite 
+    peak.info = standards.data %>%
+      filter(Compound == my.metabolite);
+    peak.start = peak.info$peak.start;
+    peak.end = peak.info$peak.end;
+    
+    # filter chromatogram for peak of interest
+    chromatogram.metabolite = chromatogram.sample %>%
+      filter(Minutes > peak.start & Minutes < peak.end);
+    
+    plot.metabolite = ggplot(chromatogram.metabolite, aes(x=Minutes, y=Intensity)) +
+      ggtitle(paste(mysample, my.metabolite, "peak", sep=" "))+
+      geom_point(size=0.5) +
+      xlab("Time") +
+      ylab("Intensity") +
+      coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chromatogram.metabolite$Intensity), max(chromatogram.metabolite$Intensity)))+
+      theme_classic() +
+      mytheme;
+    plot.list[[counter]] = plot.metabolite;
+    counter= counter+1;
+  }
+  
+  return(plot.list);
+}
+
+```
+
+## Calc compound concs
+
+```{r calculate compound concs}
+
+# calculate compound concentrations based on peak areas for a sample
+
+calc.concs = function(chromatogram.sample) 
+{
+  # get background for chromatogram
+  background = modeest::mfv(round(chromatogram.sample$Intensity, digits = 1));
+
+  # get list of metabolites for which we have standards
+  metabolites.list = standards.data$Compound;
+  
+  # declare dataframes for compound concs
+  concs.sample = data.frame(Sample = character(),
+                           Compound = character(),
+                           Conc_mM = double());
+
+  for (my.metabolite in metabolites.list)
+  {
+    # get compound info: peak start, end and regression info
+    metabolite.info = standards.data %>%
+      filter(Compound == my.metabolite);
+    peak.start = metabolite.info$peak.start;
+    peak.end = metabolite.info$peak.end;
+    metabolite.slope = metabolite.info$Slope;
+    metabolite.intercept = metabolite.info$Intercept;
+    
+ # get area for metabolite peak
+ chromatogram.peak = chromatogram.sample %>%
+   filter(Minutes > peak.start & Minutes < peak.end);
+ data.temp = chromatogram.peak %>%
+   mutate(Intensity_diff = Intensity - background);
+ peak.area = AUC(data.temp$Minutes, data.temp$Intensity_diff, method='trapezoid');
+ 
+ # calc compound conc (mM) from peak area
+ metabolite.conc = peak.area * metabolite.slope + metabolite.intercept;
+
+ # append to output data.frame
+ my.temp = data.frame(mysample, my.metabolite, metabolite.conc);
+ concs.sample = rbind(concs.sample, my.temp);
+}
+
+# return data as a list
+return(concs.sample);
+}
+
+
+```
+
+# Methods
+
+## Extract detector B chromatograms
+
+Perl to extract detector B chromatograms from Lab Solutions .txt files. Prints detector B .txt files
+
+```{perl, engine.path = "/usr/bin/perl"}
+
+# perl code to extract detector B chromatograms from LabSolutions .txt files. Outputs 
+# detector B chromatograms as .txt files.
+
+$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/TXT_Files/Test";
+
+# get list of .txt files 
+opendir(DIR, $dirpath) or die "cannot open directory $dirpath\n"; 
+@allfiles = grep(/.*\.txt$/, readdir(DIR)); 
+
+# remove cleaned files from previous runs
+foreach $file (@allfiles)
+{
+ if ($file =~ /detector/)
+ {
+  $inputfile = "$dirpath"."/"."$file";
+  unlink($inputfile);
+ }
+}
+
+# extract detector B (RID) chromatogram
+LOOP:foreach $file (@allfiles)
+{
+ $inputfilepath = "$dirpath"."/"."$file";
+ $file =~ /(.*).txt/;
+ $inputfilebase = $1;
+ $outputfile = "$inputfilebase"."_detectorB.txt";
+ $outputfilepath = "$dirpath"."/DetectorB/"."$outputfile";
+ open(IN, "<$inputfilepath") or die "cant open IN\n";
+ open(OUT, ">$outputfilepath") or die "cant open OUT\n";
+ while ($line = <IN>)
+ {
+  chomp($line);
+  $line =~ s/\r//g;
+  unless ($line =~ /LC Chromatogram\(Detector B-Ch1\)/)
+  {
+   next;
+  }
+  until ($line =~ /^R.Time/)
+  {
+    $line = <IN>;
+    chomp($line);
+    $line =~ s/\r//g;
+  }
+  print OUT "$line\n";
+  $line = <IN>;
+  until($line =~ /[a-z]/)
+ {
+  chomp($line);
+  $line =~ s/\r//g;
+  print OUT "$line\n";
+  $line = <IN>;
+ }
+next LOOP;
+}
+close IN;
+close OUT;
+}
+
+```
+
+## Data frame of chromatograms
+
+Make data.frame of chromatograms produced by chromConverter() and LabSolutions
+
+```{r Compare Chromatograms}
+
+# foreach headerless .txt file in LabSolutions directory, grab file base name, open filehandles to LabSolutions and chromConverter files base file name, plot both files on same plot.
+
+# directories of input files
+input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/TXT_Files/Test/DetectorB";
+
+# declare empty data.frame
+data.all= data.frame(Minutes = double(),
+                     Intensity = double(),
+                     Sample = character(), 
+                     Format = character());
+
+
+# read ls data into data frame
+files.ls = list.files(path = input.dir.ls, pattern = "detectorB.txt");
+
+for (file in files.ls) 
+{
+  path.ls = paste(input.dir.ls, file, sep = "/");
+  inputfile.ls.base = str_replace(string=file, pattern="_detectorB.txt", replacement="");
+  data.ls = read.csv(file = path.ls, header=TRUE, sep = "\t");
+
+# clean up data 
+data.ls = data.ls %>%
+  rename(Minutes = R.Time..min.) %>%
+  mutate(Format = "LabSolutions") %>%
+  mutate(Minutes = as.numeric(Minutes)) %>%
+  mutate(Intensity = as.numeric(Intensity)) %>%
+  mutate(Sample = inputfile.ls.base) %>%
+  drop_na();
+
+# concatenate data from two files
+data.all = rbind(data.all, data.ls);
+
+}
+
+```
+
+## Calc/Plot Sample data
+
+```{r plot data foreach sample}
+
+sample.list = unique(data.all$Sample);
+
+ # declare data.frame for metabolite concs from all samples
+ concs.all = data.frame(Sample = character(),
+                        Compound = character(),
+                        Concentration_mM = double());
+
+counter = 1;
+for (mysample in sample.list)
+{
+ sample.out = paste("Data for sample", mysample, sep=" ");
+ cat(sample.out);
+ 
+ # get chromatogram for sample
+ chromatogram.sample = data.all %>%
+   filter(Sample == mysample);
+
+ # plot chromatogram
+ myplot = ggplot(chromatogram.sample, aes(x=Minutes, y=Intensity)) +
+  ggtitle(mysample)+
+  geom_point(size=0.1, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  theme_classic() +
+  scale_x_continuous(breaks=seq(0, max(chromatogram.sample$Minutes), 2))+
+  mytheme;
+
+plot.chromatogram = grid.arrange(myplot, ncol=1);
+ 
+ # plot peaks for each compound. returns a list of plots for each compound
+metabolite.peaks = plotPeaks(chromatogram.sample); 
+plots.all = grid.arrange(grobs = metabolite.peaks);
+metabolite.peaks
+
+ # calc peak areas/concs for each compound
+concs.sample = calc.concs(chromatogram.sample);
+concs.sample = concs.sample %>%
+  rename(Sample = mysample, Compound = my.metabolite, Concentation_mM = metabolite.conc);
+
+ # plot table of metabolite concentrations
+table.concs = kable(concs.sample, caption = "Table: concentrations (mM) of each metabolite in the sample");
+print(table.concs)
+
+concs.all = rbind(concs.all, concs.sample);
+}
+
+
+```
+
+```{r print table of compound concs in each sample}
+
+write.table(concs.all, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/compound_concs_labSolutions.tsv", row.names=FALSE, sep="\t")
+```
+
+# Conclusions
