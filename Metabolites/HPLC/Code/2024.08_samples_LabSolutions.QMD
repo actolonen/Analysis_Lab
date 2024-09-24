@@ -50,7 +50,7 @@ This notebook uses chromConverter to convert .lcd files to .txt file and then ca
 
 ```{r linear regression parameters}
 
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv";
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Output/standards_regressions.tsv";
 standards.data = read.table(datafile, header = TRUE);
 
 standards.data = standards.data %>%
@@ -167,7 +167,7 @@ Perl to extract detector B chromatograms from Lab Solutions .txt files. Prints d
 # perl code to extract detector B chromatograms from LabSolutions .txt files. Outputs 
 # detector B chromatograms as .txt files.
 
-$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/TXT_Files/Test";
+$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/TXT_Files/Test";
 
 # get list of .txt files 
 opendir(DIR, $dirpath) or die "cannot open directory $dirpath\n"; 
@@ -233,7 +233,7 @@ Make data.frame of chromatograms produced by chromConverter() and LabSolutions
 # foreach headerless .txt file in LabSolutions directory, grab file base name, open filehandles to LabSolutions and chromConverter files base file name, plot both files on same plot.
 
 # directories of input files
-input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/TXT_Files/Test/DetectorB";
+input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/TXT_Files/Test/DetectorB";
 
 # declare empty data.frame
 data.all= data.frame(Minutes = double(),
@@ -322,7 +322,7 @@ concs.all = rbind(concs.all, concs.sample);
 
 ```{r print table of compound concs in each sample}
 
-write.table(concs.all, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Samples/compound_concs_labSolutions.tsv", row.names=FALSE, sep="\t")
+write.table(concs.all, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Output/compound_concs_labSolutions.tsv", row.names=FALSE, sep="\t")
 ```
 
 # Conclusions
