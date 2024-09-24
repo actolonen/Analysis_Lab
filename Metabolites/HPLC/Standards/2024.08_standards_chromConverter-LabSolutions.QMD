@@ -66,9 +66,9 @@ standards = rbind(standards1, standards2);
 
 ```
 
-# Methods
+# Functions
 
-## Functions
+## Calc peak areas
 
 Calculate peak areas for a metabolite. Returns list: chromatogram peaks for all samples, peak areas for all samples.
 
@@ -138,6 +138,8 @@ return(peakData);
 
 
 ```
+
+# Methods
 
 ## LS: extract detector B
 
