@@ -49,7 +49,7 @@ We compare the chromatograms for 5 concentrations of metabolites (STD1-5) (see t
 
 ```{r metabolite concs}
 
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/information.xlsx";
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/2024.09.02_information.xlsx";
 standards = read_excel(datafile, sheet = "Standards", col_names = TRUE);
 
 table.standards = kable(standards, caption = "Table: Metabolite concentrations in standards");
@@ -150,7 +150,7 @@ Perl to extract detector B chromatograms from Lab Solutions .txt files. Prints d
 # perl code to extract detector B chromatograms from LabSolutions .txt files. Outputs 
 # detector B chromatograms as .txt files.
 
-$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/Files_TXT";
+$dirpath = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Standards/Files_TXT";
 
 # get list of .txt files
 opendir(DIR, $dirpath) or die "cannot open directory $dirpath\n";
@@ -216,9 +216,9 @@ ChromConverter to read .lcd files and output detector B .txt files.
 # get a list of .lcd files in the working directory and convert them to data.frames, 
 # then print the data.frmes as .txt files.
 
-input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/Files_LCD";
+input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Standards/Files_LCD";
 files.lcd = list.files(path = input.dir, pattern = "STD");
-output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/Files_LCD/Output/";
+output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Standards/Files_LCD/Output/";
 
 # declare empty data.frame
 data_cc = data.frame(Minutes = double(),
@@ -255,8 +255,8 @@ Make data.frame of chromatograms produced by chromConverter() and LabSolutions
 # foreach headerless .txt file in LabSolutions directory, grab file base name, open filehandles to LabSolutions and chromConverter files base file name, plot both files on same plot.
 
 # directories of input files
-input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/Files_TXT/DetectorB";
-input.dir.cc = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/Files_LCD/Output";
+input.dir.ls = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Standards/Files_TXT/DetectorB";
+input.dir.cc = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Standards/Files_LCD/Output";
 
 # read cc data into data frame
 files.cc = list.files(path = input.dir.cc, pattern = "chromConverter_RID-10A_Detector_B.txt");
@@ -969,7 +969,7 @@ plot.reg.cc = ggplot(areas.all.cc, aes(x=Area, y=mM))+
 table.regression = kable(regressions.out, caption = "Table: regression parameters for each metabolite.");
 table.regression
 
-write.table(regressions.out, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Standards/standards_regressions.tsv", row.names=FALSE, sep="\t")
+write.table(regressions.out, file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Output/standards_regressions.tsv", row.names=FALSE, sep="\t")
 
 ```
 
