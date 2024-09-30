@@ -1,0 +1,740 @@
+---
+title: "HPLC: compare standards from 2024.09.24"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Setup
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(grid); # for multiplot
+library(modeest);
+library(readxl);
+library(DescTools); # AUC method
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+```
+
+# Introduction
+
+This notebook compares the peak areas from HPLC standards .lcd files using ChromConverter. The HPLC files include data from 3 channels (below). For these analyses, we will focus only on the data from detector B (RID).
+
+1.  Detector A-Ch1: UV/VIS SPD-20A detector at 260 nm.
+2.  Detector A-Ch2: UV/VIS SPD-20A detector at 210 nm. Acids (ie acetate) are visible using channel 2.
+3.  Detector B: Refractive index RID-10A.
+
+We compare the chromatograms for 5 concentrations of metabolites (STD1-5) (see table below). We will calculate peak areas for each file type and plot the linearity of the standard curves. The output is a file containing parameters of the linear models (slope, intercept) to calculate metabolite concentrations from the peak areas.
+
+## File IO
+
+Files used by this script.
+
+```{r file IO}
+
+# sample information file
+info.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/feuille_route_HPLC.xlsx";
+
+# input directory of .lcd files
+lcd.input.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24";
+
+# output directory of .txt files
+txt.output.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24/Txt_Files";
+
+# output file of linear model
+table.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24/standards_regressions.tsv";
+
+```
+
+```{r metabolite concs}
+
+standards = read_excel(info.file, sheet = "Standards", col_names = TRUE);
+
+table.standards = kable(standards, caption = "Table: Metabolite concentrations in standards");
+table.standards
+
+```
+
+# Functions
+
+## Calc peak areas
+
+Calculate peak areas for a metabolite. Returns list: chromatogram peaks for all samples, peak areas for all samples.
+
+```{r calculate peak areas}
+
+calc_peakAreas = function(peak.start, peak.end, data.all) 
+{
+#  get list of samples
+sample.list = unique(data.all$Sample);
+
+# declare dataframes for peaks and areas
+peaks.all = data.frame(Minutes = double(),
+                           Intensity = double(),
+                           Sample = character(),
+                           Detector = character());
+
+areas.all = data.frame(SampleID = character(),
+                       Area = double(), 
+                       Detector = character());
+
+for (SampleID in sample.list) # foreach standards sample
+{
+  
+# calc background as mode measurement
+data.temp = data.all %>%
+  filter(Sample == SampleID);
+background.cc = modeest::mfv(round(data.temp$Intensity, digits = 1));
+  
+ # get chromatogram for peak
+ data.peak = data.all %>%
+   filter(Sample == SampleID) %>%
+   filter(Minutes > peak.start & Minutes < peak.end);
+   # separate(Sample, c("Sample", "Replicate"), sep = "-");
+
+ peaks.all = rbind(peaks.all, data.peak);
+ 
+ # calc peak areas: cc and ls
+ data.temp = data.peak %>%
+   mutate(Intensity_diff = Intensity - background.cc);
+ my.area =AUC(data.temp$Minutes, data.temp$Intensity_diff, method='trapezoid');
+ Detector = unique(data.temp$Detector);
+ area.sample = data.frame(SampleID, my.area, Detector);
+ areas.all = rbind(areas.all, area.sample);
+
+}
+# return data as a list
+peakData = list(peaks.all, areas.all);
+return(peakData);
+}
+
+```
+
+# Methods
+
+## Convert .lcd files to .txt files
+
+ChromConverter to read .lcd files and output detector B .txt files.
+
+```{r Chromconverter: convert .lcd file to .txt files}
+
+# get a list of .lcd files in the working directory and convert them to data.frames, 
+# then print the data.frmes as .txt files.
+
+# select sample files for analysis
+files.lcd = list.files(path = lcd.input.dir, pattern = ".lcd");
+files.lcd.df = data.frame(files.lcd);
+files.lcd.df = files.lcd.df %>%
+  filter(grepl("^STD", files.lcd));
+files.lcd = dplyr::pull(files.lcd.df, files.lcd);
+
+# declare empty data.frame for all samples
+chromatograms.all = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      Sample = character(), 
+                      Detector = character());
+
+for (file in files.lcd) 
+{
+  inputfile = paste(lcd.input.dir, file, sep = "/");
+  inputfile.base = str_replace(string=file, pattern=".lcd", replacement = "");
+
+# declare a data.fram for this sample
+chromatograms.sample = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      Sample = character(), 
+                      Detector = character());
+  
+  data = read_shimadzu_lcd(
+     path = inputfile, 
+     format_out = "data.frame", 
+     data_format = "long", 
+     read_metadata = TRUE);
+  
+  for (detector in data) # foreach detector (data.frame) in the data list
+  {
+    my.instrument = attr(detector, which = "instrument");
+    my.detector = attr(detector, which = "detector");
+    my.wavelength = attr(detector, which = "wavelength");
+    my.detector = if_else(my.detector == "SPD-20A", true = paste(my.detector, my.wavelength, sep = " "), false = my.detector); 
+    detector = detector %>%
+      rownames_to_column(var = "Minutes") %>%
+      rename(Intensity = int) %>%
+      mutate(Sample = inputfile.base) %>%
+      mutate(Detector = my.detector);
+      chromatograms.sample = rbind(chromatograms.sample, detector); 
+   }
+
+chromatograms.all = rbind(chromatograms.all, chromatograms.sample);
+
+# print out chromatogram from this sample to file
+chromatogram.file = paste(inputfile.base, ".txt", sep="");
+chromatogram.out = paste(txt.output.dir, chromatogram.file, sep="/");
+write.table(chromatograms.sample, file = chromatogram.out, row.names=FALSE, sep="\t", col.names=TRUE); 
+}
+
+```
+
+# Results
+
+Plot chromatograms for each standards sample.
+
+```{r plot data foreach sample}
+
+sample.list = unique(chromatograms.all$Sample);
+list.chromatograms.all <- list()  # new empty list
+
+counter = 1;
+for (mysample in sample.list)
+{
+ data.plot = chromatograms.all %>%
+   filter(Sample == mysample) %>%
+   mutate(Minutes = as.numeric(Minutes));
+
+ myplot = ggplot(data.plot, aes(x=Minutes, y=Intensity)) +
+  ggtitle(mysample)+
+  geom_point(size=0.1, color = 'blue') +
+  xlab("Time") + 
+  ylab("Intensity") +
+  facet_wrap(~ Detector)+
+  coord_cartesian(xlim=c(0, max(data.plot$Minutes)), ylim=c(min(data.plot$Intensity), max(data.plot$Intensity)))+
+  theme_classic()+
+  mytheme;
+ 
+  list.chromatograms.all[[counter]] = myplot;  # add each plot into plot list
+  counter = counter+1;
+  grid.arrange(myplot, ncol=1);
+}
+ #chromatograms.all.plots = grid.arrange(grobs = list.chromatograms.all);
+ 
+
+```
+
+## Remove faulty sample
+
+```{r remove faulty sample}
+
+ # based on plots, I am removing STD-100 from future analyses
+ chromatograms.all.temp = chromatograms.all %>%
+   filter(!Sample == "STD1-100");
+ 
+ standards = standards %>%
+   filter(!Sample == "STD1-100");
+
+```
+
+## Focus just on detector-B data for quantification
+
+```{r filter detector B}
+
+data.all = chromatograms.all.temp %>%
+  filter(Detector == "RID-10A") %>%
+  mutate(Minutes = as.numeric(Minutes));
+
+```
+
+## Metabolite concentrations
+
+```{r declare output table}
+
+# declare output table with regression information to calculate concentrations from peak
+# areas in experimental samples.
+
+# compound_mM = Slope.reg * peak.area + Intercept.reg;
+
+regressions.out = data.frame(
+    Compound = character(),
+    Slope.reg = double(),
+    Intercept.reg = double(),
+    peak.start = double(),
+    peak.end = double()
+);
+
+```
+
+### Acetate
+
+Calc peak areas
+
+```{r acetate: calc peak areas}
+
+# compound parameters
+Compound = "Acetate";
+peak.start = 18.25;
+peak.end = 19.1;
+
+# get the chromatogram peaks and calculate the areas for each sample
+peakData = calc_peakAreas(peak.start, peak.end, data.all);
+peaks.all = peakData[[1]];
+areas.all = peakData[[2]];
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Metabolite == Compound) %>%
+  select(-File) %>%
+  rename(SampleID = Sample);
+
+areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+
+areas.all.concs = areas.all.concs %>%
+  rename(Area = my.area);
+
+```
+
+Calc regressions
+
+```{r acetate: regressions}
+
+my.lm = lm(mM ~ Area, areas.all.concs);
+yint = my.lm$coefficients[1];
+myslope = my.lm$coefficients[2];
+myslope.text = formatC(myslope, format = "e", digits = 2);
+
+regression.cc = data.frame(Compound, myslope, yint, peak.start, peak.end);
+regressions.out = rbind(regressions.out, regression.cc);
+regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
+
+
+```
+
+Plot peaks
+
+```{r acetate: plot peaks, fig.cap = "Peak areas of acetate in each of the standards samples."}
+
+# plot peaks
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+  ggtitle(paste(Compound, " peaks", sep=""))+
+  geom_point(size=0.5) +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(peaks.all$Intensity), max(peaks.all$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+myplot
+ 
+
+```
+
+Plot regressions
+
+```{r acetate: plot linear regression, fig.cap = "Linear regressions of peak area vs acetate concentration for all standards."}
+
+# text placement
+text.x = 2e3;
+text.y = 5;
+
+plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
+  ggtitle(paste(Compound," (ChromConverter)"))+
+  geom_point(size=2, color = 'blue') +
+  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
+  xlab("Area") + 
+  ylab("mM") +
+  theme_classic() +
+  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
+  mytheme;
+
+# print regressions
+ bothplots = grid.arrange(plot.reg.cc, ncol = 1);
+
+
+```
+
+### Ethanol
+
+Calc peak areas
+
+```{r ethanol: calc peak areas}
+
+# compound parameters
+Compound = "Ethanol";
+peak.start = 24.75;
+peak.end = 26;
+
+# get the chromatogram peaks and calculate the areas for each sample
+peakData = calc_peakAreas(peak.start, peak.end, data.all);
+peaks.all = peakData[[1]];
+areas.all = peakData[[2]];
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Metabolite == Compound) %>%
+  select(-File) %>%
+  rename(SampleID = Sample);
+
+areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+
+areas.all.concs = areas.all.concs %>%
+  rename(Area = my.area);
+
+```
+
+Calc regressions
+
+```{r ethanol: regressions}
+
+my.lm = lm(mM ~ Area, areas.all.concs);
+yint = my.lm$coefficients[1];
+myslope = my.lm$coefficients[2];
+myslope.text = formatC(myslope, format = "e", digits = 2);
+
+regression.cc = data.frame(Compound, myslope, yint, peak.start, peak.end);
+regressions.out = rbind(regressions.out, regression.cc);
+regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
+
+```
+
+Plot peaks
+
+```{r ethanol: plot peaks, fig.cap = "Peak areas of ethanol in each of the standards samples."}
+
+# plot peaks
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+  ggtitle(paste(Compound, " peaks", sep=""))+
+  geom_point(size=0.5) +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(peaks.all$Intensity), max(peaks.all$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+myplot
+ 
+ 
+
+```
+
+Plot regressions
+
+```{r ethanol: plot linear regression, fig.cap = "Linear regressions of peak area vs ethanol concentration for all standards."}
+
+# text placement
+text.x = 10e3;
+text.y = 50;
+
+plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
+  ggtitle(paste(Compound," (ChromConverter)"))+
+  geom_point(size=2, color = 'blue') +
+  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
+  xlab("Area") + 
+  ylab("mM") +
+  theme_classic() +
+  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
+  mytheme;
+
+# print regressions
+ bothplots = grid.arrange(plot.reg.cc, ncol = 1);
+
+
+```
+
+### Lactate
+
+Calc peak areas
+
+```{r lactate: calc peak areas}
+
+# compound parameters
+Compound = "Lactate";
+peak.start = 15;
+peak.end = 15.9;
+
+# get the chromatogram peaks and calculate the areas for each sample
+peakData = calc_peakAreas(peak.start, peak.end, data.all);
+peaks.all = peakData[[1]];
+areas.all = peakData[[2]];
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Metabolite == Compound) %>%
+  select(-File) %>%
+  rename(SampleID = Sample);
+
+areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+
+areas.all.concs = areas.all.concs %>%
+  rename(Area = my.area);
+
+
+```
+
+Calc regressions
+
+```{r lactate: regressions}
+
+my.lm = lm(mM ~ Area, areas.all.concs);
+yint = my.lm$coefficients[1];
+myslope = my.lm$coefficients[2];
+myslope.text = formatC(myslope, format = "e", digits = 2);
+
+regression.cc = data.frame(Compound, myslope, yint, peak.start, peak.end);
+regressions.out = rbind(regressions.out, regression.cc);
+regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
+
+
+
+```
+
+Plot peaks
+
+```{r lactate: plot peaks, fig.cap = "Peak areas of lactate in each of the standards samples."}
+
+# plot peaks
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+  ggtitle(paste(Compound, " peaks", sep=""))+
+  geom_point(size=0.5) +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(peaks.all$Intensity), max(peaks.all$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+myplot
+ 
+
+```
+
+Plot regressions
+
+```{r lactate: plot linear regression, fig.cap = "Linear regressions of peak area vs lactate concentration for all standards."}
+
+# text placement
+text.x = 10e3;
+text.y = 50;
+
+# text placement
+text.x = 2e3;
+text.y = 5;
+
+plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
+  ggtitle(paste(Compound," (ChromConverter)"))+
+  geom_point(size=2, color = 'blue') +
+  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
+  xlab("Area") + 
+  ylab("mM") +
+  theme_classic() +
+  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
+  mytheme;
+
+# print regressions
+ bothplots = grid.arrange(plot.reg.cc, ncol = 1);
+
+
+```
+
+### Glucose
+
+Calc peak areas
+
+```{r glucose: calc peak areas}
+
+# compound parameters
+Compound = "Glucose";
+peak.start = 10.4;
+peak.end = 11.2;
+
+# get the chromatogram peaks and calculate the areas for each sample
+peakData = calc_peakAreas(peak.start, peak.end, data.all);
+peaks.all = peakData[[1]];
+areas.all = peakData[[2]];
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Metabolite == Compound) %>%
+  select(-File) %>%
+  rename(SampleID = Sample);
+
+areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+
+areas.all.concs = areas.all.concs %>%
+  rename(Area = my.area);
+
+```
+
+Calc regressions
+
+```{r glucose: regressions}
+
+my.lm = lm(mM ~ Area, areas.all.concs);
+yint = my.lm$coefficients[1];
+myslope = my.lm$coefficients[2];
+myslope.text = formatC(myslope, format = "e", digits = 2);
+
+regression.cc = data.frame(Compound, myslope, yint, peak.start, peak.end);
+regressions.out = rbind(regressions.out, regression.cc);
+regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
+
+
+```
+
+Plot peaks
+
+```{r glucose: plot peaks, fig.cap = "Peak areas of glucose in each of the standards samples."}
+
+# plot peaks
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+  ggtitle(paste(Compound, " peaks", sep=""))+
+  geom_point(size=0.5) +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(peaks.all$Intensity), max(peaks.all$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+myplot
+ 
+
+ 
+
+```
+
+Plot regressions
+
+```{r glucose: plot linear regression, fig.cap = "Linear regressions of peak area vs glucose concentration for all standards."}
+
+# text placement
+text.x = 10e3;
+text.y = 5;
+
+plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
+  ggtitle(paste(Compound," (ChromConverter)"))+
+  geom_point(size=2, color = 'blue') +
+  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
+  xlab("Area") + 
+  ylab("mM") +
+  theme_classic() +
+  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
+  mytheme;
+
+# print regressions
+ bothplots = grid.arrange(plot.reg.cc, ncol = 1);
+
+
+```
+
+### Cellobiose
+
+Calc peak areas
+
+```{r cellobiose: calc peak areas}
+
+# compound parameters
+Compound = "Cellobiose";
+peak.start = 8.5;
+peak.end = 9.5;
+
+# get the chromatogram peaks and calculate the areas for each sample
+peakData = calc_peakAreas(peak.start, peak.end, data.all);
+peaks.all = peakData[[1]];
+areas.all = peakData[[2]];
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Metabolite == Compound) %>%
+  select(-File) %>%
+  rename(SampleID = Sample);
+
+areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+
+areas.all.concs = areas.all.concs %>%
+  rename(Area = my.area);
+
+
+```
+
+Calc regressions
+
+```{r cellobiose: regressions}
+
+my.lm = lm(mM ~ Area, areas.all.concs);
+yint = my.lm$coefficients[1];
+myslope = my.lm$coefficients[2];
+myslope.text = formatC(myslope, format = "e", digits = 2);
+
+regression.cc = data.frame(Compound, myslope, yint, peak.start, peak.end);
+regressions.out = rbind(regressions.out, regression.cc);
+regtext.cc = paste("mM product = ", myslope.text, "* Area + ", round(yint, 3), sep="");
+
+
+
+```
+
+Plot peaks
+
+```{r cellobiose: plot peaks, fig.cap = "Peak areas of cellobiose in each of the standards samples."}
+
+# plot peaks
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+  ggtitle(paste(Compound, " peaks", sep=""))+
+  geom_point(size=0.5) +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(peaks.all$Intensity), max(peaks.all$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+myplot
+ 
+ 
+```
+
+Plot regressions
+
+```{r cellobiose: plot linear regression, fig.cap = "Linear regressions of peak area vs cellobiose concentration for all standards."}
+
+# text placement
+text.x = 8e3;
+text.y = 5;
+
+plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
+  ggtitle(paste(Compound," (ChromConverter)"))+
+  geom_point(size=2, color = 'blue') +
+  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
+  xlab("Area") + 
+  ylab("mM") +
+  theme_classic() +
+  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
+  mytheme;
+
+# print regressions
+ bothplots = grid.arrange(plot.reg.cc, ncol = 1);
+
+
+
+```
+
+## Output regression parameters
+
+```{r print out regression parameters}
+
+table.regression = kable(regressions.out, caption = "Table: regression parameters for each metabolite.");
+table.regression
+
+write.table(regressions.out, file = table.out, row.names=FALSE, sep="\t")
+
+```
+
+# Conclusions
