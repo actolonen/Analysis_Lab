@@ -50,7 +50,7 @@ lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/
 txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/TXT_Files";
 
 # directory to read sample information file
-info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/information_HPLC.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC.xlsx";
 
 # output directory for plots
 plots.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/Plots";
