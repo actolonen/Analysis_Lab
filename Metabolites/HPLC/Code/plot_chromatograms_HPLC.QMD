@@ -1,0 +1,192 @@
+---
+title: "HPLC: plot chromatograms from .lcd files"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Setup
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(readxl);
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+```
+
+## File I/O
+
+Directories/files used by this script.
+
+```{r file IO}
+
+# get a list of .lcd files in the working directory and convert them to data.frames, 
+# then print the data.frmes as .txt files.
+
+# directory to read with .lcd files
+lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/LCD_Files";
+
+# directory to write chromConverter .txt files.
+txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/TXT_Files";
+
+# directory to read sample information file
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/information_HPLC.xlsx";
+
+# output directory for plots
+plots.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Samples/Plots";
+
+
+```
+
+# Introduction
+
+This notebook uses chromConverter to visualize the HPLC chromatograms from .lcd files. This notebook visualizes the chromatograms using the three detectors of our HPLC:
+
+1.  Detector A (UV) at 210 nm
+2.  Detector A (UV) at 260 nm
+3.  Detector B (RID)
+
+The 3 chromatograms for each sample are printed as PNG files.
+
+# Methods
+
+## Convert .lcd to .txt files
+
+ChromConverter to read .lcd files. Output detector B .txt files and a data.frame of all chromatograms.
+
+```{r chromConverter to convert .lcd to .txt}
+
+# select sample files for analysis
+files.lcd = list.files(path = lcd.input.dir, pattern = ".lcd");
+files.lcd.df = data.frame(files.lcd);
+files.lcd.df = files.lcd.df %>%
+  filter(grepl("^[A-H]\\d+", files.lcd));
+files.lcd = dplyr::pull(files.lcd.df, files.lcd);
+
+# declare empty data.frame for all samples
+chromatograms.all = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      Sample = character(), 
+                      Detector = character());
+
+for (file in files.lcd) 
+{
+  inputfile = paste(lcd.input.dir, file, sep = "/");
+  inputfile.base = str_replace(string=file, pattern=".lcd", replacement = "");
+
+# declare a data.fram for this sample
+chromatograms.sample = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      Sample = character(), 
+                      Detector = character());
+  
+  data = read_shimadzu_lcd(
+     path = inputfile, 
+     format_out = "data.frame", 
+     data_format = "long", 
+     read_metadata = TRUE);
+  
+  for (detector in data) # foreach detector (data.frame) in the data list
+  {
+    my.instrument = attr(detector, which = "instrument");
+    my.detector = attr(detector, which = "detector");
+    my.wavelength = attr(detector, which = "wavelength");
+    my.detector = if_else(my.detector == "SPD-20A", true = paste(my.detector, my.wavelength, sep = " "), false = my.detector); 
+    detector = detector %>%
+      rownames_to_column(var = "Minutes") %>%
+      rename(Intensity = int) %>%
+      mutate(Sample = inputfile.base) %>%
+      mutate(Detector = my.detector);
+      chromatograms.sample = rbind(chromatograms.sample, detector); 
+   }
+
+chromatograms.all = rbind(chromatograms.all, chromatograms.sample);
+
+# print out chromatogram from this sample to file
+chromatogram.file = paste(inputfile.base, ".txt", sep="");
+chromatogram.out = paste(txt.output.dir, chromatogram.file, sep="/");
+write.table(chromatograms.sample, file = chromatogram.out, row.names=FALSE, sep="\t", col.names=TRUE); 
+}
+```
+
+## Add sample annotation
+
+```{r add annotation to chromatograms data.frame}
+
+sample.info = read_excel(info.file, sheet = "Echantillons", col_names = TRUE);
+
+sample.info = sample.info %>%
+  unite("Description", Manip, `Time point`, sep = " ") %>%
+  separate(Fichier, c("Sample", "File.base"), sep = "\\.") %>%
+  select(Description, Sample);
+
+chromatograms.all.annot = left_join(chromatograms.all, sample.info, by="Sample");
+
+
+```
+
+## Plot chromatograms for all samples (3 detectors)
+
+Output plots for all chromatograms to .png files.
+
+```{r plot chromatograms for three detectors for each sample}
+
+# make title for plot
+chromatograms.all.plot = chromatograms.all.annot %>%
+  rename(Well = Sample) %>%
+  mutate(Temp = Well) %>%
+  unite("Sample", Temp, Description, sep = ": ") %>%
+  mutate(Minutes = as.numeric(Minutes));
+
+# get list of samples
+sample.list = unique(chromatograms.all.plot$Sample);
+
+for(my.sample in sample.list)
+{
+  # get sample of interest
+  chromatogram.plot = chromatograms.all.plot %>%
+    filter(Sample == my.sample) %>%
+    mutate(Minutes = as.numeric(Minutes));
+  
+my.plot = ggplot(chromatogram.plot, aes(x=Minutes, y=Intensity)) +
+  ggtitle(my.sample)+
+  geom_point(size=0.1) +
+  xlab("Time") + 
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(0,max(chromatograms.all.plot$Minutes)), ylim=c(0, max(chromatograms.all.plot$Intensity)))+
+  scale_x_continuous(breaks=seq(0, max(chromatograms.all.plot$Minutes), 4))+
+  scale_y_continuous(breaks=seq(0, max(chromatograms.all.plot$Intensity), max(chromatograms.all.plot$Intensity/6)))+
+  facet_wrap(~ Detector) +
+  theme_classic() +
+  mytheme;
+
+plot.file = paste(unique(chromatogram.plot$Well), ".png", sep="");
+output.path = paste(plots.output.dir, plot.file, sep="/");
+ggsave(filename = output.path, plot = my.plot);
+}
+  
+```
+
+# Conclusions
