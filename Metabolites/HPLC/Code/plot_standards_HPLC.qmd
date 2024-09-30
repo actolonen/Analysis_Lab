@@ -1,5 +1,5 @@
 ---
-title: "HPLC: compare standards from 2024.09.24"
+title: "HPLC: compare standards, compute linear module"
 author: "Fermlab"
 format: html
 editor: visual
@@ -21,7 +21,6 @@ library(stringr);
 library(tidyverse);
 library(readr);
 library(gridExtra);
-library(grid); # for multiplot
 library(modeest);
 library(readxl);
 library(DescTools); # AUC method
@@ -54,16 +53,16 @@ Files used by this script.
 ```{r file IO}
 
 # sample information file
-info.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/feuille_route_HPLC.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC.xlsx";
 
 # input directory of .lcd files
-lcd.input.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24";
+lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
 
 # output directory of .txt files
-txt.output.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24/Txt_Files";
+txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/TXT_ChromConverter";
 
 # output file of linear model
-table.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.09.24/24-09-24/standards_regressions.tsv";
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv";
 
 ```
 
@@ -87,29 +86,29 @@ Calculate peak areas for a metabolite. Returns list: chromatogram peaks for all 
 calc_peakAreas = function(peak.start, peak.end, data.all) 
 {
 #  get list of samples
-sample.list = unique(data.all$Sample);
+file.list = unique(data.all$File);
 
 # declare dataframes for peaks and areas
 peaks.all = data.frame(Minutes = double(),
                            Intensity = double(),
-                           Sample = character(),
+                           File = character(),
                            Detector = character());
 
-areas.all = data.frame(SampleID = character(),
+areas.all = data.frame(File = character(),
                        Area = double(), 
                        Detector = character());
 
-for (SampleID in sample.list) # foreach standards sample
+for (SampleID in file.list) # foreach standards sample
 {
   
 # calc background as mode measurement
 data.temp = data.all %>%
-  filter(Sample == SampleID);
+  filter(File == SampleID);
 background.cc = modeest::mfv(round(data.temp$Intensity, digits = 1));
   
  # get chromatogram for peak
  data.peak = data.all %>%
-   filter(Sample == SampleID) %>%
+   filter(File == SampleID) %>%
    filter(Minutes > peak.start & Minutes < peak.end);
    # separate(Sample, c("Sample", "Replicate"), sep = "-");
 
@@ -120,7 +119,8 @@ background.cc = modeest::mfv(round(data.temp$Intensity, digits = 1));
    mutate(Intensity_diff = Intensity - background.cc);
  my.area =AUC(data.temp$Minutes, data.temp$Intensity_diff, method='trapezoid');
  Detector = unique(data.temp$Detector);
- area.sample = data.frame(SampleID, my.area, Detector);
+ File = SampleID;
+ area.sample = data.frame(File, my.area, Detector);
  areas.all = rbind(areas.all, area.sample);
 
 }
@@ -153,7 +153,7 @@ files.lcd = dplyr::pull(files.lcd.df, files.lcd);
 chromatograms.all = data.frame(
                       Minutes = double(),
                       Intensity = double(),
-                      Sample = character(), 
+                      File = character(), 
                       Detector = character());
 
 for (file in files.lcd) 
@@ -165,7 +165,7 @@ for (file in files.lcd)
 chromatograms.sample = data.frame(
                       Minutes = double(),
                       Intensity = double(),
-                      Sample = character(), 
+                      File = character(), 
                       Detector = character());
   
   data = read_shimadzu_lcd(
@@ -174,8 +174,9 @@ chromatograms.sample = data.frame(
      data_format = "long", 
      read_metadata = TRUE);
   
-  for (detector in data) # foreach detector (data.frame) in the data list
-  {
+  #for (detector in data) # foreach detector (data.frame) in the data list
+  #{
+  detector = data;
     my.instrument = attr(detector, which = "instrument");
     my.detector = attr(detector, which = "detector");
     my.wavelength = attr(detector, which = "wavelength");
@@ -183,10 +184,10 @@ chromatograms.sample = data.frame(
     detector = detector %>%
       rownames_to_column(var = "Minutes") %>%
       rename(Intensity = int) %>%
-      mutate(Sample = inputfile.base) %>%
+      mutate(File = file) %>%
       mutate(Detector = my.detector);
       chromatograms.sample = rbind(chromatograms.sample, detector); 
-   }
+  # }
 
 chromatograms.all = rbind(chromatograms.all, chromatograms.sample);
 
@@ -233,24 +234,11 @@ for (mysample in sample.list)
 
 ```
 
-## Remove faulty sample
-
-```{r remove faulty sample}
-
- # based on plots, I am removing STD-100 from future analyses
- chromatograms.all.temp = chromatograms.all %>%
-   filter(!Sample == "STD1-100");
- 
- standards = standards %>%
-   filter(!Sample == "STD1-100");
-
-```
-
 ## Focus just on detector-B data for quantification
 
 ```{r filter detector B}
 
-data.all = chromatograms.all.temp %>%
+data.all = chromatograms.all %>%
   filter(Detector == "RID-10A") %>%
   mutate(Minutes = as.numeric(Minutes));
 
@@ -283,8 +271,8 @@ Calc peak areas
 
 # compound parameters
 Compound = "Acetate";
-peak.start = 18.25;
-peak.end = 19.1;
+peak.start = 17.7;
+peak.end = 18.7;
 
 # get the chromatogram peaks and calculate the areas for each sample
 peakData = calc_peakAreas(peak.start, peak.end, data.all);
@@ -293,11 +281,9 @@ areas.all = peakData[[2]];
 
 # add standard concentrations to peak areas
 standards.compound = standards %>%
-  filter(Metabolite == Compound) %>%
-  select(-File) %>%
-  rename(SampleID = Sample);
+  filter(Metabolite == Compound);
 
-areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+areas.all.concs = left_join(areas.all, standards.compound, by="File");
 
 areas.all.concs = areas.all.concs %>%
   rename(Area = my.area);
@@ -325,7 +311,7 @@ Plot peaks
 ```{r acetate: plot peaks, fig.cap = "Peak areas of acetate in each of the standards samples."}
 
 # plot peaks
- myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=File, color=File)) +
   ggtitle(paste(Compound, " peaks", sep=""))+
   geom_point(size=0.5) +
   xlab("Time") +
@@ -371,8 +357,8 @@ Calc peak areas
 
 # compound parameters
 Compound = "Ethanol";
-peak.start = 24.75;
-peak.end = 26;
+peak.start = 25.75;
+peak.end = 27.25;
 
 # get the chromatogram peaks and calculate the areas for each sample
 peakData = calc_peakAreas(peak.start, peak.end, data.all);
@@ -381,11 +367,9 @@ areas.all = peakData[[2]];
 
 # add standard concentrations to peak areas
 standards.compound = standards %>%
-  filter(Metabolite == Compound) %>%
-  select(-File) %>%
-  rename(SampleID = Sample);
+  filter(Metabolite == Compound);
 
-areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+areas.all.concs = left_join(areas.all, standards.compound, by="File");
 
 areas.all.concs = areas.all.concs %>%
   rename(Area = my.area);
@@ -412,7 +396,7 @@ Plot peaks
 ```{r ethanol: plot peaks, fig.cap = "Peak areas of ethanol in each of the standards samples."}
 
 # plot peaks
- myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=File, color=File)) +
   ggtitle(paste(Compound, " peaks", sep=""))+
   geom_point(size=0.5) +
   xlab("Time") +
@@ -459,8 +443,8 @@ Calc peak areas
 
 # compound parameters
 Compound = "Lactate";
-peak.start = 15;
-peak.end = 15.9;
+peak.start = 14.8;
+peak.end = 15.8;
 
 # get the chromatogram peaks and calculate the areas for each sample
 peakData = calc_peakAreas(peak.start, peak.end, data.all);
@@ -469,11 +453,9 @@ areas.all = peakData[[2]];
 
 # add standard concentrations to peak areas
 standards.compound = standards %>%
-  filter(Metabolite == Compound) %>%
-  select(-File) %>%
-  rename(SampleID = Sample);
+  filter(Metabolite == Compound);
 
-areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+areas.all.concs = left_join(areas.all, standards.compound, by="File");
 
 areas.all.concs = areas.all.concs %>%
   rename(Area = my.area);
@@ -503,7 +485,7 @@ Plot peaks
 ```{r lactate: plot peaks, fig.cap = "Peak areas of lactate in each of the standards samples."}
 
 # plot peaks
- myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=File, color=File)) +
   ggtitle(paste(Compound, " peaks", sep=""))+
   geom_point(size=0.5) +
   xlab("Time") +
@@ -553,8 +535,8 @@ Calc peak areas
 
 # compound parameters
 Compound = "Glucose";
-peak.start = 10.4;
-peak.end = 11.2;
+peak.start = 10.65;
+peak.end = 11.3;
 
 # get the chromatogram peaks and calculate the areas for each sample
 peakData = calc_peakAreas(peak.start, peak.end, data.all);
@@ -563,11 +545,9 @@ areas.all = peakData[[2]];
 
 # add standard concentrations to peak areas
 standards.compound = standards %>%
-  filter(Metabolite == Compound) %>%
-  select(-File) %>%
-  rename(SampleID = Sample);
+  filter(Metabolite == Compound);
 
-areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+areas.all.concs = left_join(areas.all, standards.compound, by="File");
 
 areas.all.concs = areas.all.concs %>%
   rename(Area = my.area);
@@ -595,7 +575,7 @@ Plot peaks
 ```{r glucose: plot peaks, fig.cap = "Peak areas of glucose in each of the standards samples."}
 
 # plot peaks
- myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=File, color=File)) +
   ggtitle(paste(Compound, " peaks", sep=""))+
   geom_point(size=0.5) +
   xlab("Time") +
@@ -653,11 +633,9 @@ areas.all = peakData[[2]];
 
 # add standard concentrations to peak areas
 standards.compound = standards %>%
-  filter(Metabolite == Compound) %>%
-  select(-File) %>%
-  rename(SampleID = Sample);
+  filter(Metabolite == Compound);
 
-areas.all.concs = left_join(areas.all, standards.compound, by="SampleID");
+areas.all.concs = left_join(areas.all, standards.compound, by="File");
 
 areas.all.concs = areas.all.concs %>%
   rename(Area = my.area);
@@ -687,7 +665,7 @@ Plot peaks
 ```{r cellobiose: plot peaks, fig.cap = "Peak areas of cellobiose in each of the standards samples."}
 
 # plot peaks
- myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
+ myplot = ggplot(peaks.all, aes(x=Minutes, y=Intensity, group=File, color=File)) +
   ggtitle(paste(Compound, " peaks", sep=""))+
   geom_point(size=0.5) +
   xlab("Time") +

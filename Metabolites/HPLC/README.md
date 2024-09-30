@@ -15,6 +15,7 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
 
 ## Analysis
-* [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/plot_chromatograms_HPLC.html) to plot HPLC chromatograms of our three detectors for a set of samples. Chromatograms are printed as .png files.
-* [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Standards/2024.08_standards_chromConverter-LabSolutions.html) to correlate peak areas and metabolite concentrations using standard solutions.
+* Step 1: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/plot_chromatograms_HPLC.html) to plot HPLC chromatograms of our three detectors for a set of samples. Chromatograms are printed as .png files.
+* Step 2: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/plot_standards_HPLC.html) to correlate peak areas and metabolite concentrations using standard solutions.
   
+## Analysis comparing quantifications by ChromConverter and Lab Solutions
