@@ -1,5 +1,5 @@
 ---
-title: "C.phy growth in the Clario"
+title: "C.phy growth in different media"
 author: "Fermlab"
 format: html
 editor: visual
@@ -10,7 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook analyzes the Clario expt comparing growth of *C. phytofermentans* WT in M6 medium containing either ethanolamine or choline.
+This notebook analyzes the Clario expt of comparing growth of *C. phytofermentans* WT different media.
 
 # Methods
 
@@ -34,7 +34,8 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                axis.title.x = element_text(size = 8), 
                axis.title.y = element_text(size = 8),
                strip.text.x = element_text(size = 4),
-               legend.position = "bottom", 
+               #legend.position = "bottom", 
+               legend.text = element_text(size=4),
                aspect.ratio =0.5);
 ```
 
@@ -58,7 +59,7 @@ growth.data = read_excel(data.in, sheet = "RAW DATA", col_names = TRUE, skip = 1
 
 # plate map variables
 first.well = "B02";
-last.well = "F10";
+last.well = "G09";
 
 # parse plate.map
 plate.map = plate.map %>%
@@ -88,7 +89,9 @@ growth.all = inner_join(growth.data.long, plate.map, by = "Well");
 
 # Results
 
-## Plot blanks
+## Plot Individual wells
+
+Plot blanks
 
 ```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well."}
 
@@ -104,7 +107,7 @@ plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600)) +
   coord_cartesian(
     xlim = c(0, max(growth.blanks$Hours)), 
     ylim = c(0, max(growth.blanks$OD600) + 0.2))+
-  facet_wrap (~Treatment)+
+  facet_wrap (~Treatment, ncol=2)+
   scale_x_continuous(breaks=seq(0, max(growth.blanks$Hours), 12))+
   scale_y_continuous(breaks=seq(0, max(growth.blanks$OD600 + 0.1), 0.05))+
   theme_classic()+
@@ -116,7 +119,9 @@ grid.arrange(plot.blanks, ncol=1);
 
 ```
 
-```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with C.phy. Each curve is a well."}
+Subtract blanks from wells with cells.
+
+```{r subtract blanks}
 
 growth.cells = growth.all %>%
   filter(grepl("C.phy", Treatment));
@@ -128,7 +133,14 @@ initial.OD = growth.cells %>%
   select(Well, OD600_t0);
 growth.cells = left_join(growth.cells, initial.OD, by = "Well");
 growth.cells = growth.cells %>%
-  mutate(OD600 = OD600 - OD600_t0);
+  mutate(OD600 = OD600 - OD600_t0) %>%
+  select(-OD600_t0);
+
+```
+
+Plot growth in well with cells
+
+```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with C.phy. Each curve is a well."}
 
 plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
   geom_point(size=.05, color = "blue") +
@@ -138,7 +150,7 @@ plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
   ylab("OD(600)") +
   coord_cartesian(
     xlim = c(0, max(growth.cells$Hours)), 
-    ylim = c(0, max(growth.cells$OD600) + 0.1))+
+    ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
   facet_wrap (~Treatment, ncol=2)+
   scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
   scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
@@ -148,7 +160,107 @@ plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
 grid.arrange(plot.cells, ncol=1);
 
 
+```
 
+## Plot treatment means +/SD
+
+```{r plot means, sd, fig.cap = "Fig 3. Growth (OD600) of treatments with C.phy. Plot shows treatment means +/-SD."}
+
+growth.cells = growth.cells %>%
+  group_by(Hours, Treatment) %>%
+  mutate(OD600_mean = mean(OD600)) %>%
+  mutate(OD600_sd = sd(OD600)) %>%
+  ungroup();
+  
+plot.cells.means = ggplot(growth.cells, aes(
+    x=Hours, 
+    y=OD600_mean, 
+    ymin = OD600_mean - OD600_sd,
+    ymax = OD600_mean + OD600_sd)) +
+  geom_point(size=.05, color = "blue") +
+  geom_line(size=0.1, color='black') +
+  geom_errorbar(width = 0, color = "blue")+
+  theme_bw() +
+  xlab("Hours") + 
+  ylab("OD(600)") +
+  coord_cartesian(
+    xlim = c(0, max(growth.cells$Hours)), 
+    ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
+  facet_wrap (~Treatment, ncol=2)+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  theme_classic()+
+  mytheme;
+
+grid.arrange(plot.cells.means, ncol=1);
+
+```
+
+## Compare treatment means
+
+C.phy utilization of choline, ethanolamine as carbon sources
+
+```{r Carbon sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different carbon sources. Plot shows treatment means."}
+
+growth.cells.carbon = growth.cells %>%
+  filter(grepl("M6_1|M6_2|M6_3|M6_4", Treatment));
+
+plot.cells.carbon = ggplot(growth.cells.carbon, aes(
+    x=Hours, 
+    y=OD600_mean, 
+    group=Treatment,
+    color=Treatment))+
+    #ymin = OD600_mean - OD600_sd,
+    #ymax = OD600_mean + OD600_sd)) +
+  geom_point(size=.05) +
+  geom_line(size=0.1, color='black') +
+  #geom_errorbar(width = 0, color = "blue")+
+  theme_bw() +
+  xlab("Hours") + 
+  ylab("OD(600)") +
+  coord_cartesian(
+    xlim = c(0, max(growth.cells$Hours)), 
+    ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  theme_classic()+
+  mytheme;
+
+grid.arrange(plot.cells.carbon, ncol=1);
+
+
+
+```
+
+C.phy utilization of choline, ethanolamine as nitrogen sources
+
+```{r Nitrogen sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different nitrogen sources. Plot shows treatment means."}
+
+growth.cells.nitrogen = growth.cells %>%
+  filter(grepl("M6_1|M6_5|M6_6|M6_7|M6_8", Treatment));
+
+plot.cells.nitrogen = ggplot(growth.cells.nitrogen, aes(
+    x=Hours, 
+    y=OD600_mean, 
+    group=Treatment,
+    color=Treatment))+
+    #ymin = OD600_mean - OD600_sd,
+    #ymax = OD600_mean + OD600_sd)) +
+  geom_point(size=.05) +
+  geom_line(size=0.1, color='black') +
+  #geom_errorbar(width = 0, color = "blue")+
+  theme_bw() +
+  xlab("Hours") + 
+  ylab("OD(600)") +
+  coord_cartesian(
+    xlim = c(0, max(growth.cells$Hours)), 
+    ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  theme_classic()+
+  mytheme;
+
+grid.arrange(plot.cells.nitrogen, ncol=1);
 ```
 
 # Conclusions
