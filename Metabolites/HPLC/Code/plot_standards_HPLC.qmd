@@ -66,6 +66,8 @@ table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC
 
 ```
 
+Metabolite concentrations in standards samples.
+
 ```{r metabolite concs}
 
 standards = read_excel(info.file, sheet = "Standards", col_names = TRUE);

@@ -1,0 +1,154 @@
+---
+title: "C.phy growth in the Clario"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+This notebook analyzes the Clario expt comparing growth of *C. phytofermentans* WT in M6 medium containing either ethanolamine or choline.
+
+# Methods
+
+## Set up
+
+```{r setup, echo=FALSE, message=FALSE}
+
+# General setup code
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(tidyverse);
+library(readxl);
+library(readr);
+library(gridExtra);
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+               axis.title.x = element_text(size = 8), 
+               axis.title.y = element_text(size = 8),
+               strip.text.x = element_text(size = 4),
+               legend.position = "bottom", 
+               aspect.ratio =0.5);
+```
+
+## File I/O
+
+```{r File IO}
+
+# input file
+file.in = "Croissance_Cphy_M6_clario_27092024.xlsx";
+path.in = "/home/tolonen/GenoscopeDrive/Lab_Projects/BMC_ADH/Growth";
+data.in = paste(path.in, file.in, sep = "/");
+
+```
+
+## Organize data for plotting
+
+```{r Organize data for plots}
+
+plate.map = read_excel(data.in, sheet = "PLAN PLAQUE", col_names = TRUE, skip = 24);
+growth.data = read_excel(data.in, sheet = "RAW DATA", col_names = TRUE, skip = 1);
+
+# plate map variables
+first.well = "B02";
+last.well = "F10";
+
+# parse plate.map
+plate.map = plate.map %>%
+  filter(!Treatment == "empty");
+  
+# parse growth.data
+growth.data.long = growth.data %>%
+  rename("Seconds" = "...1") %>%
+  slice(-1) %>% # delete first row
+  #mutate(Time = if_else(grepl("min", Time), true = Time, false =  paste(Time, "0 min", sep = " "))) %>%  # add minutes field where lacking
+  #separate(Time, c("hours", "hours.label", "min", "min.label"), sep = " ") %>%
+  mutate(Seconds = as.numeric(Seconds)) %>%
+  mutate(Hours = Seconds/3600) %>%
+  dplyr::select(Hours, first.well:last.well) %>%
+  pivot_longer(cols = first.well:last.well, names_to = "Well", values_to = "OD600");
+growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
+
+# remove contaminated wells
+#growth.data.long = growth.data.long %>%
+#  filter(!Well %in% c("A04", "A05", "A06", "C03", "E02", "G01", "G04", "G05"));
+
+# add treatment info
+growth.all = inner_join(growth.data.long, plate.map, by = "Well");
+
+
+```
+
+# Results
+
+## Plot blanks
+
+```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well."}
+
+growth.blanks = growth.all %>%
+  filter(!grepl("C.phy", Treatment));
+
+plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600)) +
+  geom_point(size=1, color = "green") +
+  geom_line(size=0.1, color='black') +
+  theme_bw() +
+  xlab("Hours") + 
+  ylab("OD(600)") +
+  coord_cartesian(
+    xlim = c(0, max(growth.blanks$Hours)), 
+    ylim = c(0, max(growth.blanks$OD600) + 0.2))+
+  facet_wrap (~Treatment)+
+  scale_x_continuous(breaks=seq(0, max(growth.blanks$Hours), 12))+
+  scale_y_continuous(breaks=seq(0, max(growth.blanks$OD600 + 0.1), 0.05))+
+  theme_classic()+
+  mytheme;
+
+grid.arrange(plot.blanks, ncol=1);
+
+
+
+```
+
+```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with C.phy. Each curve is a well."}
+
+growth.cells = growth.all %>%
+  filter(grepl("C.phy", Treatment));
+
+# subtract initial reading from OD measurements
+initial.OD = growth.cells %>%
+  filter(Hours == 0) %>%
+  rename(OD600_t0 = OD600) %>%
+  select(Well, OD600_t0);
+growth.cells = left_join(growth.cells, initial.OD, by = "Well");
+growth.cells = growth.cells %>%
+  mutate(OD600 = OD600 - OD600_t0);
+
+plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
+  geom_point(size=.05, color = "blue") +
+  geom_line(size=0.1, color='black') +
+  theme_bw() +
+  xlab("Hours") + 
+  ylab("OD(600)") +
+  coord_cartesian(
+    xlim = c(0, max(growth.cells$Hours)), 
+    ylim = c(0, max(growth.cells$OD600) + 0.1))+
+  facet_wrap (~Treatment, ncol=2)+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  theme_classic()+
+  mytheme;
+
+grid.arrange(plot.cells, ncol=1);
+
+
+
+```
+
+# Conclusions
