@@ -13,7 +13,7 @@ In addition to plotting the growth curves for different treatments, these script
 * [Bioscreen C growth curve analysis](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Data/2024.08_cphyWT_butanol.qmd): includes plotting of growth curves from Bioscreen datafile and Growthcurver calculations.
 
 ## Clario growth analysis
-* Clario [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_Wells.qmd) and [output](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_Wells.html) to visualize growth curves: simple plots shows growth of each well with panels showing each treatment.
+* Clario [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_means.qmd) and [output](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_means.html) to visualize growth curves: simple plots shows growth of each well and comparing treatment means.
 * Clario [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/2024.08_growth_butanol_dec23.qmd) and [output](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/HTML/01_2024.08_growth_butanol_dec23.html) to plot growth curves from Clario datafile and perform Growthcurver calculations.
 
 
