@@ -44,22 +44,24 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 ```{r File IO}
 
 # input file
-file.in = "Cphy_M6_27092024_bioscreen.xls";
-path.in = "/home/tolonen/GenoscopeDrive/Lab_Projects/BMC_ADH/Growth";
+file.in = "growthData_Bioscreen.xlsx";
+path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Data";
 data.in = paste(path.in, file.in, sep = "/");
 
 ```
 
 ## Organize data for plotting
 
-```{r Organize data for plots}
+```{r Organize Bioscreen data for plots}
 
-plate.map = read_excel(data.in, sheet = "plan de plaque", col_names = TRUE, skip = 28);
-growth.data = read_excel(data.in, sheet = "raw data", col_names = TRUE, skip = 2);
+# output is data.frame = [Hours, Well, OD600, Treatment]
+
+plate.map = read_excel(data.in, sheet = "Information", col_names = TRUE, skip = 3);
+growth.data = read_excel(data.in, sheet = "Raw", col_names = TRUE, skip = 1);
 
 # plate map variables
-first.well = "11";
-last.well = "90";
+first.well = "12";
+last.well = "189";
 
 # parse plate.map
 plate.map = plate.map %>%
@@ -100,9 +102,9 @@ Plot blanks
 ```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well."}
 
 growth.blanks = growth.all %>%
-  filter(!grepl("C.phy", Treatment));
+  filter(grepl("Blank", Treatment));
 
-plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600)) +
+plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600, group=Well)) +
   geom_point(size=1, color = "green") +
   geom_line(size=0.1, color='black') +
   theme_bw() +
@@ -128,7 +130,7 @@ Subtract blanks from wells with cells.
 ```{r subtract blanks}
 
 growth.cells = growth.all %>%
-  filter(grepl("C.phy", Treatment));
+  filter(grepl("Inhibitor", Treatment));
 
 # subtract initial reading from OD measurements
 temp = growth.cells %>%
@@ -160,8 +162,8 @@ plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
   facet_wrap (~Treatment, ncol=2)+
-  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
-  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
   mytheme;
 
@@ -172,7 +174,7 @@ grid.arrange(plot.cells, ncol=1);
 
 ## Plot treatment means +/SD
 
-```{r plot means, sd, fig.cap = "Fig 3. Growth (OD600) of treatments with C.phy. Plot shows treatment means +/-SD."}
+```{r plot means, fig.cap = "Fig 3. Growth (OD600) of treatments with C.phy. Plot shows treatment means +/-SD."}
 
 growth.cells = growth.cells %>%
   group_by(Hours, Treatment) %>%
@@ -195,8 +197,8 @@ plot.cells.means = ggplot(growth.cells, aes(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
   facet_wrap (~Treatment, ncol=2)+
-  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
-  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
   mytheme;
 
@@ -206,23 +208,24 @@ grid.arrange(plot.cells.means, ncol=1);
 
 ## Compare treatment means
 
-C.phy utilization of choline, ethanolamine as carbon sources
+C.phy growth at different inhibitor concentrations (1/10 initial dilution)
 
-```{r Carbon sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different carbon sources. Plot shows treatment means."}
+```{r growth inhibitor 1/10, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in media with different inhibitor concentrations. Plot shows treatment means +/-SD."}
 
-growth.cells.carbon = growth.cells %>%
-  filter(grepl("M6_1|M6_2|M6_3|M6_4", Treatment));
+growth.cells.inhibitor = growth.cells %>%
+  separate(Treatment, c("Dilution", "Treatment"), sep="-") %>%
+  filter(grepl("1/10", Dilution));
 
-plot.cells.carbon = ggplot(growth.cells.carbon, aes(
+plot.cells.inhibitor.10 = ggplot(growth.cells.inhibitor, aes(
     x=Hours, 
     y=OD600_mean, 
     group=Treatment,
-    color=Treatment))+
-    #ymin = OD600_mean - OD600_sd,
-    #ymax = OD600_mean + OD600_sd)) +
+    color=Treatment,
+    ymin = OD600_mean - OD600_sd,
+    ymax = OD600_mean + OD600_sd)) +
   geom_point(size=.05) +
   geom_line(size=0.1, color='black') +
-  #geom_errorbar(width = 0, color = "blue")+
+  geom_errorbar(width = 0)+
   theme_bw() +
   xlab("Hours") + 
   ylab("OD(600)") +
@@ -234,29 +237,30 @@ plot.cells.carbon = ggplot(growth.cells.carbon, aes(
   theme_classic()+
   mytheme;
 
-grid.arrange(plot.cells.carbon, ncol=1);
+grid.arrange(plot.cells.inhibitor.10, ncol=1);
 
 
 
 ```
 
-C.phy utilization of choline, ethanolamine as nitrogen sources
+C.phy growth at different inhibitor concentrations (1/5 initial dilution)
 
-```{r Nitrogen sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different nitrogen sources. Plot shows treatment means."}
+```{r growth inhibitor 1/5, fig.cap="Fig 5. Growth (OD600) of treatments with C.phy growing in media with different inhibitor concentrations. Plot shows treatment means +/-SD."}
 
-growth.cells.nitrogen = growth.cells %>%
-  filter(grepl("M6_1|M6_5|M6_6|M6_7|M6_8", Treatment));
+growth.cells.inhibitor = growth.cells %>%
+  separate(Treatment, c("Dilution", "Treatment"), sep="-") %>%
+  filter(grepl("1/5", Dilution));
 
-plot.cells.nitrogen = ggplot(growth.cells.nitrogen, aes(
+plot.cells.inhibitor.5 = ggplot(growth.cells.inhibitor, aes(
     x=Hours, 
     y=OD600_mean, 
     group=Treatment,
-    color=Treatment))+
-    #ymin = OD600_mean - OD600_sd,
-    #ymax = OD600_mean + OD600_sd)) +
+    color=Treatment,
+    ymin = OD600_mean - OD600_sd,
+    ymax = OD600_mean + OD600_sd)) +
   geom_point(size=.05) +
   geom_line(size=0.1, color='black') +
-  #geom_errorbar(width = 0, color = "blue")+
+  geom_errorbar(width = 0)+
   theme_bw() +
   xlab("Hours") + 
   ylab("OD(600)") +
@@ -268,7 +272,8 @@ plot.cells.nitrogen = ggplot(growth.cells.nitrogen, aes(
   theme_classic()+
   mytheme;
 
-grid.arrange(plot.cells.nitrogen, ncol=1);
+grid.arrange(plot.cells.inhibitor.5, ncol=1);
+
 ```
 
 # Conclusions

@@ -1,6 +1,6 @@
 ---
-title: "Butanol Growth Comparison: 2016.03.24"
-author: "Magali Boutard, Andrew Tolonen"
+title: "Growth comparison with GrowthCurver analysis"
+author: "Fermlab"
 format: html
 editor: visual
 toc: TRUE
@@ -10,7 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook includes the Bioscreen comparing the growth of C.phytofermentans WT in GS2 medium containing different concentrations of butanol. In the first section, we compare growth at different butanol concentrations on the same plot (mean +/-SD). In the second section, we analyze the mean OD600s for each treatment using the R package Growthcurver, which calculates growth curve parameters by fitting the data to a logistic model.
+This notebook includes the Bioscreen experiment comparing the growth of C.phytofermentans WT in GS2 medium containing different concentrations of inhibitor. In the first section, we compare growth at different concentrations on the same plot (mean +/-SD). In the second section, we analyze the mean OD600s for each treatment using the R package Growthcurver, which calculates growth curve parameters by fitting the data to a logistic model.
 
 # Methods
 
@@ -41,14 +41,9 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 ```{r File IO}
 
 # input file
-file.in = "01-1Alba_2CphyWT_different_butanol_24mars16.xlsx";
-path.in = "/home/tolonen/Github/actolonen/2_DirectedEvolution/Genemat/Projects_Genemat/Clostridia_Butanol/Cphy/Growth/Clones/Data/";
+file.in = "growthData_Bioscreen.xlsx";
+path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Data";
 data.in = paste(path.in, file.in, sep = "");
-
-# output plot
-path.out = "/home/tolonen/Github/actolonen/2_DirectedEvolution/Genemat/Projects_Genemat/Clostridia_Butanol/Cphy/Growth/Clones/Plot_Images/"
-plot.out = "plot_01-1Alba_2CphyWT_different_butanol_24mars16.png";
-data.out = paste(path.out, plot.out, sep = "");
 
 ```
 
