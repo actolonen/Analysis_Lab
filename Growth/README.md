@@ -9,7 +9,7 @@ We primarily measure microbial growth using two instruments: a [Bioscreen C](htt
 In addition to plotting the growth curves for different treatments, these scripts also calculate growth paramaters (e.g. intrinsic growth rate, generation time, carrying capacity) using the Growthcurver R package as described [here](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Logistic_Fit/2024.02_growthcurver.md). 
 
 ## Bioscreen growth analysis
-* Here is an [example file]()
+* Here is an [example file](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Data/growthData_Bioscreen.xlsx) in .xlsx format of Bioscreen data.
 * Bioscreen [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_means_Bioscreen.qmd) and [output](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Code/plotGrowth_means_Bioscreen.html) to visualize growth curves: simple plots shows growth of each well and comparing treatment means.
 * Bioscreen [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Data/2024.08_cphyWT_butanol.qmd): to plot of growth curves and perform ++and Growthcurver calculations.
 

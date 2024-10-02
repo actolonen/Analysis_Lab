@@ -43,23 +43,33 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 
 ```{r File IO}
 
+# Clario input file
+file.in = "growthData_Clario.xlsx";
+path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Data";
+data.in.clario = paste(path.in, file.in, sep = "/");
+
+# Bioscreen input file
 # input file
-file.in = "Croissance_Cphy_M6_clario_27092024.xlsx";
-path.in = "/home/tolonen/GenoscopeDrive/Lab_Projects/BMC_ADH/Growth";
-data.in = paste(path.in, file.in, sep = "/");
+file.in = "growthData_Bioscreen.xlsx";
+path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Data";
+data.in.bioscreen = paste(path.in, file.in, sep = "/");
 
 ```
 
 ## Organize data for plotting
 
-```{r Organize data for plots}
+Method to organize Clario data. Set to eval=F if analyzing Bioscreen data.
 
-plate.map = read_excel(data.in, sheet = "PLAN PLAQUE", col_names = TRUE, skip = 24);
-growth.data = read_excel(data.in, sheet = "RAW DATA", col_names = TRUE, skip = 1);
+```{r Organize clario data}
+
+# output is data.frame = [Hours, Well, OD600, Treatment]
+
+plate.map = read_excel(data.in.clario, sheet = "Information", col_names = TRUE, skip = 3);
+growth.data = read_excel(data.in.clario, sheet = "Raw", col_names = TRUE, skip = 0);
 
 # plate map variables
-first.well = "B02";
-last.well = "G09";
+first.well = "A01";
+last.well = "H12";
 
 # parse plate.map
 plate.map = plate.map %>%
@@ -67,12 +77,15 @@ plate.map = plate.map %>%
   
 # parse growth.data
 growth.data.long = growth.data %>%
-  rename("Seconds" = "...1") %>%
+  select(-Well) %>%
+  rename("Time" = "...2") %>%
   slice(-1) %>% # delete first row
-  #mutate(Time = if_else(grepl("min", Time), true = Time, false =  paste(Time, "0 min", sep = " "))) %>%  # add minutes field where lacking
-  #separate(Time, c("hours", "hours.label", "min", "min.label"), sep = " ") %>%
-  mutate(Seconds = as.numeric(Seconds)) %>%
-  mutate(Hours = Seconds/3600) %>%
+  slice(-1) %>%
+  mutate(Time = if_else(grepl("min", Time), true = Time, false =  paste(Time, "0 min", sep = " "))) %>%  # add minutes field where lacking
+  separate(Time, c("my.hours", "hours.label", "my.min", "min.label"), sep = " ") %>%
+  mutate(Hours = as.numeric(my.hours) + as.numeric(my.min)/60) %>%
+  #mutate(Seconds = as.numeric(Seconds)) %>%
+  #mutate(Hours = Seconds/3600) %>%
   dplyr::select(Hours, first.well:last.well) %>%
   pivot_longer(cols = first.well:last.well, names_to = "Well", values_to = "OD600");
 growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
@@ -87,6 +100,48 @@ growth.all = inner_join(growth.data.long, plate.map, by = "Well");
 
 ```
 
+Organize Bioscreen data: set to 'eval=F' if analyzing clario data.
+
+```{r organize Bioscreen data for plotting, eval=F}
+
+# output is data.frame = [Hours, Well, OD600, Treatment]
+
+plate.map = read_excel(data.in.bioscreen, sheet = "Information", col_names = TRUE, skip = 3);
+growth.data = read_excel(data.in.bioscreen, sheet = "Raw", col_names = TRUE, skip = 1);
+
+# plate map variables
+first.well = "12";
+last.well = "189";
+
+# parse plate.map
+plate.map = plate.map %>%
+  filter(!Treatment == "empty") %>%
+  mutate(Well = as.character(Well));
+  
+# calculate elapsed time in hours
+time1 = hms("00:00:00"); # start time
+growth.data = growth.data %>%
+  mutate(Time_hms = hms(Time)) %>%
+  mutate(Time_Elapsed = Time_hms - time1) %>%
+  mutate(Hours = hour(Time_Elapsed) + 
+         (minute(Time_Elapsed) / 60) + 
+         (second(Time_Elapsed)/3600));
+  
+growth.data.long = growth.data %>%
+  select(-Blank) %>%
+  dplyr::select(Hours, first.well:last.well) %>%
+  pivot_longer(cols = first.well:last.well, names_to = "Well", values_to = "OD600");
+growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
+
+# remove contaminated wells
+#growth.data.long = growth.data.long %>%
+#  filter(!Well %in% c("A04", "A05", "A06", "C03", "E02", "G01", "G04", "G05"));
+
+# add treatment info
+growth.all = inner_join(growth.data.long, plate.map, by = "Well");
+
+```
+
 # Results
 
 ## Plot Individual wells
@@ -96,9 +151,9 @@ Plot blanks
 ```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well."}
 
 growth.blanks = growth.all %>%
-  filter(!grepl("C.phy", Treatment));
+  filter(grepl("Blank", Treatment));
 
-plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600)) +
+plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600, group=Well)) +
   geom_point(size=1, color = "green") +
   geom_line(size=0.1, color='black') +
   theme_bw() +
@@ -124,7 +179,7 @@ Subtract blanks from wells with cells.
 ```{r subtract blanks}
 
 growth.cells = growth.all %>%
-  filter(grepl("C.phy", Treatment));
+  filter(grepl("WT|PHY", Treatment));
 
 # subtract initial reading from OD measurements
 initial.OD = growth.cells %>%
@@ -151,9 +206,9 @@ plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
   coord_cartesian(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
-  facet_wrap (~Treatment, ncol=2)+
-  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
-  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  facet_wrap (~Treatment, ncol=3)+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
   mytheme;
 
@@ -186,9 +241,9 @@ plot.cells.means = ggplot(growth.cells, aes(
   coord_cartesian(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
-  facet_wrap (~Treatment, ncol=2)+
-  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
-  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  facet_wrap (~Treatment, ncol=3)+
+  scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
   mytheme;
 
@@ -198,14 +253,14 @@ grid.arrange(plot.cells.means, ncol=1);
 
 ## Compare treatment means
 
-C.phy utilization of choline, ethanolamine as carbon sources
+C.phy WT at different inhibitor concentrations
 
-```{r Carbon sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different carbon sources. Plot shows treatment means."}
+```{r growth WT, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in medium with different inhibitor concs. Plot shows treatment means."}
 
-growth.cells.carbon = growth.cells %>%
-  filter(grepl("M6_1|M6_2|M6_3|M6_4", Treatment));
+growth.cells.wt = growth.cells %>%
+  filter(grepl("WT", Treatment));
 
-plot.cells.carbon = ggplot(growth.cells.carbon, aes(
+plot.cells.wt = ggplot(growth.cells.wt, aes(
     x=Hours, 
     y=OD600_mean, 
     group=Treatment,
@@ -226,20 +281,20 @@ plot.cells.carbon = ggplot(growth.cells.carbon, aes(
   theme_classic()+
   mytheme;
 
-grid.arrange(plot.cells.carbon, ncol=1);
+grid.arrange(plot.cells.wt, ncol=1);
 
 
 
 ```
 
-C.phy utilization of choline, ethanolamine as nitrogen sources
+C.phy mutant at different inhibitor concentrations
 
-```{r Nitrogen sources, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in M6 medium with different nitrogen sources. Plot shows treatment means."}
+```{r growth mutant, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy mutant strains growing in medium with different inhibitor concs. Plot shows treatment means."}
 
-growth.cells.nitrogen = growth.cells %>%
-  filter(grepl("M6_1|M6_5|M6_6|M6_7|M6_8", Treatment));
+growth.cells.mut = growth.cells %>%
+  filter(grepl("PHY", Treatment));
 
-plot.cells.nitrogen = ggplot(growth.cells.nitrogen, aes(
+plot.cells.mut = ggplot(growth.cells.mut, aes(
     x=Hours, 
     y=OD600_mean, 
     group=Treatment,
@@ -260,7 +315,7 @@ plot.cells.nitrogen = ggplot(growth.cells.nitrogen, aes(
   theme_classic()+
   mytheme;
 
-grid.arrange(plot.cells.nitrogen, ncol=1);
+grid.arrange(plot.cells.mut, ncol=1);
 ```
 
 # Conclusions
