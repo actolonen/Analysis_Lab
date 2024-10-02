@@ -56,7 +56,7 @@ data.in.bioscreen = paste(path.in, file.in, sep = "/");
 
 ```
 
-## Organize data for plotting
+## Organize data
 
 Method to organize Clario data. Set to eval=F if analyzing Bioscreen data.
 
@@ -100,7 +100,7 @@ growth.all = inner_join(growth.data.long, plate.map, by = "Well");
 
 ```
 
-Organize Bioscreen data: set to 'eval=F' if analyzing clario data.
+Method to organize Bioscreen data. Set to 'eval=F' if analyzing Clario data.
 
 ```{r organize Bioscreen data for plotting, eval=F}
 
