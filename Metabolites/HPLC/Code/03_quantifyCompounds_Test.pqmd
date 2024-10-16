@@ -1,0 +1,296 @@
+---
+title: "HPLC: quantify compounds in samples"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Setup
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(modeest);
+library(readxl);
+library(DescTools); # AUC method
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+```
+
+# Introduction
+
+This notebook quantifies the abundances of compounds in HPLC samples using the linear models calculated from the dilution series of standards. The inputs are Chromconverter-extracted txts files for each sample. The output is a table:
+
+1.  Sample name
+2.  Compound name
+3.  Peak area
+4.  Compound concentration (mM)
+5.  Sample description
+
+## File IO
+
+Files used by this script.
+
+```{r file IO}
+
+# input: sample information file
+sample.info.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/information_HPLC_08-10-2024.xlsx";
+
+# input: linear model computed using standards
+regressions.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/standards_regressions.tsv";
+
+# input: directory of chromatogram .txt files
+txt.input.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/ChromConverter";
+
+# output: plots of peaks in each sample
+plots.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/Chromatograms/Compound_Peaks";
+
+if (!dir.exists(plots.out)) 
+{
+  dir.create(plots.out);
+}
+
+# output: table of compound concentrations in each sample
+table.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/compound_concentrations.tsv";
+
+```
+
+Load regression parameters from standards
+
+```{r standards regressions}
+
+regressions.in = readr::read_tsv(regressions.file)
+
+table.standards = kable(regressions.in, caption = "Table: regressions parameters for each metabolite");
+table.standards
+
+```
+
+# Functions
+
+## Calc peak areas
+
+```{r calculate peak areas}
+
+calcArea = function(chrom.sample, peak.start, peak.end) 
+{
+  # select chromatogram region of peak
+  chrom.compound = chrom.sample %>%
+      filter(Minutes > peak.start & Minutes < peak.end);
+
+  # calc background as mode measurement in sample
+  background = modeest::mfv(round(chrom.sample$Intensity, digits = 1));
+  
+  # calc peak area
+  chrom.temp = chrom.compound %>%
+    mutate(Intensity_diff = Intensity - background);
+  area.compound = AUC(
+    chrom.temp$Minutes, chrom.temp$Intensity_diff, method='trapezoid');
+  return(area.compound);
+}
+
+```
+
+## Calc compound concs
+
+```{r calc compound concentration}
+
+calcConc = function(my.compound, area.compound) 
+{
+  # get regression parameters for compound
+  regression.compound = regressions.in %>%
+    filter(Compound == my.compound);
+
+  # calc compound (mM)  
+  my.slope = regression.compound$Slope;
+  my.int = regression.compound$Y.Intercept;
+  conc.compound = my.slope * area.compound + my.int;
+ 
+  return(conc.compound);
+}
+```
+
+## Plot compound peak
+
+```{r plot peak}
+
+plotPeak = function(my.compound, chrom.sample, peak.start, peak.end) 
+{
+  # select chromatogram region of peak
+  chrom.compound = chrom.sample %>%
+      filter(Minutes > peak.start & Minutes < peak.end);
+  
+ plot.compound = ggplot(chrom.compound, aes(x=Minutes, y=Intensity)) +
+  ggtitle(paste(my.compound, " peak", sep=""))+
+  geom_point(size=0.5, color='blue') +
+  xlab("Time") +
+  ylab("Intensity") +
+  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chrom.compound$Intensity), max(chrom.compound$Intensity)))+
+  theme_classic()+
+  mytheme;
+
+return(plot.compound);
+}
+
+
+```
+
+# Methods
+
+## Read chromatograms
+
+Get chromatograms from Chromconverter txt files
+
+```{r read chromatograms}
+
+# Get list of chromconverter files to read
+files.chrom = list.files(path = txt.input.dir, pattern = ".txt");
+
+files.chrom.df = data.frame(files.chrom);
+files.chrom.df = files.chrom.df %>%
+  filter(!grepl("STD", files.chrom));
+files.chrom = dplyr::pull(files.chrom.df, files.chrom);
+
+# declare a data.fram for this sample
+chrom.all = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      Sample = character(), 
+                      Detector = character());
+
+# read files
+for (file in files.chrom)
+{
+  inputfile = paste(txt.input.dir, file, sep = "/");
+  inputfile.base = str_replace(string=file, pattern=".txt", replacement = "");
+  chrom.sample = read.csv(inputfile, header = TRUE, sep = "\t");
+  chrom.all = rbind(chrom.all, chrom.sample);
+}
+
+
+```
+
+Focus on only detector B (RID) for quantifications
+
+```{r filter detector B}
+
+chrom.all = chrom.all %>%
+  filter(Detector == "RID-10A") %>%
+  mutate(Minutes = as.numeric(Minutes));
+
+```
+
+Add sample descriptions from info file to chromatograms.
+
+```{r add sample info to chromatograms data.frame}
+
+sample.info = read_excel(sample.info.file, sheet = "Echantillons", skip = 2, col_names = TRUE);
+
+sample.info = sample.info %>%
+  mutate(Sample = str_replace(string = File, pattern = ".lcd", replacement = "")) %>%
+  unite("Description", -c("File", "Sample"), sep = " ", remove=T) %>%
+  mutate(Description = str_replace_all(string=Description, pattern="NA", replacement="")) %>%
+  select(Sample, Description);
+
+chrom.all = left_join(chrom.all, sample.info, by = "Sample");
+
+
+```
+
+## Quantify compounds
+
+Declare output table
+
+```{r declare output table}
+
+# declare output table for compound quantifications.
+
+quants.all = data.frame(
+    Sample = character(),
+    Compound = character(),
+    Area = double(),
+    mM = double(),
+    Description = character());
+
+```
+
+Plot peaks and calc concentrations
+
+```{r calc peak areas and concs, fig.show = 'hide'}
+
+# get list of samples to analyze
+sample.list = unique(chrom.all$Sample);
+
+# get list of compounds to analyze 
+compound.list = unique(regressions.in$Compound);
+
+for (my.sample in sample.list) # for each sample
+{
+  # declare list for plots
+  plots.list = list();  # new empty list
+   
+  # get chromatograms for sample of interest
+  chrom.sample = chrom.all %>%
+    filter(Sample == my.sample);
+  
+  # get sample description
+  description.sample = unique(chrom.sample$Description);
+  
+  # set compound counter for plotting
+  counter = 1;
+  for (my.compound in compound.list) # for each target compound
+  {
+   # define peak position of compound
+    my.peak = regressions.in %>%
+      filter(Compound == my.compound);
+    peak.start = my.peak$Peak.start;
+    peak.end = my.peak$Peak.end;
+    area.compound = calcArea(chrom.sample, peak.start, peak.end); 
+    plot.compound = plotPeak(my.compound, chrom.sample, peak.start, peak.end); 
+    conc.compound = calcConc(my.compound, area.compound); # calc concentration
+    quants.compound = data.frame(
+      Sample = unique(chrom.sample$Sample), Compound = my.compound, 
+      Area = area.compound, Concentration = conc.compound, Description = description.sample);
+    quants.all = rbind(quants.all, quants.compound);
+    plots.list[[counter]] = plot.compound;
+    counter = counter + 1;
+  }
+plots.all = grid.arrange(grobs = plots.list, top = description.sample);
+output.path = paste(plots.out, "/", my.sample, ".png", sep = "");
+ggsave(filename = output.path, plot = plots.all); # out plots for each compound
+}
+  
+```
+
+Print compound concentrations to table.
+
+```{r print output table}
+
+write.table(quants.all, file = table.out, row.names=FALSE, sep="\t")
+
+```
+
+## Output
+
+-   [Here](https://drive.google.com/drive/folders/1jyGV1FF-cQxoGuQdTjVt-0BeUib5OxGR) is are plots of the peaks for each compound in each sample.
+
+-   [Here](https://drive.google.com/drive/folders/1Q0j5CRuTnYwlTcaqHDKFjcOWM07uUxVr) is a table of compound concentrations (mM) in each sample.
