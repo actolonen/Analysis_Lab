@@ -12,10 +12,12 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
 ## Experimental procedure
 
-Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
+*Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
+*Here is [Magali's protocol]
 
-## Analysis
-* Step 1: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/plot_chromatograms_HPLC.html) to plot HPLC chromatograms of our three detectors for a set of samples. Chromatograms are printed as .png files.
-* Step 2: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/plot_standards_HPLC.html) to correlate peak areas and metabolite concentrations using standard solutions.
+## Analysis Pipeline: quantify compound concentrations using HPLC
+* Step 1: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.html) to plot HPLC chromatograms for our three detectors for a set of samples. Chromatograms are printed as .png files.
+* Step 2: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_Test.html) to correlate peak areas and compound concentration (mM) using standard solutions.
+* Step 3: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.html) to use standard curves to quantify compounds in a set of samples.
   
 ## Analysis comparing quantifications by ChromConverter and Lab Solutions
