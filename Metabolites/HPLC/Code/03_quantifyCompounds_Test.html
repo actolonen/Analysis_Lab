@@ -8,7 +8,7 @@
 
 <meta name="author" content="Fermlab">
 
-<title>HPLC: plot chromatograms from .lcd files</title>
+<title>HPLC: quantify compounds in samples</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -3085,18 +3085,23 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
-  <li><a href="#file-io" id="toc-file-io" class="nav-link" data-scroll-target="#file-io">File I/O</a></li>
+  <li><a href="#file-io" id="toc-file-io" class="nav-link" data-scroll-target="#file-io">File IO</a></li>
   </ul></li>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a>
+  <ul class="collapse">
+  <li><a href="#calc-peak-areas" id="toc-calc-peak-areas" class="nav-link" data-scroll-target="#calc-peak-areas">Calc peak areas</a></li>
+  <li><a href="#calc-compound-concs" id="toc-calc-compound-concs" class="nav-link" data-scroll-target="#calc-compound-concs">Calc compound concs</a></li>
+  <li><a href="#plot-compound-peak" id="toc-plot-compound-peak" class="nav-link" data-scroll-target="#plot-compound-peak">Plot compound peak</a></li>
+  </ul></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#convert-.lcd-to-.txt-files" id="toc-convert-.lcd-to-.txt-files" class="nav-link" data-scroll-target="#convert-.lcd-to-.txt-files">Convert .lcd to .txt files</a></li>
-  <li><a href="#plot-chromatograms-for-all-samples-3-detectors" id="toc-plot-chromatograms-for-all-samples-3-detectors" class="nav-link" data-scroll-target="#plot-chromatograms-for-all-samples-3-detectors">Plot chromatograms for all samples (3 detectors)</a></li>
-  </ul></li>
+  <li><a href="#read-chromatograms" id="toc-read-chromatograms" class="nav-link" data-scroll-target="#read-chromatograms">Read chromatograms</a></li>
+  <li><a href="#quantify-compounds" id="toc-quantify-compounds" class="nav-link" data-scroll-target="#quantify-compounds">Quantify compounds</a></li>
   <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -3104,7 +3109,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">HPLC: plot chromatograms from .lcd files</h1>
+<h1 class="title">HPLC: quantify compounds in samples</h1>
 </div>
 
 
@@ -3129,161 +3134,309 @@ vertical-align: -.125em;
 
 <section id="setup" class="level1">
 <h1>Setup</h1>
-<section id="file-io" class="level2">
-<h2 class="anchored" data-anchor-id="file-io">File I/O</h2>
-<p>Directories/files used by this script.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># input: directory to read with .lcd files</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>lcd.input.dir <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions&quot;</span>;</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># input: directory to read sample information file</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>info.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx&quot;</span>;</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># output: directory to write chromConverter .txt files.</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt.output.dir <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter&quot;</span>;</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(txt.output.dir)) </span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(txt.output.dir);</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># output: directory for plots</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>plots.output.dir<span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms&quot;</span>;</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(plots.output.dir)) </span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(plots.output.dir);</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
 </section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>The objective of this notebook is to compare the chromatograms of samples from an HPLC run. This notebook uses chromConverter to visualize the HPLC chromatograms from .lcd files. This notebook visualizes the chromatograms using the three detectors of our HPLC:</p>
+<p>This notebook quantifies the abundances of compounds in HPLC samples using the linear models calculated from the dilution series of standards. The inputs are Chromconverter-extracted txts files for each sample. The output is a table:</p>
 <ol type="1">
-<li>Detector A (UV) at 210 nm</li>
-<li>Detector A (UV) at 260 nm</li>
-<li>Detector B (RID)</li>
+<li>Sample name</li>
+<li>Compound name</li>
+<li>Peak area</li>
+<li>Compound concentration (mM)</li>
+<li>Sample description</li>
 </ol>
+<section id="file-io" class="level2">
+<h2 class="anchored" data-anchor-id="file-io">File IO</h2>
+<p>Files used by this script.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># input: sample information file</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sample.info.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx&quot;</span>;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># input: linear model computed using standards</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>regressions.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv&quot;</span>;</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># input: directory of chromatogram .txt files</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt.input.dir <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter&quot;</span>;</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># output: plots of peaks in each sample</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plots.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms/Compound_Peaks&quot;</span>;</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(plots.out)) </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(plots.out);</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># output: table of compound concentrations in each sample</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>table.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/compound_concentrations.tsv&quot;</span>;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Load regression parameters from standards</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>regressions.in <span class="ot">=</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(regressions.file)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>table.standards <span class="ot">=</span> <span class="fu">kable</span>(regressions.in, <span class="at">caption =</span> <span class="st">&quot;Table: regressions parameters for each metabolite&quot;</span>);</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>table.standards</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Table: regressions parameters for each metabolite</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Compound</th>
+<th style="text-align: right;">Slope</th>
+<th style="text-align: right;">Y.Intercept</th>
+<th style="text-align: right;">Peak.start</th>
+<th style="text-align: right;">Peak.end</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Acetate</td>
+<td style="text-align: right;">0.0401249</td>
+<td style="text-align: right;">0.1745784</td>
+<td style="text-align: right;">17.70</td>
+<td style="text-align: right;">18.70</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ethanol</td>
+<td style="text-align: right;">0.0643045</td>
+<td style="text-align: right;">-0.0623617</td>
+<td style="text-align: right;">25.75</td>
+<td style="text-align: right;">27.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lactate</td>
+<td style="text-align: right;">0.0222623</td>
+<td style="text-align: right;">0.7805372</td>
+<td style="text-align: right;">14.80</td>
+<td style="text-align: right;">15.80</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Glucose</td>
+<td style="text-align: right;">0.0052052</td>
+<td style="text-align: right;">0.5193006</td>
+<td style="text-align: right;">10.65</td>
+<td style="text-align: right;">11.30</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="functions" class="level1">
+<h1>Functions</h1>
+<section id="calc-peak-areas" class="level2">
+<h2 class="anchored" data-anchor-id="calc-peak-areas">Calc peak areas</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>calcArea <span class="ot">=</span> <span class="cf">function</span>(chrom.sample, peak.start, peak.end) </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># select chromatogram region of peak</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  chrom.compound <span class="ot">=</span> chrom.sample <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(Minutes <span class="sc">&gt;</span> peak.start <span class="sc">&amp;</span> Minutes <span class="sc">&lt;</span> peak.end);</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calc background as mode measurement in sample</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  background <span class="ot">=</span> modeest<span class="sc">::</span><span class="fu">mfv</span>(<span class="fu">round</span>(chrom.sample<span class="sc">$</span>Intensity, <span class="at">digits =</span> <span class="dv">1</span>));</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calc peak area</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  chrom.temp <span class="ot">=</span> chrom.compound <span class="sc">%&gt;%</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Intensity_diff =</span> Intensity <span class="sc">-</span> background);</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  area.compound <span class="ot">=</span> <span class="fu">AUC</span>(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    chrom.temp<span class="sc">$</span>Minutes, chrom.temp<span class="sc">$</span>Intensity_diff, <span class="at">method=</span><span class="st">&#39;trapezoid&#39;</span>);</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(area.compound);</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="calc-compound-concs" class="level2">
+<h2 class="anchored" data-anchor-id="calc-compound-concs">Calc compound concs</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>calcConc <span class="ot">=</span> <span class="cf">function</span>(my.compound, area.compound) </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get regression parameters for compound</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  regression.compound <span class="ot">=</span> regressions.in <span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Compound <span class="sc">==</span> my.compound);</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calc compound (mM)  </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  my.slope <span class="ot">=</span> regression.compound<span class="sc">$</span>Slope;</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  my.int <span class="ot">=</span> regression.compound<span class="sc">$</span>Y.Intercept;</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  conc.compound <span class="ot">=</span> my.slope <span class="sc">*</span> area.compound <span class="sc">+</span> my.int;</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(conc.compound);</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plot-compound-peak" class="level2">
+<h2 class="anchored" data-anchor-id="plot-compound-peak">Plot compound peak</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plotPeak <span class="ot">=</span> <span class="cf">function</span>(my.compound, chrom.sample, peak.start, peak.end) </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># select chromatogram region of peak</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  chrom.compound <span class="ot">=</span> chrom.sample <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(Minutes <span class="sc">&gt;</span> peak.start <span class="sc">&amp;</span> Minutes <span class="sc">&lt;</span> peak.end);</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a> plot.compound <span class="ot">=</span> <span class="fu">ggplot</span>(chrom.compound, <span class="fu">aes</span>(<span class="at">x=</span>Minutes, <span class="at">y=</span>Intensity)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="fu">paste</span>(my.compound, <span class="st">&quot; peak&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>))<span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="fl">0.5</span>, <span class="at">color=</span><span class="st">&#39;blue&#39;</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">&quot;Time&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">&quot;Intensity&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim=</span><span class="fu">c</span>(peak.start, peak.end), <span class="at">ylim=</span><span class="fu">c</span>(<span class="fu">min</span>(chrom.compound<span class="sc">$</span>Intensity), <span class="fu">max</span>(chrom.compound<span class="sc">$</span>Intensity)))<span class="sc">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()<span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  mytheme;</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(plot.compound);</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
 </section>
 <section id="methods" class="level1">
 <h1>Methods</h1>
-<section id="convert-.lcd-to-.txt-files" class="level2">
-<h2 class="anchored" data-anchor-id="convert-.lcd-to-.txt-files">Convert .lcd to .txt files</h2>
-<p>ChromConverter to read .lcd files. Output detector B .txt files and a data.frame of all chromatograms.</p>
+<section id="read-chromatograms" class="level2">
+<h2 class="anchored" data-anchor-id="read-chromatograms">Read chromatograms</h2>
+<p>Get chromatograms from Chromconverter txt files</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># select sample files for analysis.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>files.lcd <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> lcd.input.dir, <span class="at">pattern =</span> <span class="st">&quot;.lcd&quot;</span>);</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># declare empty data.frame for all samples</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>chromatograms.all <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Minutes =</span> <span class="fu">double</span>(),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Intensity =</span> <span class="fu">double</span>(),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Sample =</span> <span class="fu">character</span>(), </span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Detector =</span> <span class="fu">character</span>());</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (file <span class="cf">in</span> files.lcd) </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  inputfile <span class="ot">=</span> <span class="fu">paste</span>(lcd.input.dir, file, <span class="at">sep =</span> <span class="st">&quot;/&quot;</span>);</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  inputfile.base <span class="ot">=</span> <span class="fu">str_replace</span>(<span class="at">string=</span>file, <span class="at">pattern=</span><span class="st">&quot;.lcd&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>);</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># declare a data.fram for this sample</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>chromatograms.sample <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Minutes =</span> <span class="fu">double</span>(),</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Intensity =</span> <span class="fu">double</span>(),</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Sample =</span> <span class="fu">character</span>(), </span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Detector =</span> <span class="fu">character</span>());</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  data <span class="ot">=</span> <span class="fu">read_shimadzu_lcd</span>(</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">path =</span> inputfile, </span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">format_out =</span> <span class="st">&quot;data.frame&quot;</span>, </span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>     <span class="at">data_format =</span> <span class="st">&quot;long&quot;</span>, </span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>     <span class="at">read_metadata =</span> <span class="cn">TRUE</span>);</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (detector <span class="cf">in</span> data) <span class="co"># foreach detector (data.frame) in the data list</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    my.instrument <span class="ot">=</span> <span class="fu">attr</span>(detector, <span class="at">which =</span> <span class="st">&quot;instrument&quot;</span>);</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    my.detector <span class="ot">=</span> <span class="fu">attr</span>(detector, <span class="at">which =</span> <span class="st">&quot;detector&quot;</span>);</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    my.wavelength <span class="ot">=</span> <span class="fu">attr</span>(detector, <span class="at">which =</span> <span class="st">&quot;wavelength&quot;</span>);</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    my.detector <span class="ot">=</span> <span class="fu">if_else</span>(my.detector <span class="sc">==</span> <span class="st">&quot;SPD-20A&quot;</span>, <span class="at">true =</span> <span class="fu">paste</span>(my.detector, my.wavelength, <span class="at">sep =</span> <span class="st">&quot; &quot;</span>), <span class="at">false =</span> my.detector); </span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    detector <span class="ot">=</span> detector <span class="sc">%&gt;%</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;Minutes&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rename</span>(<span class="at">Intensity =</span> int) <span class="sc">%&gt;%</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">Sample =</span> inputfile.base) <span class="sc">%&gt;%</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">Detector =</span> my.detector);</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>      chromatograms.sample <span class="ot">=</span> <span class="fu">rbind</span>(chromatograms.sample, detector); </span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>   }</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>chromatograms.all <span class="ot">=</span> <span class="fu">rbind</span>(chromatograms.all, chromatograms.sample);</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co"># print out chromatogram from this sample to file</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>chromatogram.file <span class="ot">=</span> <span class="fu">paste</span>(inputfile.base, <span class="st">&quot;.txt&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>chromatogram.out <span class="ot">=</span> <span class="fu">paste</span>(txt.output.dir, chromatogram.file, <span class="at">sep=</span><span class="st">&quot;/&quot;</span>);</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(chromatograms.sample, <span class="at">file =</span> chromatogram.out, <span class="at">row.names=</span><span class="cn">FALSE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>, <span class="at">col.names=</span><span class="cn">TRUE</span>); </span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co"># change &quot;Minutes&quot; to numeric</span></span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>chromatograms.all <span class="ot">=</span> chromatograms.all <span class="sc">%&gt;%</span></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Minutes =</span> <span class="fu">as.numeric</span>(Minutes));</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get list of chromconverter files to read</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>files.chrom <span class="ot">=</span> <span class="fu">list.files</span>(<span class="at">path =</span> txt.input.dir, <span class="at">pattern =</span> <span class="st">&quot;.txt&quot;</span>);</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>files.chrom.df <span class="ot">=</span> <span class="fu">data.frame</span>(files.chrom);</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>files.chrom.df <span class="ot">=</span> files.chrom.df <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">&quot;STD&quot;</span>, files.chrom));</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>files.chrom <span class="ot">=</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(files.chrom.df, files.chrom);</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># declare a data.fram for this sample</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Minutes =</span> <span class="fu">double</span>(),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Intensity =</span> <span class="fu">double</span>(),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Sample =</span> <span class="fu">character</span>(), </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Detector =</span> <span class="fu">character</span>());</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># read files</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (file <span class="cf">in</span> files.chrom)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  inputfile <span class="ot">=</span> <span class="fu">paste</span>(txt.input.dir, file, <span class="at">sep =</span> <span class="st">&quot;/&quot;</span>);</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  inputfile.base <span class="ot">=</span> <span class="fu">str_replace</span>(<span class="at">string=</span>file, <span class="at">pattern=</span><span class="st">&quot;.txt&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>);</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  chrom.sample <span class="ot">=</span> <span class="fu">read.csv</span>(inputfile, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>);</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  chrom.all <span class="ot">=</span> <span class="fu">rbind</span>(chrom.all, chrom.sample);</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-</section>
-<section id="plot-chromatograms-for-all-samples-3-detectors" class="level2">
-<h2 class="anchored" data-anchor-id="plot-chromatograms-for-all-samples-3-detectors">Plot chromatograms for all samples (3 detectors)</h2>
+<p>Focus on only detector B (RID) for quantifications</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read sample description from info file</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sample.data <span class="ot">=</span> <span class="fu">read_excel</span>(info.file, <span class="at">sheet =</span> <span class="st">&quot;Echantillons&quot;</span>, <span class="at">skip=</span><span class="dv">2</span>, <span class="at">col_names =</span> <span class="cn">TRUE</span>);</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># combine sample descriptors into a &#39;Description&#39; field</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>sample.data <span class="ot">=</span> sample.data <span class="sc">%&gt;%</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sample =</span> <span class="fu">str_replace</span>(<span class="at">string=</span>File, <span class="at">pattern=</span><span class="st">&quot;.lcd&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">&quot;Description&quot;</span>, <span class="sc">-</span><span class="fu">c</span>(<span class="st">&quot;Sample&quot;</span>, <span class="st">&quot;File&quot;</span>), <span class="at">sep =</span> <span class="st">&quot; &quot;</span>, <span class="at">remove=</span>T) <span class="sc">%&gt;%</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Description =</span> <span class="fu">str_replace_all</span>(<span class="at">string=</span>Description, <span class="at">pattern=</span><span class="st">&quot;NA&quot;</span>, <span class="at">replacement=</span><span class="st">&quot;&quot;</span>));</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>chromatograms.all.plot <span class="ot">=</span> <span class="fu">left_join</span>(chromatograms.all, sample.data, <span class="at">by =</span> <span class="st">&quot;Sample&quot;</span>);</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># get list of samples</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>sample.list <span class="ot">=</span> <span class="fu">unique</span>(chromatograms.all.plot<span class="sc">$</span>Sample);</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(my.sample <span class="cf">in</span> sample.list)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get sample of interest</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  chromatogram.plot <span class="ot">=</span> chromatograms.all.plot <span class="sc">%&gt;%</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Sample <span class="sc">==</span> my.sample);</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>my.plot <span class="ot">=</span> <span class="fu">ggplot</span>(chromatogram.plot, <span class="fu">aes</span>(<span class="at">x=</span>Minutes, <span class="at">y=</span>Intensity)) <span class="sc">+</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(chromatogram.plot<span class="sc">$</span>Description)<span class="sc">+</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">&quot;Time&quot;</span>) <span class="sc">+</span> </span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">&quot;Intensity&quot;</span>) <span class="sc">+</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="fu">max</span>(chromatogram.plot<span class="sc">$</span>Minutes)), <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(chromatogram.plot<span class="sc">$</span>Intensity)))<span class="sc">+</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(chromatogram.plot<span class="sc">$</span>Minutes), <span class="dv">4</span>))<span class="sc">+</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(chromatogram.plot<span class="sc">$</span>Intensity), <span class="fu">max</span>(chromatogram.plot<span class="sc">$</span>Intensity)<span class="sc">/</span><span class="dv">6</span>))<span class="sc">+</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> Detector) <span class="sc">+</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  mytheme;</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>plot.file <span class="ot">=</span> <span class="fu">paste</span>(<span class="fu">unique</span>(chromatogram.plot<span class="sc">$</span>Sample), <span class="st">&quot;.png&quot;</span>, <span class="at">sep=</span><span class="st">&quot;&quot;</span>);</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>output.path <span class="ot">=</span> <span class="fu">paste</span>(plots.output.dir, plot.file, <span class="at">sep=</span><span class="st">&quot;/&quot;</span>);</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> output.path, <span class="at">plot =</span> my.plot);</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> chrom.all <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Detector <span class="sc">==</span> <span class="st">&quot;RID-10A&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Minutes =</span> <span class="fu">as.numeric</span>(Minutes));</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Add sample descriptions from info file to chromatograms.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> <span class="fu">read_excel</span>(sample.info.file, <span class="at">sheet =</span> <span class="st">&quot;Echantillons&quot;</span>, <span class="at">skip =</span> <span class="dv">2</span>, <span class="at">col_names =</span> <span class="cn">TRUE</span>);</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> sample.info <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sample =</span> <span class="fu">str_replace</span>(<span class="at">string =</span> File, <span class="at">pattern =</span> <span class="st">&quot;.lcd&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">&quot;Description&quot;</span>, <span class="sc">-</span><span class="fu">c</span>(<span class="st">&quot;File&quot;</span>, <span class="st">&quot;Sample&quot;</span>), <span class="at">sep =</span> <span class="st">&quot; &quot;</span>, <span class="at">remove=</span>T) <span class="sc">%&gt;%</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Description =</span> <span class="fu">str_replace_all</span>(<span class="at">string=</span>Description, <span class="at">pattern=</span><span class="st">&quot;NA&quot;</span>, <span class="at">replacement=</span><span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Sample, Description);</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">left_join</span>(chrom.all, sample.info, <span class="at">by =</span> <span class="st">&quot;Sample&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
+<section id="quantify-compounds" class="level2">
+<h2 class="anchored" data-anchor-id="quantify-compounds">Quantify compounds</h2>
+<p>Declare output table</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># declare output table for compound quantifications.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>quants.all <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sample =</span> <span class="fu">character</span>(),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Compound =</span> <span class="fu">character</span>(),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Area =</span> <span class="fu">double</span>(),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mM =</span> <span class="fu">double</span>(),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Description =</span> <span class="fu">character</span>());</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Plot peaks and calc concentrations</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get list of samples to analyze</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sample.list <span class="ot">=</span> <span class="fu">unique</span>(chrom.all<span class="sc">$</span>Sample);</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># get list of compounds to analyze </span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>compound.list <span class="ot">=</span> <span class="fu">unique</span>(regressions.in<span class="sc">$</span>Compound);</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (my.sample <span class="cf">in</span> sample.list) <span class="co"># for each sample</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># declare list for plots</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  plots.list <span class="ot">=</span> <span class="fu">list</span>();  <span class="co"># new empty list</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get chromatograms for sample of interest</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  chrom.sample <span class="ot">=</span> chrom.all <span class="sc">%&gt;%</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Sample <span class="sc">==</span> my.sample);</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get sample description</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  description.sample <span class="ot">=</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Description);</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># set compound counter for plotting</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  counter <span class="ot">=</span> <span class="dv">1</span>;</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (my.compound <span class="cf">in</span> compound.list) <span class="co"># for each target compound</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>   <span class="co"># define peak position of compound</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    my.peak <span class="ot">=</span> regressions.in <span class="sc">%&gt;%</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(Compound <span class="sc">==</span> my.compound);</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    peak.start <span class="ot">=</span> my.peak<span class="sc">$</span>Peak.start;</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    peak.end <span class="ot">=</span> my.peak<span class="sc">$</span>Peak.end;</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    area.compound <span class="ot">=</span> <span class="fu">calcArea</span>(chrom.sample, peak.start, peak.end); </span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    plot.compound <span class="ot">=</span> <span class="fu">plotPeak</span>(my.compound, chrom.sample, peak.start, peak.end); </span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    conc.compound <span class="ot">=</span> <span class="fu">calcConc</span>(my.compound, area.compound); <span class="co"># calc concentration</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    quants.compound <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">Sample =</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Sample), <span class="at">Compound =</span> my.compound, </span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">Area =</span> area.compound, <span class="at">Concentration =</span> conc.compound, <span class="at">Description =</span> description.sample);</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    quants.all <span class="ot">=</span> <span class="fu">rbind</span>(quants.all, quants.compound);</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    plots.list[[counter]] <span class="ot">=</span> plot.compound;</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    counter <span class="ot">=</span> counter <span class="sc">+</span> <span class="dv">1</span>;</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>plots.all <span class="ot">=</span> <span class="fu">grid.arrange</span>(<span class="at">grobs =</span> plots.list, <span class="at">top =</span> description.sample);</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>output.path <span class="ot">=</span> <span class="fu">paste</span>(plots.out, <span class="st">&quot;/&quot;</span>, my.sample, <span class="st">&quot;.png&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>);</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> output.path, <span class="at">plot =</span> plots.all); <span class="co"># out plots for each compound</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Print compound concentrations to table.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(quants.all, <span class="at">file =</span> table.out, <span class="at">row.names=</span><span class="cn">FALSE</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section>
-<section id="output" class="level1">
-<h1>Output</h1>
-<p>Plots of the chromatograms are <a href="https://github.com/actolonen/Analysis_Lab/tree/main/Metabolites/HPLC/Data/Chromatograms">here</a>.</p>
+<section id="output" class="level2">
+<h2 class="anchored" data-anchor-id="output">Output</h2>
+<ul>
+<li><p><a href="https://drive.google.com/drive/folders/1jyGV1FF-cQxoGuQdTjVt-0BeUib5OxGR">Here</a> is are plots of the peaks for each compound in each sample.</p></li>
+<li><p><a href="https://drive.google.com/drive/folders/1Q0j5CRuTnYwlTcaqHDKFjcOWM07uUxVr">Here</a> is a table of compound concentrations (mM) in each sample.</p></li>
+</ul>
 </section>
-<section id="section" class="level1">
-<h1></h1>
 </section>
 
 </main>

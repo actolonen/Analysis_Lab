@@ -53,16 +53,16 @@ Files used by this script.
 ```{r file IO}
 
 # input: sample information file
-sample.info.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/information_HPLC_08-10-2024.xlsx";
+sample.info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
 
 # input: linear model computed using standards
-regressions.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/standards_regressions.tsv";
+regressions.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv";
 
 # input: directory of chromatogram .txt files
-txt.input.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/ChromConverter";
+txt.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter";
 
 # output: plots of peaks in each sample
-plots.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/Chromatograms/Compound_Peaks";
+plots.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms/Compound_Peaks";
 
 if (!dir.exists(plots.out)) 
 {
@@ -70,7 +70,7 @@ if (!dir.exists(plots.out))
 }
 
 # output: table of compound concentrations in each sample
-table.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/compound_concentrations.tsv";
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/compound_concentrations.tsv";
 
 ```
 

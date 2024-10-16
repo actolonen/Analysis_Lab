@@ -49,13 +49,13 @@ Files used by this script.
 ```{r file IO}
 
 # input: sample information file
-info.file = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/information_HPLC_08-10-2024.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
 
 # input: directory of .lcd files
-lcd.input.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08";
+lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
 
 # output: directory of .txt files
-txt.output.dir = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/ChromConverter";
+txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter";
 
 if (!dir.exists(txt.output.dir)) 
 {
@@ -63,7 +63,7 @@ if (!dir.exists(txt.output.dir))
 }
 
 # output: file of linear model
-table.out = "/home/tolonen/GenoscopeDrive/LabGroup_Shared/Lab_Projects/HPLC/2024.10.08/standards_regressions.tsv";
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv";
 
 ```
 
