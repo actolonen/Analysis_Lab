@@ -291,6 +291,6 @@ write.table(quants.all, file = table.out, row.names=FALSE, sep="\t")
 
 ## Output
 
--   [Here](https://drive.google.com/drive/folders/1jyGV1FF-cQxoGuQdTjVt-0BeUib5OxGR) is are plots of the peaks for each compound in each sample.
+-   [Here](https://github.com/actolonen/Analysis_Lab/tree/main/Metabolites/HPLC/Data/Chromatograms/Compound_Peaks) is are plots of the peaks for each compound in each sample.
 
--   [Here](https://drive.google.com/drive/folders/1Q0j5CRuTnYwlTcaqHDKFjcOWM07uUxVr) is a table of compound concentrations (mM) in each sample.
+-   [Here](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Data/compound_concentrations.tsv) is a table of compound concentrations in each sample.
