@@ -16,6 +16,8 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 * Here is [Magali's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.10_protocole_HPLC_MB.docx) to run the HPLC.
 
 ## Analysis Pipeline: quantify compound concentrations using HPLC
+This analysis pipeline requires that all the .lcd file for an HPLC run are put in a directory along with an [information file](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Data/information_HPLC_Test.xlsx) describing the files and the concentrations of the standards used for peak quantification.
+
 * Step 1: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.html) to plot HPLC chromatograms for our three detectors for a set of samples. Chromatograms are printed as .png files.
 * Step 2: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_Test.html) to correlate peak areas and compound concentration (mM) using standard solutions.
 * Step 3: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.html) to use standard curves to quantify compounds in a set of samples.
