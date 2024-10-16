@@ -12,8 +12,8 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
 ## Experimental procedure
 
-*Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
-*Here is [Magali's protocol]
+* Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
+* Here is [Magali's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.10_protocole_HPLC_MB.docx) to run the HPLC.
 
 ## Analysis Pipeline: quantify compound concentrations using HPLC
 * Step 1: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/01_chromatograms_Test.html) to plot HPLC chromatograms for our three detectors for a set of samples. Chromatograms are printed as .png files.
@@ -21,3 +21,5 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 * Step 3: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.html) to use standard curves to quantify compounds in a set of samples.
   
 ## Analysis comparing quantifications by ChromConverter and Lab Solutions
+
+*[Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/ChromConverter-LabSolutions/2024.08_standards_chromConverter-LabSolutions.QMD) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/ChromConverter-LabSolutions/2024.08_standards_chromConverter-LabSolutions.html) showing that Lab Solutions .lcd files that are converted to .txt using with Lab Solutions or [chromConverter](https://cran.rstudio.com/web/packages/chromConverter/index.html) produce similar results.
