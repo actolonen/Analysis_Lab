@@ -41,11 +41,13 @@ Directories/files used by this script.
 
 ```{r file IO}
 
-# input: directory to read with .lcd files
-lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
-
 # input: directory to read sample information file
 info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
+
+sample.data = read_excel(info.file, sheet = "Echantillons", skip=2, col_names = TRUE);
+
+# input: directory to read with .lcd files
+lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
 
 # output: directory to write chromConverter .txt files.
 txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter";
@@ -140,9 +142,6 @@ chromatograms.all = chromatograms.all %>%
 ## Plot chromatograms for all samples (3 detectors)
 
 ```{r plot chromatograms for three detectors for each sample}
-
-# read sample description from info file
-sample.data = read_excel(info.file, sheet = "Echantillons", skip=2, col_names = TRUE);
 
 # combine sample descriptors into a 'Description' field
 sample.data = sample.data %>%

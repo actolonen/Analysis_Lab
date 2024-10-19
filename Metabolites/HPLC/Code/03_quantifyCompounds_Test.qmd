@@ -53,7 +53,9 @@ Files used by this script.
 ```{r file IO}
 
 # input: sample information file
-sample.info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
+
+sample.info = read_excel(info.file, sheet = "Echantillons", skip = 2, col_names = TRUE);
 
 # input: linear model computed using standards
 regressions.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv";
@@ -202,8 +204,6 @@ chrom.all = chrom.all %>%
 Add sample descriptions from info file to chromatograms.
 
 ```{r add sample info to chromatograms data.frame}
-
-sample.info = read_excel(sample.info.file, sheet = "Echantillons", skip = 2, col_names = TRUE);
 
 sample.info = sample.info %>%
   mutate(Sample = str_replace(string = File, pattern = ".lcd", replacement = "")) %>%

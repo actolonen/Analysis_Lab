@@ -3152,24 +3152,26 @@ vertical-align: -.125em;
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># input: sample information file</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sample.info.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx&quot;</span>;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>info.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx&quot;</span>;</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># input: linear model computed using standards</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>regressions.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv&quot;</span>;</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># input: directory of chromatogram .txt files</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>txt.input.dir <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter&quot;</span>;</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># output: plots of peaks in each sample</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plots.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms/Compound_Peaks&quot;</span>;</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(plots.out)) </span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(plots.out);</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># output: table of compound concentrations in each sample</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>table.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/compound_concentrations.tsv&quot;</span>;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> <span class="fu">read_excel</span>(info.file, <span class="at">sheet =</span> <span class="st">&quot;Echantillons&quot;</span>, <span class="at">skip =</span> <span class="dv">2</span>, <span class="at">col_names =</span> <span class="cn">TRUE</span>);</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># input: linear model computed using standards</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>regressions.file <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv&quot;</span>;</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># input: directory of chromatogram .txt files</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>txt.input.dir <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter&quot;</span>;</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># output: plots of peaks in each sample</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>plots.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms/Compound_Peaks&quot;</span>;</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(plots.out)) </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(plots.out);</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># output: table of compound concentrations in each sample</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>table.out <span class="ot">=</span> <span class="st">&quot;/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/compound_concentrations.tsv&quot;</span>;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Load regression parameters from standards</p>
@@ -3347,15 +3349,13 @@ vertical-align: -.125em;
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> <span class="fu">read_excel</span>(sample.info.file, <span class="at">sheet =</span> <span class="st">&quot;Echantillons&quot;</span>, <span class="at">skip =</span> <span class="dv">2</span>, <span class="at">col_names =</span> <span class="cn">TRUE</span>);</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> sample.info <span class="sc">%&gt;%</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sample =</span> <span class="fu">str_replace</span>(<span class="at">string =</span> File, <span class="at">pattern =</span> <span class="st">&quot;.lcd&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">&quot;Description&quot;</span>, <span class="sc">-</span><span class="fu">c</span>(<span class="st">&quot;File&quot;</span>, <span class="st">&quot;Sample&quot;</span>), <span class="at">sep =</span> <span class="st">&quot; &quot;</span>, <span class="at">remove=</span>T) <span class="sc">%&gt;%</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Description =</span> <span class="fu">str_replace_all</span>(<span class="at">string=</span>Description, <span class="at">pattern=</span><span class="st">&quot;NA&quot;</span>, <span class="at">replacement=</span><span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Sample, Description);</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">left_join</span>(chrom.all, sample.info, <span class="at">by =</span> <span class="st">&quot;Sample&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sample.info <span class="ot">=</span> sample.info <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sample =</span> <span class="fu">str_replace</span>(<span class="at">string =</span> File, <span class="at">pattern =</span> <span class="st">&quot;.lcd&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unite</span>(<span class="st">&quot;Description&quot;</span>, <span class="sc">-</span><span class="fu">c</span>(<span class="st">&quot;File&quot;</span>, <span class="st">&quot;Sample&quot;</span>), <span class="at">sep =</span> <span class="st">&quot; &quot;</span>, <span class="at">remove=</span>T) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Description =</span> <span class="fu">str_replace_all</span>(<span class="at">string=</span>Description, <span class="at">pattern=</span><span class="st">&quot;NA&quot;</span>, <span class="at">replacement=</span><span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Sample, Description);</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">left_join</span>(chrom.all, sample.info, <span class="at">by =</span> <span class="st">&quot;Sample&quot;</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>

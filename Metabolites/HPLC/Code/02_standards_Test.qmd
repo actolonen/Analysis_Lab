@@ -51,6 +51,8 @@ Files used by this script.
 # input: sample information file
 info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
 
+standards = read_excel(info.file, sheet = "Standards", col_names = TRUE, skip = 2);
+
 # input: directory of .lcd files
 lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
 
@@ -70,8 +72,6 @@ table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC
 Metabolite concentrations in standards samples.
 
 ```{r metabolite concs}
-
-standards = read_excel(info.file, sheet = "Standards", col_names = TRUE, skip = 2);
 
 table.standards = kable(standards, caption = "Table: Metabolite concentrations in standards");
 table.standards
@@ -296,10 +296,6 @@ Plot regressions
 
 ```{r acetate: plot linear regression, fig.cap = "Linear regressions of peak area vs acetate concentration for all standards."}
 
-# text placement
-text.x = 2e3;
-text.y = 5;
-
 plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   ggtitle(paste(my.compound, " (chromConverter)"))+
   geom_point(size=2, color = 'blue') +
@@ -307,7 +303,6 @@ plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   xlab("Area") + 
   ylab("mM") +
   theme_classic() +
-  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
   mytheme;
 
 # print regressions
@@ -374,17 +369,11 @@ Plot peaks
 
 myplot
  
- 
-
 ```
 
 Plot regressions
 
 ```{r ethanol: plot linear regression, fig.cap = "Linear regressions of peak area vs ethanol concentration for all standards."}
-
-# text placement
-text.x = 10e3;
-text.y = 50;
 
 plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   ggtitle(paste(my.compound, " (chromConverter)"))+
@@ -393,7 +382,6 @@ plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   xlab("Area") + 
   ylab("mM") +
   theme_classic() +
-  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
   mytheme;
 
 # print regressions
@@ -470,14 +458,6 @@ Plot regressions
 
 ```{r lactate: plot linear regression, fig.cap = "Linear regressions of peak area vs lactate concentration for all standards."}
 
-# text placement
-text.x = 10e3;
-text.y = 50;
-
-# text placement
-text.x = 2e3;
-text.y = 5;
-
 plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   ggtitle(paste(my.compound, " (chromConverter)"))+
   geom_point(size=2, color = 'blue') +
@@ -485,7 +465,6 @@ plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   xlab("Area") + 
   ylab("mM") +
   theme_classic() +
-  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
   mytheme;
 
 # print regressions
@@ -562,10 +541,6 @@ Plot regressions
 
 ```{r glucose: plot linear regression, fig.cap = "Linear regressions of peak area vs glucose concentration for all standards."}
 
-# text placement
-text.x = 10e3;
-text.y = 5;
-
 plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   ggtitle(paste(my.compound," (chromConverter)"))+
   geom_point(size=2, color = 'blue') +
@@ -573,7 +548,6 @@ plot.reg.cc = ggplot(areas.all.concs, aes(x=Area, y=mM))+
   xlab("Area") + 
   ylab("mM") +
   theme_classic() +
-  geom_text(x=text.x, y=text.y, label=regtext.cc, size=2)+
   mytheme;
 
 # print regressions
