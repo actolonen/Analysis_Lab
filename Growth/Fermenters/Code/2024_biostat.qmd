@@ -10,7 +10,11 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook compares Biostat experiments of *C.phytofermentans* fermentations. Analyses include visualization of cells by microscopy and measurement of physiological parameters (pH, agitation, temperature) using the MFCS software.
+The goal of this experiment is to mesure the fermentation of glucose by C. phytofermentans. The F1 and F3 fermenters were run as follows:
+
+1.  Medium: GS2 medium with 5 g/L glucose.
+2.  Temperature: 30C
+3.  pH 7
 
 # Setup
 
@@ -35,6 +39,23 @@ mytheme = theme(axis.text.x = element_text(size = 4),
 
 # HTML
 knitr::opts_chunk$set(warning = F, message = F);
+
+```
+
+# File IO
+
+```{r File IO}
+
+# input: OD measurements
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Fermenters/Data/2024.05-06_Biostat_OD.xlsx";
+data.OD = read_excel(datafile, sheet = "06-06", col_names = TRUE);
+
+# input: Biostat MFCS files
+datafile1 = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Fermenters/Data/F1.20240606.csv";
+input.f1  = read.csv(file=datafile1, header=FALSE, sep=";"); 
+
+datafile3 = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Fermenters/Data/F3.20240606.csv";
+input.f3 = read.csv(file=datafile3, header=FALSE, sep=";"); 
 
 ```
 
@@ -95,7 +116,9 @@ return(mydata_formatted);
 
 ## Plot MFCS data
 
-```{r Plot_MFCS}
+function to plot pH
+
+```{r function: plot pH}
 # functions to make plots for pH, acid, base, agitation, temperature
 
 plot_pH = function(mydata_formatted, total_time)
@@ -117,6 +140,12 @@ plot_pH = ggplot(mydata_pH, aes(
 
 return(plot_pH);
 }
+
+```
+
+Function to plot acid injections
+
+```{r function: plot acid}
 
 plot_acid = function(mydata_formatted, total_time)
 {
@@ -142,11 +171,17 @@ plot_acid = ggplot(mydata_acid, aes(
  ylab("HCl (ml)") +
  coord_cartesian(xlim=c(0,total_time))+
  scale_x_continuous(breaks=seq(0, total_time, 12))+
- geom_text(x = (total_time/2), y = (maxacid/10), label = acidtext)+
+ geom_text(x = (total_time * 0.75), y = (maxacid/10), label = acidtext)+
  theme_classic();
 
 return(plot_acid);
 }
+
+```
+
+Function to plot base injections
+
+```{r function: plot base}
 
 plot_base = function(mydata_formatted, total_time)
 {
@@ -173,11 +208,43 @@ plot_base = ggplot(mydata_base, aes(
  ylab("NaOH (ml)") +
  coord_cartesian(xlim=c(0, total_time))+
  scale_x_continuous(breaks=seq(0, total_time, 12))+
- geom_text(x = (total_time/2), y = (maxbase/10), label = basetext)+
+ geom_text(x = (total_time * 0.75), y = (maxbase/10), label = basetext)+
  theme_classic();
 
 return(plot_base);
 }
+
+```
+
+Function to plot temperature
+
+```{r function: plot temp}
+plot_temp = function(mydata_formatted, total_time)
+{
+# plot temperature
+mydata_temp = mydata_formatted %>%
+  filter(Parameter == "Temp");
+
+plot_temp = ggplot(mydata_temp, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(linewidth=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("Degrees C") +
+ coord_cartesian(xlim=c(0, total_time))+
+ coord_cartesian(ylim=c(28, 32))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ scale_y_continuous(breaks=seq(28, 32, 0.5))+
+
+ theme_classic();
+
+return(plot_temp);
+}
+```
+
+Function to plot agitation
+
+```{r function: plot agitation}
 
 plot_agit = function(mydata_formatted, total_time)
 {
@@ -198,24 +265,100 @@ plot_agit = ggplot(mydata_a, aes(
 return(plot_agit);
 }
 
-plot_temp = function(mydata_formatted, total_time)
-{
-# plot temperature
-mydata_temp = mydata_formatted %>%
-  filter(Parameter == "Temp");
-
-plot_temp = ggplot(mydata_temp, aes(
-  x=Hours, 
-  y=Measurement))+
- geom_line(linewidth=0.2, color='blue') +
- xlab("Hours") + 
- ylab("Degrees C") +
- coord_cartesian(xlim=c(0, total_time))+
- scale_x_continuous(breaks=seq(0, total_time, 12))+
- theme_classic();
-
-return(plot_temp);
-}
 ```
 
 # Data
+
+## Microscopy
+
+![](images/2024.06.06_microscopy.png)
+
+Microscopy shows both fermenters are clear after 22h, but contamination is visible in the F1 fermenter at 96h.
+
+## Growth (OD600)
+
+```{r load MFCS data}
+
+mydata_cphy_g1 = read_biostat(input.f1);
+mydata_cphy_g3 = read_biostat(input.f3);
+
+
+```
+
+```{r Cphy OD, fig.cap = "Fig: Growth (OD600) in the F1 and F3 fermenters."}
+
+plotOD = ggplot(data.OD, aes(
+  x=Hours, y=OD600, group=Fermenter, color=Fermenter))+
+  geom_point(size = 1)+
+  geom_line()+
+  xlab("Hours")+
+  ylab("OD600")+
+  coord_cartesian(xlim=c(0, 96), ylim=c(0, 2))+
+  scale_x_continuous(breaks=seq(from=0, by=12, to=96))+
+  scale_y_continuous(breaks=seq(from=0, by=0.25, to=2))+
+  theme_bw()+
+  theme_classic();
+
+plotOD
+```
+
+## pH, Acid/base additions
+
+```{r plot acid/base-F1, fig.cap = "Fig: F1 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 96;
+plot_pH1 = plot_pH(mydata_cphy_g1, total_time);
+plot_acid1 = plot_acid(mydata_cphy_g1, total_time);
+plot_base1 = plot_base(mydata_cphy_g1, total_time);
+plot_agit1 = plot_agit(mydata_cphy_g1, total_time);
+plot_temp1 = plot_temp(mydata_cphy_g1, total_time);
+
+g1 = ggplotGrob(plot_pH1);
+g2 = ggplotGrob(plot_acid1);
+g3= ggplotGrob(plot_base1);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot acid/base-F3, fig.cap = "Fig: F3 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 96;
+plot_pH3 = plot_pH(mydata_cphy_g3, total_time);
+plot_acid3 = plot_acid(mydata_cphy_g3, total_time);
+plot_base3 = plot_base(mydata_cphy_g3, total_time);
+plot_agit3 = plot_agit(mydata_cphy_g3, total_time);
+plot_temp3 = plot_temp(mydata_cphy_g3, total_time);
+
+g1 = ggplotGrob(plot_pH3);
+g2 = ggplotGrob(plot_acid3);
+g3= ggplotGrob(plot_base3);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+```
+
+## Agitation and temperature
+
+```{r plot temp/agit F1, fig.cap = "Fig: F1 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit1);
+g2 = ggplotGrob(plot_temp1);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+```
+
+```{r plot temp/agit F3, fig.cap = "Fig: F3 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit3);
+g2 = ggplotGrob(plot_temp3);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+```
