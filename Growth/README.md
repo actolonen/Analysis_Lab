@@ -6,5 +6,5 @@ In our lab at Genoscope, we grow cells using various types of media that we prep
 ## Measuring microbial growth at different scales: from microliters to liters.
 We measure microbial growth at different volumetric scales using these methods:
 
- * [Microplates]() to measure cultures of a few hundred microliters.
- * [Fermenters]() to measure cultures of 2-5 liters.
+ * [Microplates](https://github.com/actolonen/Analysis_Lab/tree/main/Growth/Microplates) to measure cultures of a few hundred microliters.
+ * [Fermenters](https://github.com/actolonen/Analysis_Lab/tree/main/Growth/Fermenters) to measure cultures of 2-5 liters.
