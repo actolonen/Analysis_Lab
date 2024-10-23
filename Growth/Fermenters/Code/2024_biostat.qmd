@@ -1,0 +1,221 @@
+---
+title: "Biostat B-DCU fermentation analysis"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+This notebook compares Biostat experiments of *C.phytofermentans* fermentations. Analyses include visualization of cells by microscopy and measurement of physiological parameters (pH, agitation, temperature) using the MFCS software.
+
+# Setup
+
+```{r setup}
+
+library(tidyverse);
+library(readxl);
+library(knitr)
+library(ggpubr);
+library(ggtext);
+library(gtable);
+library(grid);
+
+mytheme = theme(axis.text.x = element_text(size = 4), 
+                axis.text.y = element_text(size = 4), 
+               axis.title.x = element_text(size = 4), 
+               axis.title.y = element_text(size = 4),
+               strip.text.x = element_text(size = 4),
+               legend.position = "none", 
+               aspect.ratio =1,
+               plot.caption=element_textbox_simple(padding = margin(10,0,10,0), hjust=0, size=10));
+
+# HTML
+knitr::opts_chunk$set(warning = F, message = F);
+
+```
+
+# Functions
+
+## Read MFCS file
+
+```{r Read_Biostat}
+
+# Function to format output from biostat
+read_biostat = function(inputdata)
+{
+mydata = inputdata;
+
+# read multi-line header
+firstline = as.character(mydata[1,]);
+secondline = as.character(mydata[2,]);
+thirdline = as.character(mydata[3,]);
+header = data.frame(firstline, secondline, thirdline);
+header = header %>%
+  unite("label", firstline, secondline, thirdline, sep="_");
+headerv = dplyr::pull(header, label);
+mydata = slice(mydata, 4:n()); #delete first three rows
+colnames(mydata) = headerv; # set col names to header
+
+# subset data 
+# subsetfactor = 60; # subset to measure every 5 min
+# mydata = mydata %>%
+#  slice(which(row_number() %% subsetfactor == 0));
+
+# format column names
+mydata = mydata %>%
+  rename(Time = PDatTime__) %>%
+  separate(Time, c("Day", "Time"), sep = " ") %>%
+  rename(Hours = "ProcessTime_Value_(hours)") %>%
+  rename(pH = "pH_Value_(pH)") %>%
+  rename(Temp = "TEMP_Value_(degC)") %>%
+  rename(Acid = "ACIT_Value_(ml)") %>%
+  rename(Base = "BAST_Value_(ml)") %>%
+  rename(Agitation = "STIR_Setpoint_(rpm)");
+  
+# format column types
+mydata$Hours = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Hours)));
+mydata$pH = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$pH)));
+mydata$Temp = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Temp)));
+mydata$Acid = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Acid)));
+mydata$Base = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Base)));
+mydata$Agitation = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Agitation)));
+
+mydata_formatted = mydata %>%
+  dplyr::select(Hours, pH, Temp, Acid, Base, Agitation) %>%
+  pivot_longer(cols = -Hours, names_to = "Parameter", values_to = "Measurement");
+
+return(mydata_formatted);
+}
+
+```
+
+## Plot MFCS data
+
+```{r Plot_MFCS}
+# functions to make plots for pH, acid, base, agitation, temperature
+
+plot_pH = function(mydata_formatted, total_time)
+{
+# plot pH
+mydata_pH = mydata_formatted %>%
+  filter(Parameter == "pH");
+
+plot_pH = ggplot(mydata_pH, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("pH") +
+ coord_cartesian(xlim=c(0,total_time), ylim = c(6.5,7.5))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ scale_y_continuous(breaks=seq(6.5, 7.5, 0.5))+
+ theme_classic();
+
+return(plot_pH);
+}
+
+plot_acid = function(mydata_formatted, total_time)
+{
+# plot acid
+mydata_acid = mydata_formatted %>%
+  filter(Parameter == "Acid");
+
+# normalize initial acid level to zero
+acidsubtract = mydata_acid$Measurement[1];
+mydata_acid = mydata_acid %>%
+  mutate(Measurement = Measurement - acidsubtract) %>%
+  filter(!is.na(Measurement));
+
+maxacid = max(mydata_acid$Measurement);
+mytext = "Total acid added (ml) =";
+acidtext = paste(mytext, maxacid, sep = " ");
+
+plot_acid = ggplot(mydata_acid, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("HCl (ml)") +
+ coord_cartesian(xlim=c(0,total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ geom_text(x = (total_time/2), y = (maxacid/10), label = acidtext)+
+ theme_classic();
+
+return(plot_acid);
+}
+
+plot_base = function(mydata_formatted, total_time)
+{
+
+# plot base
+mydata_base = mydata_formatted %>%
+  filter(Parameter == "Base");  
+  
+# normalize initial base level to zero
+basesubtract = mydata_base$Measurement[1];
+mydata_base = mydata_base %>%
+  mutate(Measurement = Measurement - basesubtract) %>%
+  filter(!is.na(Measurement));
+
+maxbase = max(mydata_base$Measurement);
+mytext = "Total base added (ml) =";
+basetext = paste(mytext, maxbase, sep = " ");  
+
+plot_base = ggplot(mydata_base, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("NaOH (ml)") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ geom_text(x = (total_time/2), y = (maxbase/10), label = basetext)+
+ theme_classic();
+
+return(plot_base);
+}
+
+plot_agit = function(mydata_formatted, total_time)
+{
+# plot agitation
+mydata_a = mydata_formatted %>%
+  filter(Parameter == "Agitation");
+
+plot_agit = ggplot(mydata_a, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("RPM") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ theme_classic();
+
+return(plot_agit);
+}
+
+plot_temp = function(mydata_formatted, total_time)
+{
+# plot temperature
+mydata_temp = mydata_formatted %>%
+  filter(Parameter == "Temp");
+
+plot_temp = ggplot(mydata_temp, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(linewidth=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("Degrees C") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ theme_classic();
+
+return(plot_temp);
+}
+```
+
+# Data

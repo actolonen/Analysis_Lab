@@ -1,0 +1,719 @@
+---
+title: "Biostat results of C.phy cultures"
+author: "Andrew Tolonen, Loic Couturat, Tom Zaplana"
+date: '2024'
+output:
+  html_document:
+    toc: True
+    code_folding: hide
+---
+
+# Introduction
+
+This notebook compares Biostat experiments of *C.phytofermentans* fermentations. Analyses include visualization of cells by microscopy and measurement of physiological parameters (pH, agitation, temperature) using the MFCS software.
+
+# Setup
+
+```{r setup}
+
+library(tidyverse);
+library(readxl);
+library(knitr)
+library(ggpubr);
+library(ggtext);
+library(gtable);
+library(grid);
+
+mytheme = theme(axis.text.x = element_text(size = 4), 
+                axis.text.y = element_text(size = 4), 
+               axis.title.x = element_text(size = 4), 
+               axis.title.y = element_text(size = 4),
+               strip.text.x = element_text(size = 4),
+               legend.position = "none", 
+               aspect.ratio =1,
+               plot.caption=element_textbox_simple(padding = margin(10,0,10,0), hjust=0, size=10));
+
+```
+
+```{r knit options}
+
+# HTML
+knitr::opts_chunk$set(warning = F, message = F);
+
+```
+
+# Functions
+
+```{r read_biostat}
+
+# Function to format output from biostat
+read_biostat = function(inputdata)
+{
+mydata = inputdata;
+
+# read multi-line header
+firstline = as.character(mydata[1,]);
+secondline = as.character(mydata[2,]);
+thirdline = as.character(mydata[3,]);
+header = data.frame(firstline, secondline, thirdline);
+header = header %>%
+  unite("label", firstline, secondline, thirdline, sep="_");
+headerv = dplyr::pull(header, label);
+mydata = slice(mydata, 4:n()); #delete first three rows
+colnames(mydata) = headerv; # set col names to header
+
+# subset data 
+# subsetfactor = 60; # subset to measure every 5 min
+# mydata = mydata %>%
+#  slice(which(row_number() %% subsetfactor == 0));
+
+# format column names
+mydata = mydata %>%
+  rename(Time = PDatTime__) %>%
+  separate(Time, c("Day", "Time"), sep = " ") %>%
+  rename(Hours = "ProcessTime_Value_(hours)") %>%
+  rename(pH = "pH_Value_(pH)") %>%
+  rename(Temp = "TEMP_Value_(degC)") %>%
+  rename(Acid = "ACIT_Value_(ml)") %>%
+  rename(Base = "BAST_Value_(ml)") %>%
+  rename(Agitation = "STIR_Setpoint_(rpm)");
+  
+# format column types
+mydata$Hours = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Hours)));
+mydata$pH = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$pH)));
+mydata$Temp = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Temp)));
+mydata$Acid = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Acid)));
+mydata$Base = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Base)));
+mydata$Agitation = as.numeric(gsub(",", ".", gsub("\\.", "", mydata$Agitation)));
+
+mydata_formatted = mydata %>%
+  dplyr::select(Hours, pH, Temp, Acid, Base, Agitation) %>%
+  pivot_longer(cols = -Hours, names_to = "Parameter", values_to = "Measurement");
+
+return(mydata_formatted);
+}
+
+```
+
+```{r make_plots}
+
+# functions to make plots for pH, acid, base, agitation, temperature
+
+plot_pH = function(mydata_formatted, total_time)
+{
+# plot pH
+mydata_pH = mydata_formatted %>%
+  filter(Parameter == "pH");
+
+plot_pH = ggplot(mydata_pH, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("pH") +
+ coord_cartesian(xlim=c(0,total_time), ylim = c(6.5,7.5))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ scale_y_continuous(breaks=seq(6.5, 7.5, 0.5))+
+ theme_classic();
+
+return(plot_pH);
+}
+
+plot_acid = function(mydata_formatted, total_time)
+{
+# plot acid
+mydata_acid = mydata_formatted %>%
+  filter(Parameter == "Acid");
+
+# normalize initial acid level to zero
+acidsubtract = mydata_acid$Measurement[1];
+mydata_acid = mydata_acid %>%
+  mutate(Measurement = Measurement - acidsubtract) %>%
+  filter(!is.na(Measurement));
+
+maxacid = max(mydata_acid$Measurement);
+mytext = "Total acid added (ml) =";
+acidtext = paste(mytext, maxacid, sep = " ");
+
+plot_acid = ggplot(mydata_acid, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("HCl (ml)") +
+ coord_cartesian(xlim=c(0,total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ geom_text(x = (total_time/2), y = (maxacid/10), label = acidtext)+
+ theme_classic();
+
+return(plot_acid);
+}
+
+plot_base = function(mydata_formatted, total_time)
+{
+
+# plot base
+mydata_base = mydata_formatted %>%
+  filter(Parameter == "Base");  
+  
+# normalize initial base level to zero
+basesubtract = mydata_base$Measurement[1];
+mydata_base = mydata_base %>%
+  mutate(Measurement = Measurement - basesubtract) %>%
+  filter(!is.na(Measurement));
+
+maxbase = max(mydata_base$Measurement);
+mytext = "Total base added (ml) =";
+basetext = paste(mytext, maxbase, sep = " ");  
+
+plot_base = ggplot(mydata_base, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("NaOH (ml)") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ geom_text(x = (total_time/2), y = (maxbase/10), label = basetext)+
+ theme_classic();
+
+return(plot_base);
+}
+
+plot_agit = function(mydata_formatted, total_time)
+{
+# plot agitation
+mydata_a = mydata_formatted %>%
+  filter(Parameter == "Agitation");
+
+plot_agit = ggplot(mydata_a, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(size=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("RPM") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ theme_classic();
+
+return(plot_agit);
+}
+
+plot_temp = function(mydata_formatted, total_time)
+{
+# plot temperature
+mydata_temp = mydata_formatted %>%
+  filter(Parameter == "Temp");
+
+plot_temp = ggplot(mydata_temp, aes(
+  x=Hours, 
+  y=Measurement))+
+ geom_line(linewidth=0.2, color='blue') +
+ xlab("Hours") + 
+ ylab("Degrees C") +
+ coord_cartesian(xlim=c(0, total_time))+
+ scale_x_continuous(breaks=seq(0, total_time, 12))+
+ theme_classic();
+
+return(plot_temp);
+}
+
+```
+
+# Results
+
+## Expt 1: wheat straw (may 2024)
+
+The goal of this experiment is to mesure the fermentation of wheat straw by *C. phytofermentans*. The F3 fermenter was run as follows:
+
+1.  Medium: GS2 medium with 10 g/L ground wheat straw.
+2.  Temperature: 30C
+3.  pH 7
+
+#### Microscopy
+
+![Images of C.phytofermentans cells in F3 fermenter. Cells are actively growing after 3 days in the fermenter, and sporulated at day 7.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_microscopy/2024.05.07_microscopy/2024.05.07_microscopy.png)
+
+```{r C.phy wheat straw may 2024}
+
+# load biostat files
+datafile = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.05.07_MFCS/F3.20240430.csv";
+input = read.csv(file=datafile, header=FALSE, sep=";"); 
+mydata_cphy_ws = read_biostat(input);
+
+```
+
+### MCFS data
+
+```{r plot fig 1 may24, fig.cap = "Fig 1: Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy growing in the F3 fermenter containing GS2 medium with 10 g/L wheat straw."}
+
+total_time = 180;
+plot_pH_ws = plot_pH(mydata_cphy_ws, total_time);
+plot_acid_ws = plot_acid(mydata_cphy_ws, total_time);
+plot_base_ws = plot_base(mydata_cphy_ws, total_time);
+plot_agit_ws = plot_agit(mydata_cphy_ws, total_time);
+plot_temp_ws = plot_temp(mydata_cphy_ws, total_time);
+
+g1 = ggplotGrob(plot_pH_ws);
+g2 = ggplotGrob(plot_acid_ws);
+g3= ggplotGrob(plot_base_ws);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+# fig3 = ggarrange(plot_pH1, plot_acid1, plot_base1, nrow = 3);
+# fig3
+
+```
+
+```{r plot temp/agit may24, fig.cap = "Fig 2: Biostat agitation rate and temperature (degrees C) of C.phy in GS2 medium containing 10 g/L wheat."}
+
+g1 = ggplotGrob(plot_agit_ws);
+g2 = ggplotGrob(plot_temp_ws);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+### Conclusions
+
+The *C.phytofermentans* culture actively fermented the wheat straw as evidenced by growing cells at day 3 and the injections of acid and base. The amount of 1N HCl injected into the culture (140 ml) exceeded the amout of base (0.9 ml), which is surprising because production of acetate would acidify the culture. What did *C. phytofermentans* produce that requires do much acid to equilibrate the culture? Fixation of N2 as NH3? Fermentation of proteins to liberate NH3?
+
+## Expt 2: glucose (may 2024)
+
+The goal of this experiment is to mesure the fermentation of glucose by C. phytofermentans. The F1 and F3 fermenters were run as follows:
+
+1.  Medium: GS2 medium with 5 g/L glucose.
+2.  Temperature: 30C
+3.  pH 7
+
+![Images of C.phytofermentans growing in the F1 and F3 fermenters. Note the floculation in F1.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_images/2024.05.22_fermenters.png) \### Microscopy
+
+![Images of C.phytofermentans cell in the F1 and F3 fermenters. No contamination observed in either fermenter.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_microscopy/2024.05.22_microscopy/2024.05.22_microscopy.png)
+
+### OD measurements
+
+```{r growth may 2024, fig.cap = "Fig 3: Growth (OD600) in the F1 and F3 fermenters."}
+
+# Package readxl
+datafile = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_growth/2024.05-06_Biostat_OD.xlsx";
+data.OD = read_excel(datafile, sheet = "22-05", col_names = TRUE);
+
+plotOD = ggplot(data.OD, aes(
+  x=Hours, y=OD600, group=Fermenter, color=Fermenter))+
+  geom_point(size = 1)+
+  geom_line()+
+  xlab("Hours")+
+  ylab("OD600")+
+  coord_cartesian(xlim=c(0, 60), ylim=c(0,1.5))+
+  scale_x_continuous(breaks=seq(from=0, by=12, to=60))+
+  scale_y_continuous(breaks=seq(from=0, by=0.25, to=1.5))+
+  theme_bw()+
+  theme_classic();
+
+plotOD
+
+```
+
+### MCFS data
+
+```{r C.phy glucose may 2024}
+
+# load biostat files
+datafile1 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.05.22_MFCS/F1.20240522.csv";
+input = read.csv(file=datafile1, header=FALSE, sep=";"); 
+mydata_cphy_g1 = read_biostat(input);
+
+datafile3 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.05.22_MFCS/F3.20240522.csv";
+input = read.csv(file=datafile3, header=FALSE, sep=";"); 
+mydata_cphy_g3 = read_biostat(input);
+
+```
+
+```{r plot acid/base F1 may24, fig.cap = "Fig 4: F1 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 48;
+plot_pH1 = plot_pH(mydata_cphy_g1, total_time);
+plot_acid1 = plot_acid(mydata_cphy_g1, total_time);
+plot_base1 = plot_base(mydata_cphy_g1, total_time);
+plot_agit1 = plot_agit(mydata_cphy_g1, total_time);
+plot_temp1 = plot_temp(mydata_cphy_g1, total_time);
+
+g1 = ggplotGrob(plot_pH1);
+g2 = ggplotGrob(plot_acid1);
+g3= ggplotGrob(plot_base1);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot acid/base F3 may24, fig.cap = "Fig 5: F3 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 48;
+plot_pH3 = plot_pH(mydata_cphy_g3, total_time);
+plot_acid3 = plot_acid(mydata_cphy_g3, total_time);
+plot_base3 = plot_base(mydata_cphy_g3, total_time);
+plot_agit3 = plot_agit(mydata_cphy_g3, total_time);
+plot_temp3 = plot_temp(mydata_cphy_g3, total_time);
+
+g1 = ggplotGrob(plot_pH3);
+g2 = ggplotGrob(plot_acid3);
+g3= ggplotGrob(plot_base3);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot temp/agit F1 may24, fig.cap = "Fig 6: F1 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit1);
+g2 = ggplotGrob(plot_temp1);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+```{r plot temp/agit F3 may24, fig.cap = "Fig 7: F3 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit3);
+g2 = ggplotGrob(plot_temp3);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+### Conclusions
+
+We were suprised to observe floculation in the F1 fermenter, especialy because the microscopy supported that the *C. phytofermentans* culture was axenic. What could have caused this floculation?
+
+Both cultures remained actively growing for \>24h. In both fermenters, the amount of injected acid was greater than the amount of base, supporting that the acid injection observed in the wheat straw fermenter was not due to the lignocellulosic substrate. We do not yet understand what *C. phytofermentans* produces that requires such a large injection of acid.
+
+The amount of acid and base injected into F3 was much greater than F1, suggesting the F3 culture was more active. It will be interesting to see if the F3 culture produced more fermentation products by HPLC.
+
+## Expt 3: glucose (june 2024)
+
+The goal of this experiment is to mesure the fermentation of glucose by C. phytofermentans. This experiment provides a replicate to the may 2024 experiment. Whereas the F1 and F3 fermenters were started at different time in the may 2024 expt, both fermenters were started at 18h in this experiment. The F1 and F3 fermenters were run as follows:
+
+1.  Medium: GS2 medium with 5 g/L ground wheat straw.
+2.  Temperature: 30C
+3.  pH 7
+
+### Fermenter images
+
+![Images of C.phytofermentans cells in F1 and F3 fermenters.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_images/2024.06.06_fermenters.png) Fermenter images shows floculation in F3, albeit less than in the F1 fermenter from the previous experiment.
+
+### Microscopy
+
+![Images of C.phytofermentans cells in F1 and F3 fermenters.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_microscopy/2024.06.06_microscopy/2024.06.06_microscopy.png) Microscopy shows both fermenters are clear after 22h, but contamination is visible in the F1 fermenter at 96h.
+
+### OD measurements
+
+```{r Cphy OD june 2024, fig.cap = "Fig 8: Growth (OD600) in the F1 and F3 fermenters."}
+
+# Package readxl
+datafile = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_growth/2024.05-06_Biostat_OD.xlsx";
+data.OD = read_excel(datafile, sheet = "06-06", col_names = TRUE);
+
+plotOD = ggplot(data.OD, aes(
+  x=Hours, y=OD600, group=Fermenter, color=Fermenter))+
+  geom_point(size = 1)+
+  geom_line()+
+  xlab("Hours")+
+  ylab("OD600")+
+  coord_cartesian(xlim=c(0, 96), ylim=c(0, 2))+
+  scale_x_continuous(breaks=seq(from=0, by=12, to=96))+
+  scale_y_continuous(breaks=seq(from=0, by=0.25, to=2))+
+  theme_bw()+
+  theme_classic();
+
+plotOD
+
+```
+
+### MCFS data
+
+```{r C.phy glucose data june 2024}
+
+# load biostat files
+datafile1 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.06_MFCS/F1.20240606.csv";
+input = read.csv(file=datafile1, header=FALSE, sep=";"); 
+mydata_cphy_g1 = read_biostat(input);
+
+datafile3 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.06_MFCS/F3.20240606.csv";
+input = read.csv(file=datafile3, header=FALSE, sep=";"); 
+mydata_cphy_g3 = read_biostat(input);
+
+```
+
+```{r plot acid/base-F1 june 2024, fig.cap = "Fig 9: F1 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 96;
+plot_pH1 = plot_pH(mydata_cphy_g1, total_time);
+plot_acid1 = plot_acid(mydata_cphy_g1, total_time);
+plot_base1 = plot_base(mydata_cphy_g1, total_time);
+plot_agit1 = plot_agit(mydata_cphy_g1, total_time);
+plot_temp1 = plot_temp(mydata_cphy_g1, total_time);
+
+g1 = ggplotGrob(plot_pH1);
+g2 = ggplotGrob(plot_acid1);
+g3= ggplotGrob(plot_base1);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot acid/base-F3 may24, fig.cap = "Fig 10: F3 Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy culture in GS2 medium containing 5 g/L glucose."}
+
+total_time = 96;
+plot_pH3 = plot_pH(mydata_cphy_g3, total_time);
+plot_acid3 = plot_acid(mydata_cphy_g3, total_time);
+plot_base3 = plot_base(mydata_cphy_g3, total_time);
+plot_agit3 = plot_agit(mydata_cphy_g3, total_time);
+plot_temp3 = plot_temp(mydata_cphy_g3, total_time);
+
+g1 = ggplotGrob(plot_pH3);
+g2 = ggplotGrob(plot_acid3);
+g3= ggplotGrob(plot_base3);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot temp/agit F1 june 2024, fig.cap = "Fig 11: F1 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit1);
+g2 = ggplotGrob(plot_temp1);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+```{r plot temp/agit F3 june 24, fig.cap = "Fig 12: F3 Biostat agitation rate and temperature (degrees C) of C.phy culture in GS2 medium with 5 g/L glucose"}
+
+g1 = ggplotGrob(plot_agit3);
+g2 = ggplotGrob(plot_temp3);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+### Conclusions
+
+-   F1 fermenter: no floculation, 4.8 mls base added at 24h, 120 ml acid started at 48h
+-   F3 fermenter: some floculation, 20 ml base added at 24h, 40 ml acid started at 48h.
+
+The dynamics of acid and base addition to each of the fermenters is highly reproducible verus the last experiment. Injection of base is much higher in the F3 fermenter; injection of acid is much higher in the F1 fermenter. This suggests that differences in fermentation profiles may be influenced by different conditions in the two fermenters.
+
+In contrast, floculation was observed in the F3 fermenter this time and the F1 fermenter last time.
+
+## Expt 4: wheat bran (aug 2024)
+
+The goal of this experiment is to mesure the fermentation of wheat bran by *C. phytofermentans*. The F1 and F3 fermenters were run as follows:
+
+1.  Medium: GS2 medium with 10 g/L ground wheat bran
+2.  Temperature: 30C
+3.  pH 7
+
+### Microscopy
+
+![Images of C.phytofermentans cells in F1 F3 fermenters after 2 and 5 days of growth on wheat bran.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_microscopy/2024.08_microscopy/2024.08_microscopy.png)
+
+### MFCS
+
+```{r load MFCS data (aug 2024)}
+
+
+# load biostat files
+datafile.f1 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.08_MFCS/F1.20240731_cphy_wheatbran.csv";
+datafile.f3 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.08_MFCS/F3.20240731_cphy_wheatbran.csv";
+
+data.f1 = read.csv(file=datafile.f1, header=FALSE, sep=";"); 
+mydata.f1 = read_biostat(data.f1);
+
+data.f3 = read.csv(file=datafile.f3, header=FALSE, sep=";"); 
+mydata.f3 = read_biostat(data.f3);
+
+```
+
+```{r plot MFCS F1 aug 2024,  fig.cap = "Fig: Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy growing in the F1 fermenter containing GS2 medium with 10 g/L wheat bran."}
+
+total_time = 180;
+plot_pH_f1 = plot_pH(mydata.f1, total_time);
+plot_acid_f1 = plot_acid(mydata.f1, total_time);
+plot_base_f1 = plot_base(mydata.f1, total_time);
+plot_agit_f1 = plot_agit(mydata.f1, total_time);
+plot_temp_f1 = plot_temp(mydata.f1, total_time);
+
+g1 = ggplotGrob(plot_pH_f1);
+g2 = ggplotGrob(plot_acid_f1);
+g3= ggplotGrob(plot_base_f1);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot MFCS F3 aug 2024,  fig.cap = "Fig: Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy growing in the F3 fermenter containing GS2 medium with 10 g/L wheat bran."}
+
+total_time = 180;
+plot_pH_f3 = plot_pH(mydata.f3, total_time);
+plot_acid_f3 = plot_acid(mydata.f3, total_time);
+plot_base_f3 = plot_base(mydata.f3, total_time);
+plot_agit_f3 = plot_agit(mydata.f3, total_time);
+plot_temp_f3 = plot_temp(mydata.f3, total_time);
+
+g1 = ggplotGrob(plot_pH_f3);
+g2 = ggplotGrob(plot_acid_f3);
+g3= ggplotGrob(plot_base_f3);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+```
+
+```{r plot temp/agit F1 aug 2024, fig.cap = "Fig: Biostat agitation rate and temperature (degrees C) of the F1 fermenter containing C.phy in GS2 medium with 10 g/L wehat bran."}
+
+g1 = ggplotGrob(plot_agit_f1);
+g2 = ggplotGrob(plot_temp_f1);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+```
+
+```{r plot temp/agit F3 aug 2024, fig.cap = "Fig: Biostat agitation rate and temperature (degrees C) of the F3 fermenter containing C.phy in GS2 medium with 10 g/L wehat bran."}
+
+g1 = ggplotGrob(plot_agit_f3);
+g2 = ggplotGrob(plot_temp_f3);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+### Conclusions
+
+-   pH: remained stable in both fermenters. Loic reported that the F3 base pump has problems. Why did this not affect pH?
+-   Acid: Why did F1 register 10K mls of acid? F3 acid consumpution looks normal (120 ml)
+-   Base: For the first time, the NaOH consumption of F3 was not 5-times higher than F1. \*\* F1: 2.4 ml NaOH = 5 mol / L \* 0.0024 L = 12 mM in 2 L = 6 mM acid \*\* F3: 3.6 ml NaOH = 9 mM acid
+-   Temp (30C) and agitation (50 rpm) as expected.
+
+## Expt 5: wheat bran (spt 2024)
+
+This experiment compares the fermentation of wheat bran by *C. phytofermentans* growing in GS2 versus water. Both fermenters were run at 30C with pH=7.
+
+-   F1 fermenter: GS2 10 g/L wheat bran
+-   F3 fermenter: water 10 g/L wheat bran
+
+### Microscopy
+
+![Images of C.phytofermentans cells in F1 F3 fermenters after 2 and 5 days of growth on wheat bran.](/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_microscopy/2024.09_microscopy/2024.09_microscopy.png)
+
+```{r load MFCS data (spt 2024)}
+
+
+# load biostat files
+datafile.f1 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.09_Biostat/F1.20240903.csv";
+datafile.f3 = "/home/tolonen/GenoscopeDrive/Lab_Projects/BiomassFermentation/Biostat_MFCS/2024.09_Biostat/F3.20240903.csv";
+
+data.f1 = read.csv(file=datafile.f1, header=FALSE, sep=";"); 
+mydata.f1 = read_biostat(data.f1);
+
+data.f3 = read.csv(file=datafile.f3, header=FALSE, sep=";"); 
+mydata.f3 = read_biostat(data.f3);
+
+```
+
+```{r plot MFCS F1 spt 2024,  fig.cap = "Fig: Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy growing in the F1 fermenter."}
+
+total_time = 180;
+plot_pH_f1 = plot_pH(mydata.f1, total_time);
+plot_acid_f1 = plot_acid(mydata.f1, total_time);
+plot_base_f1 = plot_base(mydata.f1, total_time);
+plot_agit_f1 = plot_agit(mydata.f1, total_time);
+plot_temp_f1 = plot_temp(mydata.f1, total_time);
+
+g1 = ggplotGrob(plot_pH_f1);
+g2 = ggplotGrob(plot_acid_f1);
+g3= ggplotGrob(plot_base_f1);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+
+```{r plot MFCS F3 spt 2024,  fig.cap = "Fig: Biostat pH, volume 1N HCl added (ml), and volume 5N NaOH added (ml) of C.phy growing in the F3 fermenter."}
+
+mydata.f3 = mydata.f3 %>%
+  filter(Hours > 0.02); # get rid of wonky acid data
+
+total_time = 180;
+plot_pH_f3 = plot_pH(mydata.f3, total_time);
+plot_acid_f3 = plot_acid(mydata.f3, total_time);
+plot_base_f3 = plot_base(mydata.f3, total_time);
+plot_agit_f3 = plot_agit(mydata.f3, total_time);
+plot_temp_f3 = plot_temp(mydata.f3, total_time);
+
+g1 = ggplotGrob(plot_pH_f3);
+g2 = ggplotGrob(plot_acid_f3);
+g3= ggplotGrob(plot_base_f3);
+g = rbind(g1, g2, g3, size = "first")
+g$widths = unit.pmax(g1$widths, g2$widths, g3$widths)
+grid.newpage()
+grid.draw(g)
+
+```
+
+```{r plot temp/agit F1 spt 2024, fig.cap = "Fig: Biostat agitation rate and temperature (degrees C) of the F1 fermenter."}
+
+g1 = ggplotGrob(plot_agit_f1);
+g2 = ggplotGrob(plot_temp_f1);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+```
+
+
+```{r plot temp/agit F3 spt 2024, fig.cap = "Fig: Biostat agitation rate and temperature (degrees C) of the F3 fermenter."}
+
+g1 = ggplotGrob(plot_agit_f3);
+g2 = ggplotGrob(plot_temp_f3);
+g = rbind(g1, g2, size = "first");
+g$widths = unit.pmax(g1$widths, g2$widths);
+grid.newpage();
+grid.draw(g);
+
+```
+
+
+### Conclusions
+
+* F1 initially had pH equilibration issues that required large injections of acid and base. Loic thinks that temp fluctuations caused these pH imbalances. 
+* Base: F1 increased from 40.3 to 45.7 ml (5. ml added). F3 gradually increased to ~7 ml over first 96h. Thus, based added to both fermenters was similar.
+* Temp: F1 spiked to ~40C in first few hours. Loic says the tour showed a spike in temperature. He stopped the apparatus and restarted. 
+* Loic also observed there was a micro cut of current during the weekend. Evidently, did not cause a problem in terms of data saving, but it caused the F1 cryostat to freeze. 
+
