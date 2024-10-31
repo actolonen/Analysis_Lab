@@ -5,8 +5,9 @@ Andrew Tolonen
 
 - [Introduction](#introduction)
 - [Setup](#setup)
+- [File IO](#file-io)
 - [Functions](#functions)
-- [Results](#results)
+- [Methods](#methods)
   - [Method 1](#method-1)
   - [Method 2](#method-2)
 
@@ -56,23 +57,11 @@ mytheme = theme(axis.text.x = element_text(size = 4),
                plot.caption=element_textbox_simple(padding = margin(10,0,10,0), hjust=0, size=10));
 ```
 
-# Functions
-
-``` r
-getSlope = function(d) # function to calc the slope of a linear regression
-{
-  d = as.data.frame(d);
-  m = lm(Substrate ~ Minutes, d);
-  myslope = m$coefficient[2];
-  return(myslope);
-}
-```
-
-# Results
+# File IO
 
 ``` r
 # load reaction data
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/reactionRate.xlsx";
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzymes/Data/reactionRate.xlsx";
 input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
 
 head(input, 10)
@@ -91,6 +80,20 @@ head(input, 10)
     ##  8     0.7     0.227
     ##  9     0.8     0.201
     ## 10     0.9     0.179
+
+# Functions
+
+``` r
+getSlope = function(d) # function to calc the slope of a linear regression
+{
+  d = as.data.frame(d);
+  m = lm(Substrate ~ Minutes, d);
+  myslope = m$coefficient[2];
+  return(myslope);
+}
+```
+
+# Methods
 
 ## Method 1
 

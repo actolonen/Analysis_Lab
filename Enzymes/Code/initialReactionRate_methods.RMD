@@ -9,9 +9,9 @@ output:
 
 # Introduction
 
-This notebook describes how to calculate the initial reaction rate (vmax) of an enzyme. Initially, the consumption of substrate is linear. However, as the substrate becomes limiting, the reaction rate decreases. This script provides two methods to identify the initial points corresponding to the linear portion of the curve. These points are used to calculate a linear model for which the slope describes the vmax of the enzyme. 
+This notebook describes how to calculate the initial reaction rate (vmax) of an enzyme. Initially, the consumption of substrate is linear. However, as the substrate becomes limiting, the reaction rate decreases. This script provides two methods to identify the initial points corresponding to the linear portion of the curve. These points are used to calculate a linear model for which the slope describes the vmax of the enzyme.
 
-In method 1, the slopes are calculated for varying number of points starting from t=0 and the slopes are clustered. All points clustering with the initial slope are included in the linear regression. In method 2, the slopes of all set of n points are calculated. The set with the greatest slope is used for a linear regression. If desired, the clustering approach used in method 1 could be applied to method 2 to group points. 
+In method 1, the slopes are calculated for varying number of points starting from t=0 and the slopes are clustered. All points clustering with the initial slope are included in the linear regression. In method 2, the slopes of all set of n points are calculated. The set with the greatest slope is used for a linear regression. If desired, the clustering approach used in method 1 could be applied to method 2 to group points.
 
 # Setup
 
@@ -45,6 +45,17 @@ mytheme = theme(axis.text.x = element_text(size = 4),
 
 ```
 
+# File IO
+
+```{r File IO}
+
+# load reaction data
+datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzymes/Data/reactionRate.xlsx";
+input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
+
+head(input, 10)
+```
+
 # Functions
 
 ```{r function slope}
@@ -59,26 +70,15 @@ getSlope = function(d) # function to calc the slope of a linear regression
 
 ```
 
-# Results
-
-```{r load data}
-
-# load reaction data
-datafile = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Enzyme_Kinetics/Data/reactionRate.xlsx";
-input = read_excel(datafile, sheet = "Rate", col_names = TRUE, skip = 0);
-
-head(input, 10)
-
-```
-
+# Methods
 
 ## Method 1
-Calculate linear model from t=0 using increasing numbers of points. This method assumes the curve is composed of two parts: the linear part and the non-linear part.  The points are divided into the linear vs non-linear groups by K-means and the cluster containing the greater slope is selected.
 
-1. Calc the slopes of linear models of increasing numbers of data points
-2. Cluster the slopes into two clusters by K-means
-3. Select datapoints in cluster with high initial reaction rate.
+Calculate linear model from t=0 using increasing numbers of points. This method assumes the curve is composed of two parts: the linear part and the non-linear part. The points are divided into the linear vs non-linear groups by K-means and the cluster containing the greater slope is selected.
 
+1.  Calc the slopes of linear models of increasing numbers of data points
+2.  Cluster the slopes into two clusters by K-means
+3.  Select datapoints in cluster with high initial reaction rate.
 
 ```{r calc linear model 1, fig.cap = "Fig: Enzyme catalyzed accumulation of product. Data points show product concentration and the black line shows the rate of product formation for the initial, linear portion of the curve. Points were selected starting from t=0 and calculating the slope for increasing numbers of points. The slopes were clustered by K-means and all points that cluster with the intial slopes are included for calculating the linear regression."}
 
@@ -205,4 +205,3 @@ myplot2 = ggplot(mydata, aes(x=Minutes, y=Substrate)) +
 myplot2
 
 ```
-
