@@ -3,9 +3,9 @@ title: "renz methods"
 author: "Andrew Tolonen"
 date: '2024'
 output:
- github_document:
-   toc: True
-urlcolor: blue
+  html_document:
+    toc: True
+    code_folding: hide
 ---
 
 # Introduction
@@ -58,7 +58,7 @@ mydata.lb = read.csv(datafile, header = TRUE, skip = 0, sep="\t");
 
 # renz functions: 3 ways to calc Km/Vmax
 
-## 1. fE.progress(): Schnell-Mendoza equation 
+## 1. fE.progress(): Schnell-Mendoza equation
 
 fE.progress() uses the Schnell-Mendoza equation to calculate Km, Vmax directly from a single curve of substrate consumption (substrate conc versus time). We get a nice linear curve and calculations of Km and Vmax when we use the toy data provided with the renz vignette:
 

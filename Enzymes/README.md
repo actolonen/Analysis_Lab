@@ -30,9 +30,9 @@ Once we have determined the initial reaction rate at a range of substrate concen
 
 The [R package renz](https://cran.r-project.org/web/packages/renz/vignettes/Km_Vm.html) is available from the CRAN repository to calculate parameters for Michaelis-Menten enzyme kinetics data. Below, we discuss three methods to calculate Km and Vmax using functions in the renz package.
 
-This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzymes/Code/renz_methods.RMD) demonstrates the calculation of enzyme kinetic parameters Km and Vmax using the below three methods using functions in the renz package. For each method, the script compares results using toy data provided with the renz package and actual data from our lab.
+This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzymes/Code/renz_methods.html) demonstrates the calculation of enzyme kinetic parameters Km and Vmax using the below three methods using functions in the renz package. For each method, the script compares results using toy data provided with the renz package and actual data from our lab.
 
-## Method 1: calculate Km, Vmax directly from substrate versus time curves
+## Method 1: calculate Km, Vmax directly from a substrate versus time curve
 
 fE.progress() uses the Schnell-Mendoza equation to obtain the kinetic parameters of the enzyme from a single substrate versus time curve. In this method, we relate the variation in the concentration of substrate over time integrating the velocity equation as follows:
 
