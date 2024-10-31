@@ -9,14 +9,14 @@ $v = {vmax * S \over (S + Km)}$
 * S = substrate concentration
 * Km = substrate concentration where v = vmax / 2
 
-![alt text](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/Images/plotMM.png)
+![](https://github.com/actolonen/Analysis_Lab/blob/main/Enzymes/Images/plotMM.png)
 
 Michaelis-Menten kinetics requires that a few basic assumptions are met:
 1. Substrate concentration is higher than the enzyme concentration (all enzyme molecules occupied).
 2. No product inhibition (the product has no effect on the catalyzed reaction rate).
 3. The reaction only goes forward (substrate concentration drops as it is converted into a product by the unidirectional reaction catalyzed by our enzyme).
 
-In lab, we typically measure the consumption of substrate or accumulation of product over time (time vs substrate/product). However, application of the Michaelis-Menten equation requires calculating the intial reaction rate (V0) at a range of substrate concentrations (initial reaction rate verus substrate/product). See the V0 vs S curve in the image above. As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity (V0). The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/initialReactionRate_methods.md) provides two methods to identify the points corresponding to the initial, linear portion of the curve of measurements of substrate (or product) changes over time. Once these points are selected, we fit a linear regression and calculate the initial reaction rate based on the slope of the regression line. Here is a description of these two methods:
+We typically measure the consumption of substrate or accumulation of product over time (time vs substrate/product). However, the Michaelis-Menten equation requires measuring the initial reaction rate (V0) at a range of substrate concentrations (initial reaction rate verus substrate/product). See the V0 vs S curve in the image above. As the enzyme converts substrate to product, there is an initial, linear reaction period at which the enzyme is working at max velocity (V0). The reaction rate gradually declines as the substrate becomes limiting. This [script](https://github.com/actolonen/Analysis_Lab/blob/main/Enzyme_Kinetics/initialReactionRate_methods.md) provides two methods to identify the points corresponding to the initial, linear portion of the curve of measurements of substrate (or product) changes over time. Once these points are selected, we fit a linear regression and calculate the initial reaction rate based on the slope of the regression line. Here is a description of these two methods:
 
 1. Method 1: points are selected starting from t=0 into windows of increasing size. Each time a point is added, the slope of a linear regression is re-calculated. The slopes are clustered. Points that cluster together with slopes are selected for the linear regression.
 2. Method 2: points are selected based on a sliding window of size = n, slopes are calculated and points belowing to the window with the highest slope are included in the linear correlation.
