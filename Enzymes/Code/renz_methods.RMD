@@ -180,7 +180,7 @@ p3
 
 ```
 
-### LB weighted regression: toy data
+### Lineweaver-Burk weighted regression: toy data
 
 ```{r Lineweaver-Burke method 2}
 
@@ -204,6 +204,8 @@ Km.out
 Vmax.out
 
 ```
+
+### Lineweaver-Burk: lab data
 
 ```{r LB linear regression lab data}
 
