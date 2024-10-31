@@ -134,6 +134,8 @@ ONPG[ , 4:7] <- 1000 * ONPG[ , 4:7]; # put all data on same scale
 ONPG.data = ONPG %>%
   pivot_longer(cols = v1:v8, names_to = "Student", values_to = "Rate");
 
+head(ONPG.data, 10)
+
 # check data looks OK
 p1=ggplot(ONPG.data, aes(x=ONPG, y=Rate))+
   geom_point(size = 2)+
@@ -141,6 +143,8 @@ p1=ggplot(ONPG.data, aes(x=ONPG, y=Rate))+
   ylab("Velocity")+
   facet_wrap(~Student)+
   theme_classic();
+
+p1
      
 # Method 1: linear regression of sample means   
 # get mean rate
