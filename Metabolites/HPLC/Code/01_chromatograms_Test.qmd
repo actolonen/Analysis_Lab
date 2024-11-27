@@ -1,5 +1,5 @@
 ---
-title: "HPLC: plot chromatograms from .lcd files"
+title: "HPLC: plot chromatograms from .lcd files."
 author: "Fermlab"
 format: html
 editor: visual
@@ -42,14 +42,14 @@ Directories/files used by this script.
 ```{r file IO}
 
 # input: directory to read sample information file
-info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC.xlsx";
 
-sample.data = read_excel(info.file, sheet = "Echantillons", skip=2, col_names = TRUE);
+sample.data.in = read_excel(info.file, sheet = "Samples", skip=0, col_names = TRUE);
 
 # input: directory to read with .lcd files
 lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
 
-# output: directory to write chromConverter .txt files.
+# output: directory to write chromConverter .txt files
 txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/ChromConverter";
 
 if (!dir.exists(txt.output.dir)) 
@@ -57,7 +57,7 @@ if (!dir.exists(txt.output.dir))
   dir.create(txt.output.dir);
 }
 
-# output: directory for plots
+# output: directory for all plots
 plots.output.dir= "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Chromatograms";
 
 if (!dir.exists(plots.output.dir)) 
@@ -69,11 +69,13 @@ if (!dir.exists(plots.output.dir))
 
 # Introduction
 
-The objective of this notebook is to compare the chromatograms of samples from an HPLC run. This notebook uses chromConverter to visualize the HPLC chromatograms from .lcd files. This notebook visualizes the chromatograms using the three detectors of our HPLC:
+This code visualizes the chromatograms of a set of samples containing standard solutions in water and GS2 medium.
 
-1.  Detector A (UV) at 210 nm
-2.  Detector A (UV) at 260 nm
-3.  Detector B (RID)
+STD1 = formate, acetate, lactate, ethanol, glucose.
+
+STD2 = acetone, butyrate, butanol
+
+STD12 = STD1 + STD2
 
 # Methods
 
@@ -141,15 +143,23 @@ chromatograms.all = chromatograms.all %>%
 
 ## Plot chromatograms for all samples (3 detectors)
 
-```{r plot chromatograms for three detectors for each sample}
+Add sample descriptions (plot titles)
+
+```{r add sample descriptions}
 
 # combine sample descriptors into a 'Description' field
-sample.data = sample.data %>%
+sample.data = sample.data.in %>%
+  rename(Description = Sample) %>%
+  mutate(Description = str_replace_all(string=Description, pattern="NA", replacement="")) %>%
   mutate(Sample = str_replace(string=File, pattern=".lcd", replacement = "")) %>%
-  unite("Description", -c("Sample", "File"), sep = " ", remove=T) %>%
-  mutate(Description = str_replace_all(string=Description, pattern="NA", replacement=""));
+  unite("Description", c("Sample", "Description"), sep = " ", remove=F) %>%
+  select(Sample, Description, File);
 
 chromatograms.all.plot = left_join(chromatograms.all, sample.data, by = "Sample");
+
+```
+
+```{r plot chromatograms for three detectors for each sample}
 
 # get list of samples
 sample.list = unique(chromatograms.all.plot$Sample);
@@ -181,6 +191,8 @@ ggsave(filename = output.path, plot = my.plot);
 
 # Output
 
-Plots of the chromatograms are [here](https://github.com/actolonen/Analysis_Lab/tree/main/Metabolites/HPLC/Data/Chromatograms).
+Directories containing chromatogram images:
 
-# 
+-   Plots of the the full chromatograms are [here](https://drive.google.com/drive/folders/1ZgZeCcE5mgKPquccsJO7rvapZbQHkuMe).
+
+# Conclusions
