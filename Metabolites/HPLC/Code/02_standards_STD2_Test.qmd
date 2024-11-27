@@ -1,5 +1,5 @@
 ---
-title: "HPLC: compute linear model to quantify compounds in standard solution (STD2)"
+title: "HPLC: compute linear model to quantify compounds in standard solution STD2"
 author: "Fermlab"
 format: html
 editor: visual
