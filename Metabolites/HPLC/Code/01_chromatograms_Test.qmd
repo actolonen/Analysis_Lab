@@ -143,7 +143,7 @@ chromatograms.all = chromatograms.all %>%
 
 ## Plot chromatograms for all samples (3 detectors)
 
-Add sample descriptions (plot titles)
+Add sample descriptions (plot titles) to data frame of chromatograms
 
 ```{r add sample descriptions}
 
@@ -158,6 +158,8 @@ sample.data = sample.data.in %>%
 chromatograms.all.plot = left_join(chromatograms.all, sample.data, by = "Sample");
 
 ```
+
+Plot full chromatograms and output as .png files
 
 ```{r plot chromatograms for three detectors for each sample}
 
@@ -191,8 +193,6 @@ ggsave(filename = output.path, plot = my.plot);
 
 # Output
 
-Directories containing chromatogram images:
-
--   Plots of the the full chromatograms are [here](https://drive.google.com/drive/folders/1ZgZeCcE5mgKPquccsJO7rvapZbQHkuMe).
+Plots of the the full chromatograms are [here](https://github.com/actolonen/Analysis_Lab/tree/main/Metabolites/HPLC/Data/Chromatograms).
 
 # Conclusions
