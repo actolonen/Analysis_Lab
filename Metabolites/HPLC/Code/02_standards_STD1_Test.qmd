@@ -18,12 +18,14 @@ library(knitr);
 knitr::opts_chunk$set(warning = F, message = F);
 knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
 
+# standard libraries
 library(tidyverse);
 library(stringr);
 library(readr);
 library(gridExtra);
 library(readxl);
 
+# specific libraries
 library(modeest); # calc mode
 library(chromConverter); # convert .lcd to .txt
 library(DescTools); # AUC method
@@ -103,23 +105,17 @@ Calculate peak areas for a metabolite.
 calc_areas = function(chroms.peak, my.compound)
 {
 
-# calculate background-normalized intensity for each file (mode measurement)
+# calc background-normalized intensity for each file 
+# calc peak area for each file
 chroms.peak.norm = chroms.peak %>%
   group_by(File) %>%
-    mutate(Background = modeest::mfv1(round(Intensity, digits = 1))) %>%
     mutate(Intensity_diff = Intensity - Background) %>%
-  ungroup();
-
-# calculate peak areas for each file
-areas.all = chroms.peak.norm %>%
-  group_by(File) %>%
     mutate(Area = AUC(Minutes, Intensity_diff, method = 'trapezoid')) %>%
   ungroup();
 
 # format data frame
-areas.all = areas.all %>%
+areas.all = chroms.peak.norm %>%
   select(Area, Sample, File) %>%
-  filter(Area > 0) %>%
   distinct();
 
 # add standard concentrations to peak areas
@@ -300,9 +296,11 @@ peak.end = 18.9;
 my.detector = "RID-10A";
 my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -365,9 +363,11 @@ peak.end = 18.6;
 my.detector = "SPD-20A 210nm";
 my.data = data.uv210;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -428,9 +428,11 @@ peak.end = 27.7;
 my.detector = "RID-10A";
 my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -441,7 +443,6 @@ areas.concs = calc_areas(chroms.peak, my.compound);
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
 lm.out = rbind(lm.out, lm.compound);
-
 
 ```
 
@@ -495,9 +496,11 @@ peak.end = 16.1;
 my.detector = "RID-10A";
 my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -562,9 +565,11 @@ peak.end = 15.8;
 my.detector = "SPD-20A 210nm";
 my.data = data.uv210;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -626,9 +631,11 @@ peak.end = 17.4;
 my.detector = "RID-10A";
 my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -691,9 +698,11 @@ peak.end = 17.3;
 my.detector = "SPD-20A 210nm";
 my.data = data.uv210;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -755,9 +764,11 @@ peak.end = 11.7;
 my.detector = "RID-10A";
 my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 

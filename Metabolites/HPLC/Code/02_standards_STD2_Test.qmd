@@ -1,5 +1,5 @@
 ---
-title: "HPLC: compute linear model to quantify compounds in standard solution (STD1)"
+title: "HPLC: compute linear model to quantify compounds in standard solution (STD2)"
 author: "Fermlab"
 format: html
 editor: visual
@@ -18,12 +18,14 @@ library(knitr);
 knitr::opts_chunk$set(warning = F, message = F);
 knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
 
+# standard libraries
 library(tidyverse);
 library(stringr);
 library(readr);
 library(gridExtra);
 library(readxl);
 
+# specific libraries
 library(modeest); # calc mode
 library(chromConverter); # convert .lcd to .txt
 library(DescTools); # AUC method
@@ -44,7 +46,13 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 
 This notebook quantifies the peak areas of compounds using a dilution series of standards (see Table below). The peak areas of the compounds at different concentrations are used to compute a linear model correlating peak area and compound concentration (mM). The output is a file containing parameters of the linear model (slope, intercept) that can be applied to calculate compound concentrations in the experimental samples.
 
-The chromatograms are extracted from the .lcd files using chromConverter. These HPLC files include data from 3 channels: RID, UV 210 nm, and UV 260 nm. Thus, linear models are calculated for all metabolites in STD1 using the RID detector and just the acids (formate, acetate) using the UV 210 nm detector.
+The chromatograms are extracted from the .lcd files using chromConverter. These HPLC files include data from 3 channels: RID, UV 210 nm, and UV 260 nm. Thus, linear models are calculated for all metabolites as follows:
+
+-   Butanol: RID
+
+-   Butyrate: UV 210 nm
+
+-   Acetone; UV 260 nm
 
 # File IO
 
@@ -70,7 +78,7 @@ if (!dir.exists(txt.output.dir))
 }
 
 # output: file of linear model
-table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions_STD1.tsv";
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions_STD2.tsv";
 
 ```
 
@@ -78,13 +86,13 @@ Metabolite concentrations in standards samples.
 
 ```{r metabolite concs}
 
-# focus on STD1 standards
+# focus on STD2 standards
 standards = standards %>%
-  filter(grepl("STD1_", Sample)) %>%
+  filter(grepl("STD2_", Sample)) %>%
   mutate(Concentration_mM = round(mM, 2)) %>%
   select(Sample, Compound, Concentration_mM);
 
-table.standards = kable(standards, caption = "Table 1: Metabolite concentrations in STD1 standards");
+table.standards = kable(standards, caption = "Table 1: Metabolite concentrations in STD2 standards");
 table.standards
 
 ```
@@ -103,23 +111,17 @@ Calculate peak areas for a metabolite.
 calc_areas = function(chroms.peak, my.compound)
 {
 
-# calculate background-normalized intensity for each file (mode measurement)
+# calc background-normalized intensity for each file 
+# calc peak area for each file
 chroms.peak.norm = chroms.peak %>%
   group_by(File) %>%
-    mutate(Background = modeest::mfv1(round(Intensity, digits = 1))) %>%
     mutate(Intensity_diff = Intensity - Background) %>%
-  ungroup();
-
-# calculate peak areas for each file
-areas.all = chroms.peak.norm %>%
-  group_by(File) %>%
     mutate(Area = AUC(Minutes, Intensity_diff, method = 'trapezoid')) %>%
   ungroup();
 
 # format data frame
-areas.all = areas.all %>%
+areas.all = chroms.peak.norm %>%
   select(Area, Sample, File) %>%
-  filter(Area > 0) %>%
   distinct();
 
 # add standard concentrations to peak areas
@@ -158,7 +160,7 @@ return(lm.compound);
 
 ## Convert .lcd files to .txt files
 
-Select .lcd files of interest (STD1)
+Select .lcd files of interest (STD2)
 
 ```{r select STD1 files}
 
@@ -167,9 +169,9 @@ files.lcd.all = list.files(path = lcd.input.dir, pattern = ".lcd");
 files.lcd.df = data.frame(File = files.lcd.all);
 files.lcd.df = left_join(files.lcd.df, samples, by = "File");
 
-# select STD1 files
+# select STD2 files
 files.lcd.df = files.lcd.df %>%
-  filter(grepl("STD1_", Sample)) %>%
+  filter(grepl("STD2_", Sample)) %>%
   select(File, Sample);
 
 # make vector of files of interest
@@ -287,22 +289,24 @@ lm.out = data.frame(
 
 ```
 
-### Acetate: RID
+### Butyrate: UV 210 nm
 
 Calc peak areas and linear model
 
-```{r acetate RID: calc peaks, lm}
+```{r butyrate UV210: calc peaks, lm}
 
 # compound parameters
-my.compound = "Acetate";
-peak.start = 17.7;
-peak.end = 18.9;
-my.detector = "RID-10A";
-my.data = data.rid;
+my.compound = "Butyrate";
+peak.start = 24.5;
+peak.end = 26.5;
+Detector = "SPD-20A 210nm";
+my.data = data.uv210;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -318,7 +322,7 @@ lm.out = rbind(lm.out, lm.compound);
 
 Plot peaks
 
-```{r acetate RID: plot peaks, fig.cap = "Peak areas of acetate in each of the standards samples."}
+```{r butyrate UV210: plot peaks, fig.cap = "Peak areas of butyrate in each of the standards samples."}
 
 # plot peaks
  plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
@@ -337,7 +341,7 @@ plot.peaks
 
 Plot linear model
 
-```{r acetate RID LM: plot linear regression, fig.cap = "Linear regressions of peak area vs acetate concentration for all standards."}
+```{r butyrate UV210 LM: plot linear regression, fig.cap = "Linear regressions of peak area vs butyrate concentration for all standards."}
 
 plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
   ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
@@ -352,22 +356,24 @@ plot.lm
 
 ```
 
-### Acetate: UV 210
+### Butanol: RID
 
 Calc peak areas
 
-```{r acetate UV210: calc peak areas, lm}
+```{r butanol RID: calc peak areas, lm}
 
 # compound parameters
-my.compound = "Acetate";
-peak.start = 17.7;
-peak.end = 18.6;
-my.detector = "SPD-20A 210nm";
-my.data = data.uv210;
+my.compound = "Butanol";
+peak.start = 43.8;
+peak.end = 46;
+Detector = "RID-10A";
+my.data = data.rid;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -383,7 +389,7 @@ lm.out = rbind(lm.out, lm.compound);
 
 Plot peaks
 
-```{r acetate UV210: plot peaks, fig.cap = "Peak areas of acetate in each of the standards samples."}
+```{r butanol RID: plot peaks, fig.cap = "Peak areas of butanol in each of the standards samples."}
 
 # plot peaks
  plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
@@ -400,7 +406,7 @@ plot.peaks
 
 Plot linear model
 
-```{r acetate UV210 LM: plot linear regression, fig.cap = "Linear regressions of peak area vs acetate concentration for all standards."}
+```{r butanol RID LM: plot linear regression, fig.cap = "Linear regressions of peak area vs butanol concentration for all standards."}
 
 plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
   ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
@@ -415,22 +421,24 @@ plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
  bothplots = grid.arrange(plot.lm, ncol = 1);
 ```
 
-### Ethanol: RID
+### Acetone: UV 260 nm
 
 Calc peak areas
 
-```{r ethanol: calc peak areas}
+```{r acetone UV 260: calc peak areas}
 
 # compound parameters
-my.compound = "Ethanol";
-peak.start = 26.3;
-peak.end = 27.7;
-my.detector = "RID-10A";
-my.data = data.rid;
+my.compound = "Acetone";
+peak.start = 25.5;
+peak.end = 27;
+Detector = "SPD-20A 260nm";
+my.data = data.uv260;
 
+# get background (mode) for each file
 # get chromatograms for peak of interest
 chroms.peak = my.data %>%
   group_by(File) %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
     filter(Minutes > peak.start & Minutes < peak.end) %>%
   ungroup();
 
@@ -442,12 +450,11 @@ areas.concs = calc_areas(chroms.peak, my.compound);
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
 lm.out = rbind(lm.out, lm.compound);
 
-
 ```
 
 Plot peaks
 
-```{r ethanol: plot peaks, fig.cap = "Peak areas of ethanol in each of the standards samples."}
+```{r acetone: plot peaks, fig.cap = "Peak areas of acetone in each of the standards samples."}
 
 # plot peaks
  plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
@@ -465,336 +472,7 @@ plot.peaks
 
 Plot linear model
 
-```{r ethanol: plot linear model, fig.cap = "Linear regressions of peak area vs ethanol concentration for all standards."}
-
-plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
-  ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
-  geom_point(size=2, color = 'blue') +
-  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
-  xlab("Area") + 
-  ylab("mM") +
-  theme_classic() +
-  mytheme;
-
-# print regressions
- bothplots = grid.arrange(plot.lm, ncol = 1);
-
-
-```
-
-### Lactate: RID
-
-Calc peak areas, lm
-
-```{r lactate RID: calc peak areas, lm}
-
-# compound parameters
-my.compound = "Lactate";
-peak.start = 15.1;
-peak.end = 16.1;
-my.detector = "RID-10A";
-my.data = data.rid;
-
-# get chromatograms for peak of interest
-chroms.peak = my.data %>%
-  group_by(File) %>%
-    filter(Minutes > peak.start & Minutes < peak.end) %>%
-  ungroup();
-
-# calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
-
-# calc the linear model
-lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
-lm.out = rbind(lm.out, lm.compound);
-
-
-```
-
-Plot peaks
-
-```{r lactate RID: plot peaks, fig.cap = "Peak areas of lactate in each of the standards samples."}
-
-# plot peaks
- plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
-  ggtitle(paste(my.compound, " peaks", sep=""))+
-  geom_point(size=0.5) +
-  xlab("Time") +
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chroms.peak$Intensity), max(chroms.peak$Intensity)))+
-  theme_classic()+
-  mytheme;
-
-plot.peaks
- 
-
-```
-
-Plot linear model
-
-```{r lactate LM RID: plot linear regression, fig.cap = "Linear regressions of peak area vs lactate concentration for all standards."}
-
-plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
-  ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
-  geom_point(size=2, color = 'blue') +
-  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
-  xlab("Area") + 
-  ylab("mM") +
-  theme_classic() +
-  mytheme;
-
-# print regressions
- bothplots = grid.arrange(plot.lm, ncol = 1);
-
-```
-
-### Lactate: UV 210
-
-Calc peak areas, linear model
-
-```{r lactate UV210: calc peak areas, lm}
-
-# compound parameters
-my.compound = "Lactate";
-peak.start = 14.9;
-peak.end = 15.8;
-my.detector = "SPD-20A 210nm";
-my.data = data.uv210;
-
-# get chromatograms for peak of interest
-chroms.peak = my.data %>%
-  group_by(File) %>%
-    filter(Minutes > peak.start & Minutes < peak.end) %>%
-  ungroup();
-
-# calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
-
-# calc the linear model
-lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
-lm.out = rbind(lm.out, lm.compound);
-
-```
-
-Plot peaks
-
-```{r lactate UV2120: plot peaks, fig.cap = "Peak areas of lactate in each of the standards samples."}
-
-# plot peaks
- plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
-  ggtitle(paste(my.compound, " peaks", sep=""))+
-  geom_point(size=0.5) +
-  xlab("Time") +
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chroms.peak$Intensity), max(chroms.peak$Intensity)))+
-  theme_classic()+
-  mytheme;
-
-plot.peaks
-```
-
-Plot linear model
-
-```{r lactate LM UV210: plot linear regression, fig.cap = "Linear regressions of peak area vs lactate concentration for all standards."}
-
-plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
-  ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
-  geom_point(size=2, color = 'blue') +
-  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
-  xlab("Area") + 
-  ylab("mM") +
-  theme_classic() +
-  mytheme;
-
-# print regressions
- bothplots = grid.arrange(plot.lm, ncol = 1);
-
-```
-
-### Formate: RID
-
-Calc peak areas, lm
-
-```{r formate RID: calc peak areas, lm}
-
-# compound parameters
-my.compound = "Formate";
-peak.start = 16.4;
-peak.end = 17.4;
-my.detector = "RID-10A";
-my.data = data.rid;
-
-# get chromatograms for peak of interest
-chroms.peak = my.data %>%
-  group_by(File) %>%
-    filter(Minutes > peak.start & Minutes < peak.end) %>%
-  ungroup();
-
-# calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
-
-# calc the linear model
-lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
-lm.out = rbind(lm.out, lm.compound);
-
-```
-
-Plot peaks
-
-```{r formate RID: plot peaks, fig.cap = "Peak areas of formate in each of the standards samples."}
-
-# plot peaks
- plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
-  ggtitle(paste(my.compound, " peaks", sep=""))+
-  geom_point(size=0.5) +
-  xlab("Time") +
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chroms.peak$Intensity), max(chroms.peak$Intensity)))+
-  theme_classic()+
-  mytheme;
-
-plot.peaks
- 
-```
-
-Plot linear model
-
-```{r formate LM RID: plot linear regression, fig.cap = "Linear regressions of peak area vs formate concentration for all standards."}
-
-plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
-  ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
-  geom_point(size=2, color = 'blue') +
-  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
-  xlab("Area") + 
-  ylab("mM") +
-  theme_classic() +
-  mytheme;
-
-# print regressions
- bothplots = grid.arrange(plot.lm, ncol = 1);
-
-```
-
-### Formate: UV210
-
-Calc peaks, lm
-
-```{r formate uv210: calc peak areas, lm}
-
-# compound parameters
-my.compound = "Formate";
-peak.start = 16.2;
-peak.end = 17.3;
-my.detector = "SPD-20A 210nm";
-my.data = data.uv210;
-
-# get chromatograms for peak of interest
-chroms.peak = my.data %>%
-  group_by(File) %>%
-    filter(Minutes > peak.start & Minutes < peak.end) %>%
-  ungroup();
-
-# calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
-
-# calc the linear model
-lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
-lm.out = rbind(lm.out, lm.compound);
-
-```
-
-Plot peaks
-
-```{r formate UV210: plot peaks, fig.cap = "Peak areas of formate in each of the standards samples."}
-
-# plot peaks
- plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=File, color=File)) +
-  ggtitle(paste(my.compound, " peaks", sep=""))+
-  geom_point(size=0.5) +
-  xlab("Time") +
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chroms.peak$Intensity), max(chroms.peak$Intensity)))+
-  theme_classic()+
-  mytheme;
-
-plot.peaks
-```
-
-Plot linear model
-
-```{r formate LM UV210: plot linear regression, fig.cap = "Linear regressions of peak area vs formate concentration for all standards."}
-
-plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
-  ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
-  geom_point(size=2, color = 'blue') +
-  geom_smooth(method=lm, se=FALSE, color='red', width=0.1, formula = y ~ x)+
-  xlab("Area") + 
-  ylab("mM") +
-  theme_classic() +
-  mytheme;
-
-# print regressions
- bothplots = grid.arrange(plot.lm, ncol = 1);
-
-```
-
-### Glucose: RID
-
-Calc peak areas
-
-```{r glucose: calc peak areas}
-
-# compound parameters
-my.compound = "Glucose";
-peak.start = 10.7;
-peak.end = 11.7;
-my.detector = "RID-10A";
-my.data = data.rid;
-
-# get chromatograms for peak of interest
-chroms.peak = my.data %>%
-  group_by(File) %>%
-    filter(Minutes > peak.start & Minutes < peak.end) %>%
-  ungroup();
-
-# calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
-
-# calc the linear model
-lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
-lm.out = rbind(lm.out, lm.compound);
-
-```
-
-Plot peaks
-
-```{r glucose: plot peaks, fig.cap = "Peak areas of glucose in each of the standards samples."}
-
-# plot peaks
- plot.peaks = ggplot(chroms.peak, aes(x=Minutes, y=Intensity, group=Sample, color=Sample)) +
-  ggtitle(paste(my.compound, " peaks", sep=""))+
-  geom_point(size=0.5) +
-  xlab("Time") +
-  ylab("Intensity") +
-  coord_cartesian(xlim=c(peak.start, peak.end), ylim=c(min(chroms.peak$Intensity), max(chroms.peak$Intensity)))+
-  theme_classic()+
-  mytheme;
-
-plot.peaks
- 
-
- 
-
-```
-
-Plot regressions
-
-```{r glucose: plot linear regression, fig.cap = "Linear regressions of peak area vs glucose concentration for all standards."}
+```{r acetone: plot linear model, fig.cap = "Linear regressions of peak area vs acetone concentration for all standards."}
 
 plot.lm = ggplot(areas.concs, aes(x=Area, y=Concentration_mM))+
   ggtitle(paste(my.compound, my.detector, "(chromConverter)", sep = " "))+
