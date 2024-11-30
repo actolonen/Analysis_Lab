@@ -57,8 +57,8 @@ Files used by this script.
 # input: sample information file
 info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC.xlsx";
 
-standards = read_excel(info.file, sheet = "Standards", col_names = TRUE, skip = 0);
-samples = read_excel(info.file, sheet = "Samples", col_names = TRUE, skip = 0);
+standards = read_excel(info.file, sheet = "Standards", col_names = TRUE, skip = 2);
+samples = read_excel(info.file, sheet = "Samples", col_names = TRUE, skip = 2);
 
 # input: directory of .lcd files
 lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/LCD_LabSolutions";
@@ -78,15 +78,17 @@ table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC
 
 Metabolite concentrations in standards samples.
 
-```{r metabolite concs}
+```{r standards metabolite concs}
 
-# focus on STD1 standards
-standards = standards %>%
+# Define the standards that will be used to quantify compounds.
+
+# focus on STD1 standards.
+my.standards = standards %>%
   filter(grepl("STD1_", Sample)) %>%
-  mutate(Concentration_mM = round(mM, 2)) %>%
+  mutate(Concentration_mM = round(Concentration_mM, 2)) %>%
   select(Sample, Compound, Concentration_mM);
 
-table.standards = kable(standards, caption = "Table 1: Metabolite concentrations in STD1 standards");
+table.standards = kable(my.standards, caption = "Table 1: Metabolite concentrations in STD1 standards");
 table.standards
 
 ```
@@ -154,22 +156,22 @@ return(lm.compound);
 
 ## Convert .lcd files to .txt files
 
-Select .lcd files of interest (STD1)
+Select standards .lcd files of interest
 
-```{r select STD1 files}
+```{r select standards files}
 
-# get list of all .lcd files in onput dir
+# get list of all .lcd files in input dir, add sample descriptions
 files.lcd.all = list.files(path = lcd.input.dir, pattern = ".lcd");
 files.lcd.df = data.frame(File = files.lcd.all);
-files.lcd.df = left_join(files.lcd.df, samples, by = "File");
+files.lcd.df = left_join(samples, files.lcd.df, by = "File");
 
-# select STD1 files
-files.lcd.df = files.lcd.df %>%
-  filter(grepl("STD1_", Sample)) %>%
-  select(File, Sample);
+# select standards files from standards table (Table 1)
+standards.vector = unique(my.standards$Sample);
+standards.list = data.frame(Sample = standards.vector);
+files.standards = left_join(standards.list, files.lcd.df, by = "Sample");
 
 # make vector of files of interest
-files.lcd = as.vector(files.lcd.df$File);
+files.lcd = as.vector(files.standards$File);
 
 ```
 
