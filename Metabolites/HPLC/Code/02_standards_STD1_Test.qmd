@@ -48,7 +48,12 @@ This notebook quantifies the peak areas of compounds using a dilution series of 
 
 The chromatograms are extracted from the .lcd files using chromConverter. These HPLC files include data from 3 channels: RID, UV 210 nm, and UV 260 nm. Thus, linear models are calculated for all metabolites in STD1 using the RID detector and just the acids (formate, acetate) using the UV 210 nm detector.
 
-# File IO
+The user must select one of two alternative methods to background-normalize the chromatogram values prior to calculation of the the peak areas:
+
+1.  The chromatogram intensities are normalized by subtracting the mode intensity of in the chromatogram.
+2.  The chromatogram intensities are normalized by subtracting the mean of the boundary intensities of the peak.
+
+# Config/File IO
 
 Files used by this script.
 
@@ -74,6 +79,10 @@ if (!dir.exists(txt.output.dir))
 # output: file of linear model
 table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions_STD1.tsv";
 
+# define method to calculate peak areas. 
+#peak.method = "mode";
+peak.method = "boundaries";
+
 ```
 
 Metabolite concentrations in standards samples.
@@ -97,14 +106,14 @@ table.standards
 
 ## Calc peak areas
 
-Calculate peak areas for a metabolite.
+Method 1: Calculate peak areas for a metabolite. Intensities are normalized by subtracting the mode intensity of the chromatogram.
 
-```{r calculate peak areas for copound of interest}
+```{r calculate peak areas for compound of interest (mode normalization)}
 
 # input = data.frame chroms.peak = Minutes, Intensity, Sample, File
 # output = data.frame areas.all = Area, Concentration_mM, Sample, File
 
-calc_areas = function(chroms.peak, my.compound)
+calc_areas_mode = function(chroms.peak, my.compound)
 {
 
 # calc background-normalized intensity for each file 
@@ -112,6 +121,46 @@ calc_areas = function(chroms.peak, my.compound)
 chroms.peak.norm = chroms.peak %>%
   group_by(File) %>%
     mutate(Intensity_diff = Intensity - Background) %>%
+    mutate(Area = AUC(Minutes, Intensity_diff, method = 'trapezoid')) %>%
+  ungroup();
+
+# format data frame
+areas.all = chroms.peak.norm %>%
+  select(Area, Sample, File) %>%
+  distinct();
+
+# add standard concentrations to peak areas
+standards.compound = standards %>%
+  filter(Compound == my.compound);
+
+areas.concs = left_join(areas.all, standards.compound, by="Sample");
+
+areas.concs = areas.concs %>%
+  mutate(Concentration_mM = as.numeric(Concentration_mM));
+
+return(areas.concs);
+}
+
+```
+
+Method 2: Calculate peak areas for a metabolite. Intensities are normalized by subtracting the mean of the values before and after the peak (peak boundaries). This method may be more accurate when the chromatogram baseline wanders.
+
+```{r calculate peak areas for compound of interest (boundries normalization)}
+
+# input = data.frame chroms.peak = Minutes, Intensity, Sample, File
+# output = data.frame areas.all = Area, Concentration_mM, Sample, File
+
+calc_areas_boundaries = function(chroms.peak, my.compound)
+{
+
+# calc background-normalized intensity for each file 
+# calc peak area for each file
+chroms.peak.norm = chroms.peak %>%
+  group_by(File) %>%
+    mutate(Intensity_first = dplyr::first(Intensity)) %>%
+    mutate(Intensity_last= dplyr::last(Intensity)) %>%
+    mutate(Intensity_base = (Intensity_first + Intensity_last)/2) %>%
+    mutate(Intensity_diff = Intensity - Intensity_base) %>%
     mutate(Area = AUC(Minutes, Intensity_diff, method = 'trapezoid')) %>%
   ungroup();
 
