@@ -356,8 +356,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -423,8 +429,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -488,8 +500,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -556,8 +574,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -625,8 +649,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -691,8 +721,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -758,8 +794,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -824,8 +866,14 @@ chroms.peak = my.data %>%
   ungroup();
 
 # calculate area for peak of interest
-# areas.concs = data.frame areas.all = Area, Concentration_mM, Sample, File
-areas.concs = calc_areas(chroms.peak, my.compound);
+if (peak.method == "mode")
+{
+  areas.concs = calc_areas_mode(chroms.peak, my.compound);
+}
+if (peak.method == "boundaries")
+{
+  areas.concs = calc_areas_boundaries(chroms.peak, my.compound);
+}
 
 # calc the linear model
 lm.compound = calc_linearModel(my.compound, peak.start, peak.end, my.detector, areas.concs);
@@ -849,9 +897,6 @@ Plot peaks
 
 plot.peaks
  
-
- 
-
 ```
 
 Plot regressions
