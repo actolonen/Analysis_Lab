@@ -85,7 +85,7 @@ if (!dir.exists(analysis.output.dir))
 }
 
 # output: file of linear model
-table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Analysis/standards_regressions_STD1.tsv";
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/Analysis/standards_regressions_STD2.tsv";
 
 # define method to calculate peak areas. 
 #peak.method = "mode";
