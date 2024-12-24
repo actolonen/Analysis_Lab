@@ -1059,8 +1059,6 @@ plot.lm
 
 ```
 
-## 
-
 ### Propionate: UV 210
 
 Calc peak areas, linear model

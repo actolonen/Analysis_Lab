@@ -25,23 +25,31 @@ This analysis pipeline requires that all the .lcd file for an HPLC run are put i
 
 -   Acids: detect by RID and UV 210 nm
 
-    -   Formate: 16 min
+    -   Lactate: 15.5 min
 
-    -   Acetate: 18 min
+    -   Formate: 16.8 min
 
-    -   Lactate: 15 min
+    -   Acetate: 18.25 min
 
-    -   Butyrate: 25 min
+    -   Propionate 21 min
+
+    -   Butyrate: 25.5 min
 
 -   Alcohols: RID
 
     -   Ethanol: 26 min
 
-    -   Butanol: 44 min
+    -   1-Propanol: 33.5 min
+
+    -   Butanol: 45 min
 
 -   Ketones: RID and UV 260 nm
 
-    -   Acetone: 26 min
+    -   Acetone: 26.4 min
+
+-   Sugars (RID)
+
+    -   Glucose: 11.2 min
 
 ## 3 steps to visualize chromatograms and quantify compounds
 
