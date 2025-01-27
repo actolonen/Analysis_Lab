@@ -2,7 +2,7 @@
 
 ## *Clostridium phytofermentans* media
 
--   [GS2 medium ](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/GS2.md)
+-   [GS2 medium](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/GS2.md)
 -   [Defined medium (M6)](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/definedMedia_Cphytofermentans.pdf)
 
 ## *E. coli* media
