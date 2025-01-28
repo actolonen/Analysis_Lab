@@ -174,9 +174,14 @@ codon.freqs.aa %>%
   select(Codon, Amino_acid, Frequency, Fraction) %>%
   arrange(Amino_acid);
 
+# format for Twist tool
+codon.freqs.aa = codon.freqs.aa %>%
+  dplyr::rename(Triplet = Codon, 'Amino acid' = Amino_acid) %>%
+  select(Triplet, 'Amino acid', Fraction);
+
 # printout table
 table1 = kable(codon.freqs.aa, caption = "Table 1: codon frequencies in the C. phytofermentans genome.");
-write.csv = (codon.freqs.aa, file = table.out, sep = ",");
+write.csv(codon.freqs.aa, file = table.out, sep = ",", row.names = F);
 
 
 
