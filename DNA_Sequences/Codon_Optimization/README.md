@@ -1,7 +1,7 @@
-# DNA sequence analysis
+# DNA sequence codon optimization
 
-This is a collection of methods we commonly use for DNA sequence analysis.
+Codon usage can vary widely across different species. For example, here is a [codon usage table for *C.phytofermentans*](https://github.com/actolonen/Analysis_Lab/blob/main/DNA_Sequences/Codon_Optimization/Data/2025.01_codon_freqs_ISDg.xlsx)*,* revealing that some codons are rarely used. It is thus important to customize the codon usage in DNA sequences to facilitate proper expression in the host of interest. Codon optimization is particularly important for synthetic gene design for heterologous protein production.
 
-1.  [Clustering](https://github.com/actolonen/Analysis_Lab/tree/main/Genome_Sequences/Clustering) of sequences using hierarchial and K-means clustering.
-2.  [CRISPR site identification](https://github.com/actolonen/Analysis_Lab/tree/main/DNA_Sequences/CRISPR_Sites) in a genome sequence.
-3.  Codon optimization of a DNA sequence.
+## Codon Harmonizer
+
+[Codon harmonizer](https://codonharmonizer.systemsbiology.nl/)

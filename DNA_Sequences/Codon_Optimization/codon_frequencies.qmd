@@ -1,0 +1,153 @@
+---
+title: "codon_frequencies.qmd"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+The goal of this script to to calculate codon frequencies in a genome.
+
+-   Input = FASTA file of DNA sequences for each gene
+
+-   Output = Table of codon frequencies across all genes in genome
+
+# File IO/Setup
+
+Setup
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(readxl);
+library(Biostrings);
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+
+```
+
+File IO
+
+```{r file IO, echo=FALSE, message=FALSE}
+
+# input: directory to read sample information file
+sequencefile.fna = "/home/tolonen/GenoscopeDrive/Lab_Projects/Genome_Cphy/Genome_Files/2024.09_Genbank/Assemblies/GCA_000018685.1_ASM1868v1/GCA_000018685.1_ASM1868v1_cds_from_genomic.fna";
+
+
+```
+
+# Functions
+
+Calculate codon frequencies in a DNA sequence
+
+```{r Calculate codon frequencies in a gene sequence}
+
+# input = gene sequence string
+# output = data.frame, col1 = codon, col2 = frequency.
+
+# Function to count codon frequencies in a gene sequence
+count.codons <- function(gene_sequence) {
+ 
+   # Split the gene sequence into codons
+  codons <- substring(gene_sequence, seq(1, nchar(gene_sequence) - 2, 3), seq(3, nchar(gene_sequence), 3))
+  
+  # Count the frequency of each codon
+  codon_freq <- table(codons)
+  
+  # Create a data frame with codon sequences and their frequencies
+  codon.freqs.gene <- data.frame(
+    codon = names(codon_freq),
+    frequency.gene = as.integer(codon_freq),
+    stringsAsFactors = FALSE
+  )
+  
+  return(codon.freqs.gene);
+}
+
+```
+
+# Method
+
+Parse input file into data.frame of gene sequences
+
+```{r r parse DNA sequence file into data.frame of genes}
+
+fasta <- readDNAStringSet(sequencefile.fna);
+  
+# Create a data frame with gene names and sequences
+gene.sequences <- data.frame(
+    gene.name = names(fasta),
+    gene.sequence = as.character(fasta),
+    stringsAsFactors = FALSE
+  );
+
+# rename gene.names to Cphy_\\d{4}
+gene.sequences = gene.sequences %>%
+  mutate(gene.name.short = str_match(string = gene.name, pattern = "Cphy_\\d{4}"));
+
+  
+```
+
+Generate empty codon.freqs data.frame for genome.
+
+```{r generate codon frequency data.frame}
+
+# Define the letters
+letters <- c("A", "C", "G", "T")
+
+# Generate all possible three-letter sequences
+codon <- as.vector(outer(letters, outer(letters, letters, paste0), paste0));
+frequency = seq(0, 0, length.out = length(codon));
+
+codon.freqs = data.frame(codon, frequency);
+
+
+```
+
+Cycle through gene sequences, count codons in each sequence, increment codon.freqs data.frame for genome.
+
+```{r get codon frequencies for each gene and use them to increment the codon frequenies in the genome}
+
+num.seqs = nrow(gene.sequences);
+
+for (i in 1:num.seqs)
+{
+  my.seq = gene.sequences$gene.sequence[i];
+  codon.freqs.gene = count.codons(my.seq);
+
+    codon.freqs = left_join(codon.freqs, codon.freqs.gene, by = "codon");
+    codon.freqs = codon.freqs %>%
+    replace(is.na(.), 0);
+
+    codon.freqs = codon.freqs %>%
+    mutate(frequency = frequency + frequency.gene) %>%
+    select(-frequency.gene);
+}
+
+```
+
+Associate each codon with an amino acid
+
+```{r}
+
+```
