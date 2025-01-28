@@ -53,6 +53,11 @@ File IO
 # input: directory to read sample information file
 sequencefile.fna = "/home/tolonen/GenoscopeDrive/Lab_Projects/Genome_Cphy/Genome_Files/2024.09_Genbank/Assemblies/GCA_000018685.1_ASM1868v1/GCA_000018685.1_ASM1868v1_cds_from_genomic.fna";
 
+aminoacids.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/DNA_Sequences/Codon_Optimization/Data/codons_aa.xlsx";
+aa.table = read_excel(aminoacids.in, skip=0, col_names = TRUE);
+
+table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/DNA_Sequences/Codon_Optimization/Data/codons_frequencies_cphy.csv";
+
 
 ```
 
@@ -69,7 +74,9 @@ Calculate codon frequencies in a DNA sequence
 count.codons <- function(gene_sequence) {
  
    # Split the gene sequence into codons
-  codons <- substring(gene_sequence, seq(1, nchar(gene_sequence) - 2, 3), seq(3, nchar(gene_sequence), 3))
+    codons <- substring(gene_sequence, 
+                        seq(1, nchar(gene_sequence) - 2, 3), 
+                        seq(3, nchar(gene_sequence), 3))
   
   # Count the frequency of each codon
   codon_freq <- table(codons)
@@ -148,6 +155,29 @@ for (i in 1:num.seqs)
 
 Associate each codon with an amino acid
 
-```{r}
+```{r associate codons with amino acids}
+
+# rename codon column
+codon.freqs.aa = codon.freqs %>%
+  dplyr::rename(Codon = codon, Frequency = frequency);
+
+# add amino acid info to codon frequency df
+codon.freqs.aa = left_join(codon.freqs.aa, aa.table, by = "Codon");
+
+# calculate the fractional codon usage for each amino acid
+codon.freqs.aa = codon.freqs.aa %>%
+  group_by(Amino_acid) %>%
+    mutate(Fraction = Frequency / sum(Frequency));
+
+# order alphabetically by aa abbreviations
+codon.freqs.aa %>%
+  select(Codon, Amino_acid, Frequency, Fraction) %>%
+  arrange(Amino_acid);
+
+# printout table
+table1 = kable(codon.freqs.aa, caption = "Table 1: codon frequencies in the C. phytofermentans genome.");
+write.csv = (codon.freqs.aa, file = table.out, sep = ",");
+
+
 
 ```

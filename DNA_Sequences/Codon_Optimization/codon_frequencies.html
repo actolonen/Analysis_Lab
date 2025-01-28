@@ -3145,20 +3145,22 @@ vertical-align: -.125em;
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>count.codons <span class="ot">&lt;-</span> <span class="cf">function</span>(gene_sequence) {</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a> </span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>   <span class="co"># Split the gene sequence into codons</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  codons <span class="ot">&lt;-</span> <span class="fu">substring</span>(gene_sequence, <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">nchar</span>(gene_sequence) <span class="sc">-</span> <span class="dv">2</span>, <span class="dv">3</span>), <span class="fu">seq</span>(<span class="dv">3</span>, <span class="fu">nchar</span>(gene_sequence), <span class="dv">3</span>))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Count the frequency of each codon</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  codon_freq <span class="ot">&lt;-</span> <span class="fu">table</span>(codons)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a data frame with codon sequences and their frequencies</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  codon.freqs.gene <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">codon =</span> <span class="fu">names</span>(codon_freq),</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">frequency.gene =</span> <span class="fu">as.integer</span>(codon_freq),</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(codon.freqs.gene);</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    codons <span class="ot">&lt;-</span> <span class="fu">substring</span>(gene_sequence, </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">nchar</span>(gene_sequence) <span class="sc">-</span> <span class="dv">2</span>, <span class="dv">3</span>), </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">seq</span>(<span class="dv">3</span>, <span class="fu">nchar</span>(gene_sequence), <span class="dv">3</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Count the frequency of each codon</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  codon_freq <span class="ot">&lt;-</span> <span class="fu">table</span>(codons)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a data frame with codon sequences and their frequencies</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  codon.freqs.gene <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">codon =</span> <span class="fu">names</span>(codon_freq),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">frequency.gene =</span> <span class="fu">as.integer</span>(codon_freq),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(codon.freqs.gene);</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -3218,6 +3220,93 @@ vertical-align: -.125em;
 </details>
 </div>
 <p>Associate each codon with an amino acid</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rename codon column</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="ot">=</span> codon.freqs <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Codon =</span> codon);</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># add amino acid info to codon frequency df</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="ot">=</span> <span class="fu">left_join</span>(codon.freqs.aa, aa.table, <span class="at">by =</span> <span class="st">&quot;Codon&quot;</span>);</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># order alphabetically by aa abbreviations</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="sc">%&gt;%</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Abbreviation_aa);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Codon frequency                  Amino_acid Abbreviation_aa
+1    GCA     38951                     Alanine               A
+2    GCC      7499                     Alanine               A
+3    GCG     10927                     Alanine               A
+4    GCT     26041                     Alanine               A
+5    TGC      5277                    Cysteine               C
+6    TGT     12239                    Cysteine               C
+7    GAC     14161                   Aspartate               D
+8    GAT     56503                   Aspartate               D
+9    GAA     65137                   Glutamate               E
+10   GAG     31280                   Glutamate               E
+11   TTC     12789               Phenylalanine               F
+12   TTT     44159               Phenylalanine               F
+13   GGA     33120                     Glycine               G
+14   GGC      9837                     Glycine               G
+15   GGG      9434                     Glycine               G
+16   GGT     33790                     Glycine               G
+17   CAC      4359                   Histidine               H
+18   CAT     17416                   Histidine               H
+19   ATA     29827                  Isoleucine               I
+20   ATC     24790                  Isoleucine               I
+21   ATT     56729                  Isoleucine               I
+22   AAA     60464                      Lysine               K
+23   AAG     37461                      Lysine               K
+24   CTA     15744                     Leucine               L
+25   TTA     50704                     Leucine               L
+26   CTC      5078                     Leucine               L
+27   CTG      7368                     Leucine               L
+28   TTG     14736                     Leucine               L
+29   CTT     28526                     Leucine               L
+30   ATG     37134                  Methionine               M
+31   AAC     16726                  Asparagine               N
+32   AAT     52683                  Asparagine               N
+33   CCA     20195                     Proline               P
+34   CCC      1767                     Proline               P
+35   CCG      6228                     Proline               P
+36   CCT     12784                     Proline               P
+37   CAA     23903                   Glutamine               Q
+38   CAG     16750                   Glutamine               Q
+39   AGA     19103                    Arginine               R
+40   CGA      6482                    Arginine               R
+41   CGC      3470                    Arginine               R
+42   AGG      4822                    Arginine               R
+43   CGG      1837                    Arginine               R
+44   CGT     13209                    Arginine               R
+45   TCA     16164                      Serine               S
+46   TCC     11791                      Serine               S
+47   AGC     10045                      Serine               S
+48   TCG      5690                      Serine               S
+49   TCT     19917                      Serine               S
+50   AGT     21012                      Serine               S
+51   ACA     28887                   Threonine               T
+52   ACC     14104                   Threonine               T
+53   ACG     11154                   Threonine               T
+54   ACT     21569                   Threonine               T
+55   GTA     35658                      Valine               V
+56   GTC      7015                      Valine               V
+57   GTG     12870                      Valine               V
+58   GTT     32605                      Valine               V
+59   TGG     11225                  Tryptophan               W
+60   TAA      2491         Termination (ochre)               X
+61   TGA       464 Termination (opal or umber)               X
+62   TAG       947         Termination (amber)               X
+63   TAC     12229                    Tyrosine               Y
+64   TAT     45376                    Tyrosine               Y</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># printout table</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>table1 <span class="ot">=</span> <span class="fu">kable</span>(codon.freqs.aa, <span class="at">caption =</span> <span class="st">&quot;Table 1: codon frequencies in the C. phytofermentans genome.&quot;</span>); </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section>
 
 </main>
