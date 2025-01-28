@@ -3233,40 +3233,357 @@ vertical-align: -.125em;
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the fractional codon usage for each amino acid</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="ot">=</span> codon.freqs.aa <span class="sc">%&gt;%</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Amino_acid) <span class="sc">%&gt;%</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Fraction =</span> Frequency <span class="sc">/</span> <span class="fu">sum</span>(Frequency));</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># order alphabetically by aa abbreviations</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="sc">%&gt;%</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Codon, Amino_acid, Frequency, Fraction) <span class="sc">%&gt;%</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Amino_acid);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Fraction =</span> Frequency <span class="sc">/</span> <span class="fu">sum</span>(Frequency)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  ungroup;</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># format for Twist tool</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="ot">=</span> codon.freqs.aa <span class="sc">%&gt;%</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(Amino_acid) <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Triplet =</span> Codon, <span class="st">&#39;Amino acid&#39;</span> <span class="ot">=</span> Amino_acid) <span class="sc">%&gt;%</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Triplet, <span class="st">&#39;Amino acid&#39;</span>, Fraction);</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># printout table</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>table1 <span class="ot">=</span> <span class="fu">kable</span>(codon.freqs.aa, <span class="at">caption =</span> <span class="st">&quot;Table 1: codon frequencies in the C. phytofermentans genome.&quot;</span>);</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>table1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 64 × 4
-# Groups:   Amino_acid [21]
-   Codon Amino_acid Frequency Fraction
-   &lt;chr&gt; &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
- 1 GCA   A              38951   0.467 
- 2 GCC   A               7499   0.0899
- 3 GCG   A              10927   0.131 
- 4 GCT   A              26041   0.312 
- 5 TGC   C               5277   0.301 
- 6 TGT   C              12239   0.699 
- 7 GAC   D              14161   0.200 
- 8 GAT   D              56503   0.800 
- 9 GAA   E              65137   0.676 
-10 GAG   E              31280   0.324 
-# ℹ 54 more rows</code></pre>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Table 1: codon frequencies in the C. phytofermentans genome.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Triplet</th>
+<th style="text-align: left;">Amino acid</th>
+<th style="text-align: right;">Fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">GCA</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">0.4669376</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GCC</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">0.0898967</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GCG</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">0.1309909</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GCT</td>
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">0.3121748</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TGC</td>
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">0.3012674</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TGT</td>
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">0.6987326</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GAC</td>
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">0.2003991</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GAT</td>
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">0.7996009</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GAA</td>
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">0.6755759</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GAG</td>
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">0.3244241</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TTC</td>
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">0.2245733</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TTT</td>
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">0.7754267</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GGA</td>
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">0.3843074</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GGC</td>
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">0.1141435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GGG</td>
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">0.1094673</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GGT</td>
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">0.3920818</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CAC</td>
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">0.2001837</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAT</td>
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">0.7998163</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATA</td>
+<td style="text-align: left;">I</td>
+<td style="text-align: right;">0.2678767</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATC</td>
+<td style="text-align: left;">I</td>
+<td style="text-align: right;">0.2226393</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATT</td>
+<td style="text-align: left;">I</td>
+<td style="text-align: right;">0.5094840</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AAA</td>
+<td style="text-align: left;">K</td>
+<td style="text-align: right;">0.6174521</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AAG</td>
+<td style="text-align: left;">K</td>
+<td style="text-align: right;">0.3825479</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CTA</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.1288844</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TTA</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.4150758</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CTC</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.0415698</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CTG</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.0603163</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TTG</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.1206326</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CTT</td>
+<td style="text-align: left;">L</td>
+<td style="text-align: right;">0.2335211</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATG</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">1.0000000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AAC</td>
+<td style="text-align: left;">N</td>
+<td style="text-align: right;">0.2409774</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AAT</td>
+<td style="text-align: left;">N</td>
+<td style="text-align: right;">0.7590226</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CCA</td>
+<td style="text-align: left;">P</td>
+<td style="text-align: right;">0.4928735</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CCC</td>
+<td style="text-align: left;">P</td>
+<td style="text-align: right;">0.0431249</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CCG</td>
+<td style="text-align: left;">P</td>
+<td style="text-align: right;">0.1519988</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CCT</td>
+<td style="text-align: left;">P</td>
+<td style="text-align: right;">0.3120027</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CAA</td>
+<td style="text-align: left;">Q</td>
+<td style="text-align: right;">0.5879763</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAG</td>
+<td style="text-align: left;">Q</td>
+<td style="text-align: right;">0.4120237</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AGA</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.3904707</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CGA</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.1324939</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CGC</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.0709278</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AGG</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.0985630</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CGG</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.0375488</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CGT</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: right;">0.2699957</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TCA</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.1910209</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TCC</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.1393422</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AGC</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.1187086</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TCG</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.0672426</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TCT</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.2353727</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AGT</td>
+<td style="text-align: left;">S</td>
+<td style="text-align: right;">0.2483130</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ACA</td>
+<td style="text-align: left;">T</td>
+<td style="text-align: right;">0.3815279</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACC</td>
+<td style="text-align: left;">T</td>
+<td style="text-align: right;">0.1862799</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ACG</td>
+<td style="text-align: left;">T</td>
+<td style="text-align: right;">0.1473175</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACT</td>
+<td style="text-align: left;">T</td>
+<td style="text-align: right;">0.2848747</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GTA</td>
+<td style="text-align: left;">V</td>
+<td style="text-align: right;">0.4045242</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GTC</td>
+<td style="text-align: left;">V</td>
+<td style="text-align: right;">0.0795821</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GTG</td>
+<td style="text-align: left;">V</td>
+<td style="text-align: right;">0.1460044</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GTT</td>
+<td style="text-align: left;">V</td>
+<td style="text-align: right;">0.3698893</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TGG</td>
+<td style="text-align: left;">W</td>
+<td style="text-align: right;">1.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TAA</td>
+<td style="text-align: left;">X</td>
+<td style="text-align: right;">0.6383906</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TGA</td>
+<td style="text-align: left;">X</td>
+<td style="text-align: right;">0.1189134</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TAG</td>
+<td style="text-align: left;">X</td>
+<td style="text-align: right;">0.2426961</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TAC</td>
+<td style="text-align: left;">Y</td>
+<td style="text-align: right;">0.2122906</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TAT</td>
+<td style="text-align: left;">Y</td>
+<td style="text-align: right;">0.7877094</td>
+</tr>
+</tbody>
+</table>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># format for Twist tool</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>codon.freqs.aa <span class="ot">=</span> codon.freqs.aa <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Triplet =</span> Codon, <span class="st">&#39;Amino acid&#39;</span> <span class="ot">=</span> Amino_acid) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Triplet, <span class="st">&#39;Amino acid&#39;</span>, Fraction);</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># printout table</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>table1 <span class="ot">=</span> <span class="fu">kable</span>(codon.freqs.aa, <span class="at">caption =</span> <span class="st">&quot;Table 1: codon frequencies in the C. phytofermentans genome.&quot;</span>);</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(codon.freqs.aa, <span class="at">file =</span> table.out, <span class="at">sep =</span> <span class="st">&quot;,&quot;</span>, <span class="at">row.names =</span> F);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(codon.freqs.aa, <span class="at">file =</span> table.out, <span class="at">row.names =</span> F);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
