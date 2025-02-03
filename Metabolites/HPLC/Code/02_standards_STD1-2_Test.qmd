@@ -1116,7 +1116,7 @@ plot.lm
 
 # rename cols for output
 lm.out = lm.out %>%
-  rename(Compound = my.compound, Slope = my.slope, Y.Intercept = yint, Peak.start = peak.start, Peak.end = peak.end);
+  rename(Compound = my.compound, Slope = my.slope, Y.Intercept = yint, Peak.start = peak.start, Peak.end = peak.end, Detector = my.detector);
 
 table.regression = kable(lm.out, caption = "Table: regression parameters for each metabolite.", row.names = F);
 table.regression

@@ -18,7 +18,6 @@ library(knitr);
 knitr::opts_chunk$set(warning = F, message = F);
 knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
 
-library(chromConverter);
 library(stringr);
 library(tidyverse);
 library(readr);
@@ -57,9 +56,9 @@ Files used by this script.
 
 
 # input: sample information file
-info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC_Test.xlsx";
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/information_HPLC.xlsx";
 
-sample.info.in = read_excel(info.file, sheet = "Echantillons", skip = 2, col_names = TRUE);
+sample.info.in = read_excel(info.file, sheet = "Samples", skip = 2, col_names = TRUE);
 
 # input: linear model computed using standards
 regressions.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/standards_regressions.tsv";
@@ -78,8 +77,6 @@ if (!dir.exists(plots.out))
 # output: table of compound concentrations in each sample
 table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Data/compound_concentrations.tsv";
 
-
-
 ```
 
 Load regression parameters from standards
@@ -95,6 +92,50 @@ table.standards
 
 # Functions
 
+## Background-normalize chromatograms
+
+Method 1: normalize using mode intensity
+
+```{r normalize chromatograms using mode intensity}
+
+norm_mode = function(chroms.data, peak.start, peak.end)
+{
+  
+# calc background-normalized intensity for each file 
+chrom.peak.norm = chroms.data %>%
+    mutate(Background = min(DescTools::Mode(round(Intensity, 1)))) %>%
+    mutate(Intensity_norm  = Intensity - Background) %>%
+    filter(Minutes > peak.start & Minutes < peak.end) %>%
+  ungroup();
+
+return(chrom.peak.norm);
+}
+
+```
+
+Method 2: normalize using peak boundaries
+
+```{r normalize chromatograms using peak boundaries}
+
+# calculate base intensity as the mean of the two boundaries. 
+
+norm_boundaries = function(chroms.data, peak.start, peak.end)
+{
+
+# calc background-normalized intensity for each file 
+chrom.peak.norm = chroms.data %>%
+    filter(Minutes > peak.start & Minutes < peak.end) %>%
+    mutate(Intensity_first = dplyr::first(Intensity)) %>%
+    mutate(Intensity_last= dplyr::last(Intensity)) %>%
+    mutate(Intensity_base = (Intensity_first + Intensity_last)/2) %>%
+    mutate(Intensity_norm = Intensity - Intensity_base) %>%
+  ungroup();
+
+return(chrom.peak.norm);
+}
+
+```
+
 ## Calc peak areas
 
 ```{r calculate peak areas}
@@ -107,21 +148,22 @@ calcArea = function(chrom.sample, my.detector, peak.start, peak.stop)
   # select detector
   chrom.sample.det = chrom.sample %>%
     filter(Detector == my.detector);
-
-  # calc background as mode measurement in sample
-  background = modeest::mfv(round(chrom.sample.det$Intensity, digits = 1));
-
-  # define peak
-  chrom.peak = chrom.sample.det %>%
-    filter(Minutes > peak.start & Minutes < peak.stop);
+  
+  # background-normalize the peak
+   if (peak.method == "mode")
+   {
+     chrom.peak.norm = norm_mode(chrom.sample.det, peak.start, peak.stop);
+   }
+   if (peak.method == "boundaries")
+   {
+     chrom.peak.norm = norm_boundaries(chrom.sample.det, peak.start, peak.stop);
+   }
   
   # calc peak area
-  chrom.peak = chrom.peak %>%
-    mutate(Intensity_diff = Intensity - background);
   area.compound = AUC(
-    chrom.peak$Minutes, chrom.peak$Intensity_diff, method='trapezoid');
+    chrom.peak.norm$Minutes, chrom.peak.norm$Intensity_norm, method='trapezoid');
   
-  area.list = list(chrom.peak, area.compound);
+  area.list = list(chrom.peak.norm, area.compound);
  
    return(area.list);
 }
@@ -165,7 +207,9 @@ files.chrom = list.files(path = txt.input.dir, pattern = ".txt");
 
 files.chrom.df = data.frame(files.chrom);
 files.chrom.df = files.chrom.df %>%
-  filter(!grepl("STD", files.chrom));
+  filter(!grepl("STD", files.chrom)) %>%
+  filter(!grepl("blanc", files.chrom));
+
 files.chrom = dplyr::pull(files.chrom.df, files.chrom);
 
 # declare a data.fram for this sample
@@ -227,12 +271,11 @@ quants.all = data.frame(
 
 Based on a previous run of the code, I am selecting revising the input from the linear models to best quantify the compounds.
 
-```{r modify LM data}
-
-# Define ethanol peak as 26.5 min to 27.7 min
+```{r modify LM data, eval=F}
 
 regressions.in = regressions.in %>%
-  mutate(Peak.start = if_else(Compound == "Ethanol", true= 26.5, false = Peak.start));
+  mutate(Peak.start = if_else((Compound == "Formate" & Detector == "SPD-20A 210nm"), true=16.4, false = Peak.start)) %>%
+  mutate(Peak.start = if_else((Compound == "Formate" & Detector == "RID-10A"), true=16.6, false = Peak.start));
 
 
 ```
@@ -293,7 +336,7 @@ for (my.sample in sample.list) # for each sample
   }
   
 # print out plots for sample of interest
-description.sample = unique(chrom.sample$Sample);  
+description.sample = unique(chrom.sample$Description);  
 plots.all = grid.arrange(grobs = plots.list, top = description.sample);
 output.path = paste(plots.out, "/", my.sample, ".png", sep = "");
 ggsave(filename = output.path, plot = plots.all); # out plots for each compound
@@ -311,6 +354,6 @@ write.table(quants.all, file = table.out, row.names=FALSE, sep="\t")
 
 ## Output
 
--   [Here](https://drive.google.com/drive/u/0/folders/1UxKYvCfV72XOI01aJdPKvXKqdBkWxhS0) is are plots of the peaks for each compound in each sample.
+-   [Here](https://drive.google.com/drive/u/0/folders/1nQtbVMlfAlNJVuUk17FjbCjntyMRQwlL) is are plots of the peaks for each compound in each sample.
 
--   [Here](https://drive.google.com/drive/u/0/folders/1vhBfj4KYmcfhuTalo_I_nAGLkoZJi4Bg) is a table of compound concentrations in each sample.
+    # Conclusions
