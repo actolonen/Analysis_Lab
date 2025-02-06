@@ -11,7 +11,7 @@
 
 ## Clostridium acetobutylicum medium
 
--   [2xYTG medium]
+-   [2xYTG medium](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/2xYTG.md)
 
 ## *Flavobacterium johnsonaie* media
 
