@@ -9,6 +9,10 @@
 
 -   [MS, MA, M9 defined media](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/2024.02_mediaRecipes_MS-MA-M9.pdf)
 
+## Clostridium acetobutylicum medium
+
+-   [2xYTG medium]
+
 ## *Flavobacterium johnsonaie* media
 
 -   [Complex media (CYE, PY2, MM)](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/complex_media_Fjohnsoniae.md)
