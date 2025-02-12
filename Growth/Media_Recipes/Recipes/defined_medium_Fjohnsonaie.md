@@ -7,7 +7,7 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 | Reagent | Grams per Liter | Concentration | Product |
 |:--:|:--:|---:|---:|
 | NH4Cl | 1 | 0.1% | [A4514](https://www.sigmaaldrich.com/FR/en/product/sigald/a4514) |
-| MgSO4 | 0.061 | 0.5 mM | [M2643](https://www.sigmaaldrich.com/FR/en/product/sigma/m2643) |
+| MgSO4-7H20 | 0.12 | 0.5 mM | [M1880](https://www.sigmaaldrich.com/FR/en/product/sigald/m1880) |
 | CaCl2-2H2O | 0.029 | 0.2 mM | [C3881](https://www.sigmaaldrich.com/FR/en/product/sigald/c3881) |
 | FeSO4-7H2O | 0.014 | 0.05 mM | [F8633](https://www.sigmaaldrich.com/FR/en/product/sigma/f8633) |
 | EDTA | 0.012 | 0.04 mM | [E6758](https://www.sigmaaldrich.com/FR/en/product/sigma/e6758) |
