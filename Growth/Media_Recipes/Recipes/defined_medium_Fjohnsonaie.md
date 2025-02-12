@@ -28,11 +28,11 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
 ### Prepare SG medium
 
--   Prepare SG medium base
+-   Prepare SG medium base (1 liter)
 
-    -   10 g NH4Cl
+    -   1 g NH4Cl
 
-    -   0.061 g MgSO4
+    -   0.12 g MgSO4-7H20
 
     -   0.029 g CaCl2-2H2O
 
