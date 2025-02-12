@@ -43,4 +43,4 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
 -   Autoclave
 
--   Add 10 ml of 40% glucose solution
+-   Add 20 ml of 20% glucose solution
