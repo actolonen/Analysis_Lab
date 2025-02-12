@@ -17,14 +17,14 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
 ## Preparation of 1 liter of SD medium
 
-### Prepare phosphate buffer pH 7.5 (0.1 M) [Reference](https://www.novoprolabs.com/tools/buffer-preparations-and-recipes/sodium-phosphate-buffer)
+### Prepare phosphate buffer pH 7.25 (0.1 M) [Reference](https://www.novoprolabs.com/tools/buffer-preparations-and-recipes/sodium-phosphate-buffer)
 
-1.  Add 0.8 L of distilled water to a bottle.
-2.  Add 1.834 g of Sodium dihydrogen phosphate to the solution.
-3.  Add 12.025 g of Sodium phosphate dibasic to the solution.
-4.  Add distilled water until the volume is 1 L.
-5.  Confirm pH = 7.5
-6.  Sterilize by filtration (0.45 uM)
+1. Prepare 0.8 L of distilled water in a suitable container.
+2. Add 2.949 g of Sodium dihydrogen phosphate to the solution.
+3. Add 10.705 g of Sodium phosphate dibasic to the solution.
+4. Add distilled water until the volume is 1 L.
+5. Confirm pH = 7.25
+6. Sterilize by filtration (0.45 uM)
 
 ### Prepare SG medium
 
