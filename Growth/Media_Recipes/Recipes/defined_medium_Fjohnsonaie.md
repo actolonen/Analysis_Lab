@@ -30,17 +30,17 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
 -   Prepare SG medium base (1 liter)
 
-    -   1 g NH4Cl
+    -   1 g NH4Cl (or use 1M solution)
 
-    -   0.12 g MgSO4-7H20
+    -   0.12 g MgSO4-7H20 (or use 1M solution)
 
-    -   0.029 g CaCl2-2H2O
+    -   0.029 g CaCl2-2H2O (or use 1M solution)
 
     -   0.014 g FeSO4-7H2O
 
-    -   0.012 g EDTA
+    -   0.012 g EDTA (use 0.5M EDTA pH8)
 
--   20 ml phosphate buffer pH 7.5
+-   20 ml phosphate buffer pH 7.25
 
 -   Autoclave
 
