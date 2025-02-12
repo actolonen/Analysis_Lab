@@ -1,14 +1,46 @@
 # Defined medium for growth of *Flavobacterium johnsoniae*
 
-Recipes from Thierry Doan
+Recipe from Thierry Doan
 
 Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/article/10.1007/BF01571154)
 
-* 0.4% glucose
-* 0.1% NH4Cl
-* 0.5 mM MGSO4
-* 0.2 mM CaCl2-2H2O
-* 0.05 mM FeSO4-7H20
-* 0.04 mM EDTA
-* 20 mM phosphate buffer pH 7.5
+| Reagent | Grams per Liter | Concentration | Product |
+|:----------------:|:----------------:|------------------:|-----------------:|
+| NH4Cl | 1 | 0.1% | [A4514](https://www.sigmaaldrich.com/FR/en/product/sigald/a4514) |
+| MgSO4 | 0.061 | 0.5 mM | [M2643](https://www.sigmaaldrich.com/FR/en/product/sigma/m2643) |
+| CaCl2-2H2O | 0.029 | 0.2 mM | [C3881](https://www.sigmaaldrich.com/FR/en/product/sigald/c3881) |
+| FeSO4-7H2O | 0.014 | 0.05 mM | [F8633](https://www.sigmaaldrich.com/FR/en/product/sigma/f8633) |
+| EDTA | 0.012 | 0.04 mM | [E6758](https://www.sigmaaldrich.com/FR/en/product/sigma/e6758) |
+| NaH2PO4 | phosphate solution | x | [S3139](https://www.sigmaaldrich.com/FR/en/product/sigma/s3139) |
+| Na2HPO4 | phosphate solution | x | [S9763](https://www.sigmaaldrich.com/FR/en/product/sigald/s9763) |
+| Glucose | 20% solution | 0.4% | [G7021](https://www.sigmaaldrich.com/FR/en/product/sigma/g7021) |
 
+## Preparation of 1 liter of SD medium
+
+### Prepare phosphate buffer pH 7.5
+
+1.  Add 0.8 L of distilled water to a bottle.
+2.  Add 1.834 g of Sodium dihydrogen phosphate to the solution.
+3.  Add 12.025 g of Sodium phosphate dibasic to the solution.
+4.  Add distilled water until the volume is 1 L.
+5.  Confirm pH = 7.5
+
+### Prepare SG medium
+
+-   Prepare SG medium base
+
+    -   10 g NH4Cl
+
+    -   0.061 g MgSO4
+
+    -   0.029 g CaCl2-2H2O
+
+    -   0.014 g FeSO4-7H2O
+
+    -   0.012 g EDTA
+
+-   20 ml phosphate buffer pH 7.5
+
+-   Autoclave
+
+-   Add 10 ml of 40% glucose solution
