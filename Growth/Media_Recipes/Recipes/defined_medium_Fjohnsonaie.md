@@ -5,7 +5,7 @@ Recipe from Thierry Doan
 Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/article/10.1007/BF01571154)
 
 | Reagent | Grams per Liter | Concentration | Product |
-|:----------------:|:----------------:|------------------:|-----------------:|
+|:--:|:--:|---:|---:|
 | NH4Cl | 1 | 0.1% | [A4514](https://www.sigmaaldrich.com/FR/en/product/sigald/a4514) |
 | MgSO4 | 0.061 | 0.5 mM | [M2643](https://www.sigmaaldrich.com/FR/en/product/sigma/m2643) |
 | CaCl2-2H2O | 0.029 | 0.2 mM | [C3881](https://www.sigmaaldrich.com/FR/en/product/sigald/c3881) |
@@ -17,7 +17,7 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
 ## Preparation of 1 liter of SD medium
 
-### Prepare phosphate buffer pH 7.5
+### Prepare phosphate buffer pH 7.5 (0.1 M) [Reference](https://www.novoprolabs.com/tools/buffer-preparations-and-recipes/sodium-phosphate-buffer)
 
 1.  Add 0.8 L of distilled water to a bottle.
 2.  Add 1.834 g of Sodium dihydrogen phosphate to the solution.
