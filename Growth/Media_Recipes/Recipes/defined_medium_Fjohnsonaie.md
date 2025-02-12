@@ -24,7 +24,7 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 3. Add 93.225 g of Sodium phosphate dibasic to the solution.
 4. Add distilled water until the volume is 1 L.
 5. Confirm pH = 7.25
-6. Sterilize by filtration (0.45 uM)
+6. Sterilize by filtration (0.22 uM)
 
 ### Prepare SG medium
 
