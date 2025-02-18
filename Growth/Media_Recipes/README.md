@@ -15,7 +15,7 @@
 
 ## *Flavobacterium johnsonaie* media
 
--   [Complex media (CYE, PY2, MM)](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/complex_media_Fjohnsoniae.md)
+-   [Complex media (CYE, PY2, MM, CF)](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/complex_media_Fjohnsoniae.md)
 
 -   [Defined medium (SD)](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes/Recipes/defined_medium_Fjohnsonaie.md)
 
