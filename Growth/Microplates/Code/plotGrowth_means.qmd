@@ -1,5 +1,5 @@
 ---
-title: "C.phy growth in different media"
+title: "Microbial growth in microplates (Bioscreen/Clario)"
 author: "Fermlab"
 format: html
 editor: visual
@@ -10,7 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook analyzes the Clario expt of comparing growth of *C. phytofermentans* WT different media.
+This notebook analyzes the growth of microbial cells in microplates
 
 # Methods
 
@@ -21,9 +21,6 @@ This notebook analyzes the Clario expt of comparing growth of *C. phytofermentan
 # General setup code
 
 library(knitr);
-knitr::opts_chunk$set(warning = F, message = F);
-knitr::opts_chunk$set(engine.path = list(perl = "/usr/bin/perl"));
-
 library(tidyverse);
 library(readxl);
 library(readr);
@@ -37,6 +34,7 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                #legend.position = "bottom", 
                legend.text = element_text(size=4),
                aspect.ratio =0.5);
+
 ```
 
 ## File I/O
@@ -81,7 +79,8 @@ growth.data.long = growth.data %>%
   rename("Time" = "...2") %>%
   slice(-1) %>% # delete first row
   slice(-1) %>%
-  mutate(Time = if_else(grepl("min", Time), true = Time, false =  paste(Time, "0 min", sep = " "))) %>%  # add minutes field where lacking
+  mutate(Time = if_else(grepl("min", Time), true = Time, false =  paste(Time, "0 min", sep = " "))) %>%  
+# add minutes field where lacking
   separate(Time, c("my.hours", "hours.label", "my.min", "min.label"), sep = " ") %>%
   mutate(Hours = as.numeric(my.hours) + as.numeric(my.min)/60) %>%
   #mutate(Seconds = as.numeric(Seconds)) %>%
@@ -170,16 +169,16 @@ plot.blanks = ggplot(growth.blanks, aes(x=Hours, y=OD600, group=Well)) +
 
 grid.arrange(plot.blanks, ncol=1);
 
-
-
 ```
 
 Subtract blanks from wells with cells.
 
-```{r subtract blanks}
+Option 1: normalize each well by initial reading
+
+```{r subtract blanks as initial reading, eval=F}
 
 growth.cells = growth.all %>%
-  filter(grepl("WT|PHY", Treatment));
+  filter(grepl("cells", Treatment));
 
 # subtract initial reading from OD measurements
 initial.OD = growth.cells %>%
@@ -191,11 +190,33 @@ growth.cells = growth.cells %>%
   mutate(OD600 = OD600 - OD600_t0) %>%
   select(-OD600_t0);
 
+
+
+```
+
+Option 2: normalize each well by subtracting mean blank for same treatment
+
+```{r subtract blanks are mean OD}
+
+growth.cells = growth.all %>%
+  filter(grepl("cells", Treatment));
+
+# substract mean of blank from OD measurements
+# calc mean blank 
+growth.blanks = growth.blanks %>%
+    group_by(Hours, Treatment)%>%
+        mutate(OD600_blank = mean(OD600));
+    ungroup;
+
+growth.cells = left_join(growth.cells, growth.blanks, by = c("Treatment", "Hours");
+growth.cells = growth.cells %>%
+    mutate(OD600 = OD600 - OD600_blank);
+                      
 ```
 
 Plot growth in well with cells
 
-```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with C.phy. Each curve is a well."}
+```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with cells. Each curve is a well."}
 
 plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
   geom_point(size=.05, color = "blue") +
@@ -219,7 +240,7 @@ grid.arrange(plot.cells, ncol=1);
 
 ## Plot treatment means +/SD
 
-```{r plot means, sd, fig.cap = "Fig 3. Growth (OD600) of treatments with C.phy. Plot shows treatment means +/-SD."}
+```{r plot means, sd, fig.cap = "Fig 3. Growth (OD600) of treatments with cells. Plot shows treatment means +/-SD."}
 
 growth.cells = growth.cells %>%
   group_by(Hours, Treatment) %>%
@@ -253,9 +274,7 @@ grid.arrange(plot.cells.means, ncol=1);
 
 ## Compare treatment means
 
-C.phy WT at different inhibitor concentrations
-
-```{r growth WT, fig.cap="Fig 4. Growth (OD600) of treatments with C.phy growing in medium with different inhibitor concs. Plot shows treatment means."}
+```{r growth compare means, fig.cap="Fig 4. Growth (OD600) of treatments with cells growing in different treatments. Plot shows treatment means."}
 
 growth.cells.wt = growth.cells %>%
   filter(grepl("WT", Treatment));
