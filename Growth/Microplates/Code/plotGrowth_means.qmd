@@ -10,7 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook analyzes the growth of microbial cells in microplates
+This notebook analyzes the growth of microbial cells in microplates. Functions are included to format data from different plate readers.
 
 # Methods
 
