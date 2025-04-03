@@ -10,17 +10,15 @@ embed-resources: TRUE
 
 # Introduction
 
-<<<<<<< HEAD
-This notebook analyzes the growth of microbial cells in microplates. Functions are included to format data from different plate readers.
-=======
 This notebook analyzes the growth of microbial cells in microplates.
->>>>>>> Testing_act
 
 Functions are included that organize data from different plate readers:
 
 -   Bioscreen
 
--   Clario.
+-   Clario
+
+-   Tecan (in development)
 
 Input file = excel spreadsheet with 2 pages
 
