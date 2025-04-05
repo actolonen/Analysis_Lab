@@ -216,20 +216,24 @@ Function to normalize OD600 readings by subtracting mean OD600 at the same time 
 
 # substract blank mean from OD measurements
 
-#norm_mean = function(growth.blanks, growth.cells)
+norm_mean = function(growth.blanks, growth.cells)
 {
 # calc mean blank 
-#growth.blanks = growth.blanks %>%
-#    group_by(Hours, Treatment)%>%
-#        mutate(OD600_blank = mean(OD600)) %>%
-#    ungroup;
+growth.blanks = growth.blanks %>%
+    group_by(Hours)%>%
+        mutate(OD600_blank = mean(OD600)) %>%
+    ungroup;
+
+growth.blanks = growth.blanks %>%
+    select(Hours, OD600_blank) %>%
+    distinct();
 
 # subtract mean blank
-#growth.cells = left_join(growth.cells, growth.blanks, by = c("Treatment", "Hours");
-#growth.cells = growth.cells %>%
-#    mutate(OD600 = OD600 - OD600_blank);
+growth.cells = left_join(growth.cells, growth.blanks, by = c("Hours"));
+growth.cells = growth.cells %>%
+    mutate(OD600_norm = OD600 - OD600_blank);
 
-#return(growth.cells);
+return(growth.cells);
 }
 
 ```
@@ -256,7 +260,7 @@ if (plate_reader == "Bioscreen")
 
 Plot blanks
 
-```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well. Data shows contaminated wells for corn starch, galacturonic acid, and pectin that will be removed from subsequent analyses."}
+```{r Plot blanks, fig.cap = "Fig 1. OD600 of blank treatments (no cells). Each curve is a well."}
 
 growth.blanks = growth.all %>%
   filter(grepl("Blank", Strain));
