@@ -1,7 +1,7 @@
 # Microbial Growth Analysis 
 
 ## Growth media
-In our lab at Genoscope, we grow cells using various types of media that we prepare using these [media recipes](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes).
+We cultivate microbial cells using various growth media that are prepared using these [protocols](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Media_Recipes).
 
 ## Measuring microbial growth at different scales: from microliters to liters.
 We measure microbial growth at different volumetric scales using these methods:
