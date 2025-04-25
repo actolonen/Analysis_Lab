@@ -8,7 +8,11 @@ code-fold: TRUE
 embed-resources: TRUE
 ---
 
+
+
 # Setup
+
+
 
 ```{r setup, echo=FALSE, message=FALSE}
 
@@ -34,9 +38,13 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 
 ```
 
+
+
 ## File I/O
 
 Directories/files used by this script.
+
+
 
 ```{r file IO}
 
@@ -66,6 +74,8 @@ if (!dir.exists(plots.output.dir))
 
 ```
 
+
+
 # Introduction
 
 This code visualizes the chromatograms of a set of samples containing standard solutions in water and GS2 medium.
@@ -82,9 +92,11 @@ STD12 = STD1 + STD2
 
 ChromConverter to read .lcd files. Output detector B .txt files and a data.frame of all chromatograms.
 
-Code for method if read_shimadzu_lcd produces a single data.frame
+Code for new method
 
-```{r chromConverter: convert .lcd files to .txt files, eval=F}
+
+
+```{r chromConverter: convert .lcd files to .txt files}
 
 # select sample files for analysis.
 files.lcd = list.files(path = lcd.input.dir, pattern = ".lcd");
@@ -124,9 +136,13 @@ chromatograms.all = rbind(chromatograms.all, data.sample);
 }
 ```
 
-Code for method if read_shimadzu_lcd produces a list of data.frames
 
-```{r chromConverter to convert .lcd to .txt}
+
+Code for old method
+
+
+
+```{r chromConverter to convert .lcd to .txt, eval=F}
 
 # select sample files for analysis.
 files.lcd = list.files(path = lcd.input.dir, pattern = ".lcd");
@@ -184,9 +200,13 @@ chromatograms.all = chromatograms.all %>%
 
 ```
 
+
+
 ## Plot chromatograms for all samples (3 detectors)
 
 Add sample descriptions (plot titles) to data frame of chromatograms
+
+
 
 ```{r add sample descriptions}
 
@@ -202,7 +222,11 @@ chromatograms.all.plot = left_join(chromatograms.all, sample.data, by = "Sample"
 
 ```
 
+
+
 Plot full chromatograms and output as .png files
+
+
 
 ```{r plot chromatograms for three detectors for each sample}
 
@@ -233,5 +257,7 @@ ggsave(filename = output.path, plot = my.plot);
 }
   
 ```
+
+
 
 # Conclusions
