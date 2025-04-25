@@ -1,6 +1,6 @@
 # CGM: Complex medium for growth of *Clostridium acetobutylicum*
 
-Preparation CGM medium (1 liter)
+Preparation CGM medium (1 liter) as described in [Wiesenborn et al, 1989](https://pmc.ncbi.nlm.nih.gov/articles/PMC204361/).
 
 * 0.75g KH2PO4
 * 0.75g K2HPO4
