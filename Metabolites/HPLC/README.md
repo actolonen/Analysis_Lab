@@ -47,7 +47,10 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
    3. "Samples": description of samples. This page must have these 3 columns:
           1. Sample: name of the sample. NOTE: the names of the standards samples must be the same as on the "Standards" page.
           2. File: the name of the LCD file.
-          3. Description: the description of the sample.       
+          3. Description: the description of the sample.
+      
+**File format conversion**
+Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd files. Following [this conversation with Ethan Bass](https://github.com/ethanbass/chromConverter/issues/29#issuecomment-2313702224) the above pipeline was developed using chromConverter to extract chromatograms from .lcd files and print them as .txt files.
 
 **3 steps to visualize chromatograms and quantify compounds**
 
@@ -58,8 +61,6 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
     -   STD12 solution: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD1-2_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD1-2_Test.htm) to correlate peak areas and compound concentration (mM) mix of STD1 and STD2.
 -   Step 3: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/03_quantifyCompounds_Test.html) to use linear models from step 2 to quantify compounds in test samples.
 
-## File format conversion
 
-Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd files. Following [this conversation with Ethan Bass](https://github.com/ethanbass/chromConverter/issues/29#issuecomment-2313702224) the above pipeline was developed using chromConverter to extract chromatograms from .lcd files and print them as .txt files.
 
 -   [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/ChromConverter-LabSolutions/2024.08_standards_chromConverter-LabSolutions.QMD) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/ChromConverter-LabSolutions/2024.08_standards_chromConverter-LabSolutions.html) showing that Lab Solutions .lcd files that are converted to .txt using with Lab Solutions or chromConverter produce similar results.
