@@ -3,7 +3,7 @@
 
 **Files required for analysis** 
 * LCD file produced by the HPLC
-* Excel file (see [example](/Data/information_HPLC_date.xls)) containing 3 pages:
+* Excel file (see [example](/Data/information_HPLC_DATE.xlsx)) containing 3 pages:
 1. <ins>Plan de plaque</ins> plate map of the HPLC experiment. It is not read by the analysis code.
 2. <ins>Standards</ins> the compounds and their concentration in each standards. This page must have these three columns
     1. *Sample* name of the standard
