@@ -10,9 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook analyzes the growth of microbial cells in microplates.
-
-Functions are included that organize data from different plate readers:
+This notebook analyzes the growth of microbial cells in microplates. Functions are included that organize data from different plate readers:
 
 -   Bioscreen
 
@@ -22,7 +20,7 @@ Functions are included that organize data from different plate readers:
 
 Input file = excel spreadsheet with 2 pages
 
-1.  Page 1 = "Information". Plate map describing experiment with these columns. NOTE: empty wells are written as "empty" in all columns except Well.
+1.  Page 1 = "Informations". Plate map describing experiment with these columns. NOTE: empty wells are written as "empty" in all columns except Well.
     1.  Well: microtiter plate well
     2.  Strain
     3.  Medium: growth medium
@@ -52,6 +50,14 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                legend.text = element_text(size=4),
                aspect.ratio =0.5);
 
+# Type of plate reader: select "Bioscreen" or "Clario"
+plate_reader = "Clario";
+
+# normalization method: 
+# "initial" = normalize OD600 by subtracting the reading at t=0h
+# "mean"  = subtract the mean OD600 reading at each time point
+norm_OD600 = "initial";
+
 ```
 
 ## File I/O
@@ -59,17 +65,9 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 ```{r File IO}
 
 # input data
-file.in = "growthData_Bioscreen.xlsx";
+file.in = "growthData_Clario.xlsx";
 path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Microplates/Data";
 data.in = paste(path.in, file.in, sep = "/");
-
-# Type of plate reader: select "Bioscreen" or "Clario"
-plate_reader = "Bioscreen";
-
-# normalization method: 
-# "initial" = normalize OD600 by subtracting the reading at t=0h
-# "mean"  = subtract the mean OD600 reading at each time point
-norm_OD600 = "initial";
 
 ```
 
@@ -87,7 +85,7 @@ These functions take data from a specific type of plate reader and returns a dat
 6.  Growth medium
 7.  Treatment (ie different carbon sources)
 
-Function to organize clario data
+Function to organize Clario data
 
 ```{r function to organize clario data}
 
@@ -95,7 +93,7 @@ organize_clario = function(data.in)
 {                              
 # output is data.frame = [Hours, Well, OD600, Treatment]
 
-plate.map = read_excel(data.in, sheet = "Information", col_names = TRUE, skip = 3);
+plate.map = read_excel(data.in, sheet = "Informations", col_names = TRUE, skip = 3);
 growth.data = read_excel(data.in, sheet = "Raw data", col_names = TRUE, skip = 0);
 
 # plate map variables
@@ -104,7 +102,7 @@ last.well = "H12";
 
 # parse plate.map
 plate.map = plate.map %>%
-  filter(!Treatment == "empty");
+  filter(!Treatment == "Empty");
   
 # parse growth.data
 growth.data.long = growth.data %>%
@@ -126,7 +124,7 @@ growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
 growth.all = inner_join(growth.data.long, plate.map, by = "Well");
 
 growth.all = growth.all %>%
-    select(Hours, Well, OD600, Strain, Medium, Treatment, Dilution)
+    select(Well, Hours, OD600, Strain, Medium, Treatment, Dilution)
 
 return(growth.all)
 }
@@ -141,7 +139,7 @@ organize_bioscreen = function(data.in)
 {    
 # output is data.frame = [Hours, Well, OD600, Treatment]
 
-plate.map = read_excel(data.in, sheet = "Information", col_names = TRUE, skip = 4);
+plate.map = read_excel(data.in, sheet = "Informations", col_names = TRUE, skip = 4);
 growth.data = read_excel(data.in, sheet = "Raw data", col_names = TRUE, skip = 2);
 
 # plate map variables
@@ -174,6 +172,8 @@ growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
 
 # add treatment info
 growth.all = inner_join(growth.data.long, plate.map, by = "Well");
+
+growth.all = select(growth.all, Well, Hours, OD600, Strain, Medium, Treatment, Dilution);
 
 return(growth.all)
 }
@@ -253,6 +253,9 @@ if (plate_reader == "Bioscreen")
   growth.all = organize_bioscreen(data.in);
 }
 
+growth.short = head(growth.all, 5);
+table.growth = kable(growth.short, caption = "Table: tidy growth data");
+table.growth
 
 ```
 

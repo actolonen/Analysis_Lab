@@ -28,7 +28,6 @@ library(tidyverse);
 library(readxl);
 library(readr);
 library(gridExtra);
-library(growthcurver);
 
 mytheme = theme(axis.text.x = element_text(size = 6), 
                 axis.text.y = element_text(size = 6), 
@@ -46,7 +45,7 @@ mytheme = theme(axis.text.x = element_text(size = 6),
 
 # input file
 file.in = "growthData_Bioscreen.xlsx";
-path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Data";
+path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Microplates/Data";
 data.in = paste(path.in, file.in, sep = "/");
 
 ```
@@ -93,12 +92,14 @@ return(fitdata);
 
 ## Organize data for plotting
 
+Organize data into tidy data.frame
+
 ```{r Organize Bioscreen data for plots}
 
 # output is data.frame = [Hours, Well, OD600, Treatment]
 
-plate.map = read_excel(data.in, sheet = "Information", col_names = TRUE, skip = 3);
-growth.data = read_excel(data.in, sheet = "Raw", col_names = TRUE, skip = 1);
+plate.map = read_excel(data.in, sheet = "Informations", col_names = TRUE, skip = 4);
+growth.data = read_excel(data.in, sheet = "Raw data", col_names = TRUE, skip = 2);
 
 # plate map variables
 first.well = "12";
@@ -131,6 +132,9 @@ growth.data.long$OD600 = as.numeric(growth.data.long$OD600);
 # add treatment info
 growth.all = inner_join(growth.data.long, plate.map, by = "Well");
 
+# print out first lines of data.frame
+table.growth = kable(growth.all, caption = "Table: tidy growth data");
+table.growth
 
 ```
 
