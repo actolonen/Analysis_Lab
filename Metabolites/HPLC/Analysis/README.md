@@ -11,9 +11,8 @@
     3. *Concentration_mM* the concentration of the compound in mM in that standard
     4. *File* name of the LCD file
 3. <ins>Samples</ins> description of samples. This page must have these 3 columns:
-    1. *Sample* name of the sample. NOTE: the names of the standards samples must be the same as on the "Standards" page.
-    2. *File* the name of the LCD file.
-    3. *Description* the description of the sample.
+    1. *File* the name of the LCD file.
+    2. *Description* the description of the sample. NOTE: the names of the standards samples on the "Standards" page must exactly match the description in this column.
             
 Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd files. Following [this conversation with Ethan Bass](https://github.com/ethanbass/chromConverter/issues/29#issuecomment-2313702224) the above pipeline was developed using chromConverter to extract chromatograms from .lcd files and print them as .txt files.
 
