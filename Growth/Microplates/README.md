@@ -11,13 +11,13 @@ Data from the plate readers are saved into excel files:
 * Here is an [example Clario file](Data/growthData_Clario.xlsx) in .xlsx format.
 
 These excel files have two pages:
-* <ins>Informations</ins> describes the plate map. The file must have lines for each well with the following columns:
+* <ins>Informations</ins> this page describes the plate map. The file must have lines for each well with the following columns:
    1. *Well* position on plate
    2. *Strain* type/strain of microorganims
    3. *Medium* growth medium used in the experiment
    4. *Treatment*  treatment added to the growth medium
    5. *Dilution* dilution factor of the cells at the start of the experiment. For example, if the cells were diluted 1/20 into medium the dilution factor = 0.05.
-* <ins>Raw data</ins> page contains the raw data from the plate reader. Data for the Hours and OD600 is added to that of the Informations page.
+* <ins>Raw data</ins> this page contains the raw data from the plate reader. Data for the Hours and OD600 is added to that of the Informations page.
 
 ## Methods for growth analysis
 
