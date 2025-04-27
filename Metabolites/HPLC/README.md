@@ -36,7 +36,7 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
 ## Analysis pipeline
 
-**File Formats** 
+**Files required for analysis** 
 1. LCD file produced by HPLC.
 2. Excel file containing 3 pages
     1. "Plan de plaque": plate map of the HPLC experiment. It is not read by the analysis code.
