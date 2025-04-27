@@ -21,35 +21,20 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
 This analysis pipeline requires that all the .lcd file for an HPLC run are put in a directory along with an [information file](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Data/information_HPLC_Test.xlsx) describing the files and the concentrations of the standards used for peak quantification.
 
-**Compound detection**: our HPLC has 3 detectors: refractive index (RID), UV 210 nm, and UV 260 nm. Different compounds can be detected with the detectors:
+**Compound detection**: our HPLC has 3 detectors: refractive index (RID), UV 210 nm, and UV 260 nm. Different compounds can be detected with the detectors. The table below shows peak elution times for each compound.
 
--   Acids: detect by RID and UV 210 nm
-
-    -   Lactate: 15.5 min
-
-    -   Formate: 16.8 min
-
-    -   Acetate: 18.25 min
-
-    -   Propionate 21 min
-
-    -   Butyrate: 25.5 min
-
--   Alcohols: RID
-
-    -   Ethanol: 26 min
-
-    -   1-Propanol: 33.5 min
-
-    -   Butanol: 45 min
-
--   Ketones: RID and UV 260 nm
-
-    -   Acetone: 26.4 min
-
--   Sugars (RID)
-
-    -   Glucose: 11.2 min
+| Compound | Type | RID | UV 210 nm | UV 260 nm |
+|:----------------:|:----------------:|-----------------:|-----------------:|
+| Lactate | Acid | 15.5 | 15.5  | none |
+| Formate | Acid | 16.8 | 16.8 | none |
+| Acetate | Acid | 18.25 | 18.25 | none |
+| Propionate | Acid | 21 | 21  | none |
+| Butyrate | Acid | 25.5 | 25.5 | none |
+| Ethanol | Alcohol | 26 | none | none |
+| 1-Propanol | Alcohol | 33.5 | none | none |
+| 1-Butanol | Alcohol | 45 | none | none |
+| Acetone | Ketone | 26.4 | none | 26.4 |
+| Glucose | Sugar | 11.2 | none | none |
 
 ## 3 steps to visualize chromatograms and quantify compounds
 
