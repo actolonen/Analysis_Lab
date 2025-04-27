@@ -7,8 +7,8 @@ We primarily measure microbial growth in microplates using two instruments: a [B
 ## Input file format
 
 Data from the plate readers are saved into excel files:
-* Here is an [example Bioscreen file](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Data/growthData_Bioscreen.xlsx) in .xlsx format.
-* Here is an [example Clario file](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Data/growthData_Clario.xlsx) in .xlsx format.
+* Here is an [example Bioscreen file](Data/growthData_Bioscreen.xlsx) in .xlsx format.
+* Here is an [example Clario file](Data/growthData_Clario.xlsx) in .xlsx format.
 
 These excel files have two pages:
 * The "Informations" describes the plate map. The file must have lines for each well with the following columns:
@@ -22,7 +22,7 @@ These excel files have two pages:
 ## Methods for growth analysis
 
 ### Plot growth curves
-This [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Code/plotGrowth_means.qmd) and [Quarto notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Code/plotGrowth_means.html) shows how to visualize growth curves in three steps. The code can be adapted to either Clario or Bioscreen data by selecting one of the "Organize Data" chunks and setting the other to 'eval=F'.
+This [code](Code/plotGrowth_means.qmd) and [Quarto notebook](Code/plotGrowth_means.html) shows how to visualize growth curves in three steps. The code can be adapted to either Clario or Bioscreen data setting the "plate_reader" variable.
 Outputs:
 
 1. Plot growth in each well.
@@ -30,7 +30,7 @@ Outputs:
 3. Compare treatment means.
 
 ### Calculate growth parameters
-In addition to visualizing the growth curves for different treatments, it is also useful to calculate growth paramaters (e.g. intrinsic growth rate, generation time, carrying capacity). The Growthcurver R package as described [here](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Logistic_Fit/2024.02_growthcurver.md) calculates parameters for growth curves by performing a logistic fit.
+In addition to visualizing the growth curves for different treatments, it is also useful to calculate growth paramaters (e.g. intrinsic growth rate, generation time, carrying capacity). The Growthcurver R package as described [here](Logistic_Fit/2024.02_growthcurver.md) calculates parameters for growth curves by performing a logistic fit.
 
-This [code](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Code/plotGrowth_means_growthCurver_Bioscreen.qmd) and [Quarto notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Growth/Microplates/Code/plotGrowth_means_growthCurver_Bioscreen.html) shows how to calculate growth parameters using GrowthCurver.
+This [code](Code/growthCurver_plotGrowth_means_Bioscreen.qmd) shows how to calculate growth parameters using GrowthCurver.
 
