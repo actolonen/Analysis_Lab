@@ -24,7 +24,7 @@ This analysis pipeline requires that all the .lcd file for an HPLC run are put i
 **Compound detection**: our HPLC has 3 detectors: refractive index (RID), UV 210 nm, and UV 260 nm. Different compounds can be detected with the detectors. The table below shows peak elution times for each compound.
 
 | Compound | Type | RID | UV 210 nm | UV 260 nm |
-|:----------------:|:----------------:|-----------------:|-----------------:|
+|:----------------:|:----------------:|-----------------:|-----------------:|-----------------:|
 | Lactate | Acid | 15.5 | 15.5  | none |
 | Formate | Acid | 16.8 | 16.8 | none |
 | Acetate | Acid | 18.25 | 18.25 | none |
