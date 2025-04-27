@@ -18,7 +18,7 @@ Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd fil
 
 **3 steps to visualize chromatograms and quantify compounds**
 
--   Step 1: [Code](/Code/01_chromatograms_Test.qmd) and [notebook](Code/01_chromatograms_Test.html) to plot HPLC chromatograms using all three detectors. Chromatogram data is extracted from LCD files using [chromConverter](https://cran.rstudio.com/web/packages/chromConverter/index.html). Chromatograms outputed as .txt files and are printed as .png files.
+-   Step 1: [Code](/Code/01_chromatograms_Test.qmd) to plot HPLC chromatograms using all three detectors. Chromatogram data is extracted from LCD files using [chromConverter](https://cran.rstudio.com/web/packages/chromConverter/index.html). Chromatograms outputed as .txt files and are printed as .png files.
 -   Step 2: build linear models (LMs) correlate peak areas and compound concentrations in standard solutions. We will apply this model to calculate compound concentrations based on peak areas in the samples.
     -   STD1 solution: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD1_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD1_Test.html) to correlate peak areas and compound concentration (mM) in standard solution 1 (formate, acetate, lactate, ethanol, glucose).
     -   STD2 solution: [Code](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD2_Test.qmd) and [notebook](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/Code/02_standards_STD2_Test.html) to correlate peak areas and compound concentration (mM) in standard solution 1 (acetone, butyrate, butanol).
