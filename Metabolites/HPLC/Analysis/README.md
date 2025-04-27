@@ -6,13 +6,13 @@
 * Excel file (see [example](Data/information_HPLC_DATE.xlsx)) containing 3 pages:
 1. <ins>Plan de plaque</ins> plate map of the HPLC experiment. It is not read by the analysis code.
 2. <ins>Standards</ins> the compounds and their concentration in each standards. This page must have these three columns
-    1. *Sample* name of the standard
-    2. *Compound* name of compound in the standard
-    3. *Concentration_mM* the concentration of the compound in mM in that standard
-    4. *File* name of the LCD file
+    1. *File* name of the LCD file
+    2. *Sample* name of the standard
+    3. *Compound* name of compound in the standard
+    4. *Concentration_mM* the concentration of the compound in mM in that standard
 3. <ins>Samples</ins> description of samples. This page must have these 3 columns:
     1. *File* the name of the LCD file.
-    2. *Description* the description of the sample. NOTE: the names of the standards samples on the "Standards" page must exactly match the description in this column.
+    2. *Description* the description of the sample. NOTE: the *Sample* name of the standards samples on the <ins>Standards</ins> page must exactly match the description in this column.
             
 Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd files. Following [this conversation with Ethan Bass](https://github.com/ethanbass/chromConverter/issues/29#issuecomment-2313702224) the above pipeline was developed using chromConverter to extract chromatograms from .lcd files and print them as .txt files.
 
