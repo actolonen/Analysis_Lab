@@ -17,7 +17,7 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 -   Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
 -   Here is [Magali's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.10_protocole_HPLC_MB.docx) to run the HPLC.
 
-## Analysis Pipeline: quantify compound concentrations using HPLC
+## Compound detection by HPLC
 
 **Compound detection**: our HPLC has 3 detectors: refractive index (RID), UV 210 nm, and UV 260 nm. Different compounds can be detected with the detectors. The table below shows peak elution times for each compound.
 
@@ -33,6 +33,8 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 | 1-Butanol | Alcohol | 45 | none | none |
 | Acetone | Ketone | 26.4 | none | 26.4 |
 | Glucose | Sugar | 11.2 | none | none |
+
+## Analysis pipeline
 
 **File Formats** 
 1. LCD file produced by HPLC.
