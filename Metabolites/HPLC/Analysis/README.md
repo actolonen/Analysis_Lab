@@ -9,6 +9,7 @@
     1. *Sample* name of the standard
     2. *Compound* name of compound in the standard
     3. *Concentration_mM* the concentration of the compound in mM in that standard
+    4. *File* name of the LCD file
 3. <ins>Samples</ins> description of samples. This page must have these 3 columns:
     1. *Sample* name of the sample. NOTE: the names of the standards samples must be the same as on the "Standards" page.
     2. *File* the name of the LCD file.
