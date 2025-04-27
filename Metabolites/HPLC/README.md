@@ -41,9 +41,9 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 2. Excel file containing 3 pages
     1. *Plan de plaque* plate map of the HPLC experiment. It is not read by the analysis code.
     2. *Standards* the compounds and their concentration in each standards. This page must have these three columns
-      1. Sample: name of the standard
-      2. Compound: name of compound in the standard
-      3. Concentration_mM: the concentration of the compound in mM in that standard
+          1. Sample: name of the standard
+          2. Compound: name of compound in the standard
+          3. Concentration_mM: the concentration of the compound in mM in that standard
    3. *Samples* description of samples. This page must have these 3 columns:
           1. Sample: name of the sample. NOTE: the names of the standards samples must be the same as on the "Standards" page.
           2. File: the name of the LCD file.
