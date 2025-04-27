@@ -17,7 +17,7 @@ These excel files have two pages:
    3. Medium: the growth medium used in the experiment
    4. Treatment: the treatment added to the growth medium
    5. Dilution: the dilution factor of the cells at the start of the experiment. For example, if the cells were diluted 1/20 into medium the dilution factor = 0.05.
-* The "Raw data" page contains the raw data from the plate reader.   
+* The "Raw data" page contains the raw data from the plate reader. Data for the Hours and OD600 is added to that of the Informations page.
 
 ## Methods for growth analysis
 
