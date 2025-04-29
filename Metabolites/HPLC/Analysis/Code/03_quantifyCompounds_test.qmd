@@ -21,7 +21,7 @@ This notebook quantifies the abundances of compounds in HPLC samples using the l
 
 -   Outputs
 
-    1.   Table: Sample name, Compound , Peak area, Compound concentration (mM), Sample description
+    1.  Table: Sample name, Compound , Peak area, Compound concentration (mM), Sample description
     2.  Output graphs: plots of the peaks of each compound in each sample.
 
 # Setup
@@ -254,7 +254,7 @@ sample.info = sample.info.in %>%
     mutate(Description = str_replace_all(string=Description, pattern="NA", replacement="")) %>%
   select(Sample, File, Description);
 
-chrom.all = left_join(chrom.all, sample.info.in, by = "File");
+chrom.all = left_join(chrom.all, sample.info, by = "File");
 
 # print header of output
 chrom.all.table = head(chrom.all, 5);
@@ -286,8 +286,8 @@ Based on a previous run of the code, I am selecting revising the position of the
 ```{r modify LM data, eval=F}
 
 regressions.in = regressions.in %>%
-  mutate(Peak.start = if_else((Compound == "Formate" & Detector == "SPD-20A 210nm"), true=16.4, false = Peak.start)) %>%
-  mutate(Peak.start = if_else((Compound == "Formate" & Detector == "RID-10A"), true=16.6, false = Peak.start));
+  mutate(Peak_start = if_else((Compound == "Formate" & Detector == "SPD-20A 210nm"), true=16.4, false = Peak_start)) %>%
+  mutate(Peak_start = if_else((Compound == "Formate" & Detector == "RID-10A"), true=16.6, false = Peak_start));
 
 
 ```
@@ -342,7 +342,7 @@ for (my.sample in sample.list) # for each sample
       Detector = my.detector, 
       Area = area.compound, 
       Concentration = conc.compound, 
-      Description = unique(chrom.sample$Sample));
+      Description = unique(chrom.sample$Description));
     
     quants.all = rbind(quants.all, quants.compound);
     
@@ -351,7 +351,7 @@ for (my.sample in sample.list) # for each sample
   }
   
 # print out plots for sample of interest
-description.sample = unique(chrom.sample$Sample);  
+description.sample = unique(chrom.sample$Description);  
 plots.all = grid.arrange(grobs = plots.list, top = description.sample);
 output.path = paste(plots.out, "/", my.sample, ".png", sep = "");
 ggsave(filename = output.path, plot = plots.all); # out plots for each compound
