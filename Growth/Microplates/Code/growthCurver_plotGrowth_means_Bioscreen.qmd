@@ -28,6 +28,7 @@ library(tidyverse);
 library(readxl);
 library(readr);
 library(gridExtra);
+library(growthCurver);
 
 mytheme = theme(axis.text.x = element_text(size = 6), 
                 axis.text.y = element_text(size = 6), 
@@ -37,6 +38,7 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                #legend.position = "bottom", 
                legend.text = element_text(size=4),
                aspect.ratio =0.5);
+
 ```
 
 ## File I/O

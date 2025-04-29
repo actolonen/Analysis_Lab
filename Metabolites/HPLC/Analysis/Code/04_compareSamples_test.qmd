@@ -1,0 +1,123 @@
+---
+title: "HPLC: compare fermentation profiles of different samples"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+The goal of this analysis is to compare the fermentation profiles of HPLC samples.
+
+# Setup
+
+Libraries
+
+```{r setup, message=FALSE}
+
+rm(list = ls());
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(readxl);
+library(plotly);
+
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "none", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+
+```
+
+File IO
+
+```{r file IO}
+
+# input: directory to read sample information file
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/information_HPLC_DATE.xlsx";
+
+# input fermentation measurements
+data.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/Analysis/compound_concentrations.tsv";
+data.in = read_tsv(file = data.file, col_names=T);
+
+```
+
+# Methods
+
+Select which detector to use for quantification of each acid
+
+```{r select detector}
+
+# Select RID by removing formate UV210, Actate UV210, Lactate RID
+data.in = data.in %>%
+  filter(!(Compound =="Formate" & Detector == "SPD-20A 210nm")) %>%
+  filter(!(Compound =="Acetate" & Detector == "SPD-20A 210nm")) %>%
+  filter(!(Compound =="Lactate" & Detector == "SPD-20A 210nm"));
+  
+```
+
+Organize data for plotting
+
+```{r organize data}
+
+# focus on data of interest
+data.all = data.in %>%
+  filter(!grepl("H2SO4", Description)) %>%
+  filter(!grepl("test", Description));
+
+data.all = data.all %>%
+  mutate(Strain_type = if_else(grepl("WT|GS2", Description), true = "control", false = "Test")) %>%
+  mutate(Temp = Description) %>%
+  separate(Temp, c("Strain", "Rep", "Treatment"), sep = "-");
+  
+# organize samples
+data.samples = data.all %>%
+  group_by(Sample, Compound) %>%
+    mutate(Concentration_mean = mean(Concentration)) %>%
+  ungroup() %>%
+  dplyr::select(Compound, Concentration_mean, Sample) %>%
+  distinct();
+
+```
+
+### Plot data
+
+Plot data: all fermentation products
+
+```{r plot no-add, fig.cap = "Fig 1: Fermentation products by C.phytofermentans PHY24.0 clones growing in GS2 medium with no addition."}
+
+plot.ferm = ggplot(data.samples, aes(
+   x = Compound, 
+   y = Concentration_mean, 
+   fill = Compound))+
+ geom_violin()+
+ geom_jitter(aes(color=Compound, text = Sample), size = 2, position=position_jitter(0.2))+
+ xlab("Compound")+
+ ylab("mM produced")+
+ coord_cartesian(ylim=c(0, 50))+
+ scale_y_continuous(breaks=seq(0, 50, 10))+
+ #scale_color_manual(values = c('gray', '#613f4f', 'red', 'green', 'blue'))+
+ theme_classic()+
+ mytheme;
+
+plotly.ferm = ggplotly(plot.ferm, tooltip="text");
+plotly.ferm
+
+
+```
+
+# Conclusions

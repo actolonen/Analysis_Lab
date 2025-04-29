@@ -1,0 +1,261 @@
+---
+title: "HPLC: extract and plot HPLC chromatograms from LCD files"
+author: "Fermlab"
+format: html
+editor: visual
+toc: TRUE
+code-fold: TRUE
+embed-resources: TRUE
+---
+
+# Introduction
+
+This code extracts HPLC chromatograms from LCD files and outputs the chromatogram data as TXT files and plots the data as a PNG file.
+
+# Setup
+
+Libraries and config variables.
+
+```{r setup, echo=FALSE, message=FALSE}
+
+library(knitr);
+knitr::opts_chunk$set(warning = F, message = F);
+
+library(chromConverter);
+library(stringr);
+library(tidyverse);
+library(readr);
+library(gridExtra);
+library(readxl);
+Sys.setenv(RETICULATE_PYTHON = "/home/tolonen/.conda/envs/fermlab2/bin/python") # Set desired python installation
+library(reticulate);
+
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+                axis.title.x = element_text(size = 8), 
+                axis.title.y = element_text(size = 8),
+                strip.text.x = element_text(size = 6),
+                legend.position = "bottom", 
+                aspect.ratio =0.5,
+                plot.title = element_text(size = 8),
+               );
+
+# chromconverter method 
+#chrom_method = "method 1";
+chrom_method = "method 2";
+
+
+```
+
+## File I/O
+
+Directories/files used by this script.
+
+```{r file IO}
+
+# input: directory to read sample information file
+info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/information_HPLC_DATE.xlsx";
+
+sample.data.in = read_excel(info.file, sheet = "Samples", skip=2, col_names = TRUE);
+
+# input: directory to read with .lcd files
+lcd.input.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/LCD_LabSolutions";
+
+# output: directory to write chromConverter .txt files
+txt.output.dir = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/ChromConverter";
+
+if (!dir.exists(txt.output.dir)) 
+{
+  dir.create(txt.output.dir);
+}
+
+# output: directory for all plots
+plots.output.dir= "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/Chromatograms";
+
+if (!dir.exists(plots.output.dir)) 
+{
+  dir.create(plots.output.dir);
+}
+
+```
+
+# Functions
+
+Method 1 to convert LCD files to TXT files using Chromconverter. Use ths method when chromconverter extracts the chromatogram for each detector as a separate data frame.
+
+```{r method 1 chromConverter to convert .lcd to .txt}
+
+convert_method1 = function(files.lcd)
+{
+
+# declare empty data.frame for all samples
+chromatograms.all = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      File = character(), 
+                      Detector = character());
+
+for (file in files.lcd) 
+{
+  inputfile = paste(lcd.input.dir, file, sep = "/");
+  inputfile.base = str_replace(string=file, pattern=".lcd", replacement = "");
+
+# declare a data.fram for this sample
+chromatograms.sample = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      File = character(), 
+                      Detector = character());
+  
+  data = read_shimadzu_lcd(
+     path = inputfile, 
+     format_out = "data.frame", 
+     data_format = "long", 
+     read_metadata = TRUE);
+  
+  for (detector in data) # foreach detector (data.frame) in the data list
+  {
+    my.instrument = attr(detector, which = "instrument");
+    my.detector = attr(detector, which = "detector");
+    my.wavelength = attr(detector, which = "wavelength");
+    my.detector = if_else(my.detector == "SPD-20A", true = paste(my.detector, my.wavelength, sep = " "), false = my.detector); 
+    detector = detector %>%
+      rownames_to_column(var = "Minutes") %>%
+      rename(Intensity = int) %>%
+      mutate(File = file) %>%
+      mutate(Detector = my.detector);
+      chromatograms.sample = rbind(chromatograms.sample, detector); 
+   }
+
+chromatograms.all = rbind(chromatograms.all, chromatograms.sample);
+
+# print out chromatogram from this sample to file
+chromatogram.file = paste(inputfile.base, ".txt", sep="");
+chromatogram.out = paste(txt.output.dir, chromatogram.file, sep="/");
+write.table(chromatograms.sample, file = chromatogram.out, row.names=FALSE, sep="\t", col.names=TRUE); 
+}
+
+# change "Minutes" to numeric
+chromatograms.all = chromatograms.all %>%
+  mutate(Minutes = as.numeric(Minutes));
+
+return(chromatograms.all);
+
+}
+    
+
+```
+
+Method 2 to convert LCD files to TXT files using Chromconverter. Use ths method when chromconverter extracts the chromatograms for all detectors as a single data frame.
+
+```{r method 2 chromConverter to convert .lcd to .txt}
+
+convert_method2 = function(files.lcd)
+{
+
+# declare empty data.frame for all samples
+chromatograms.all = data.frame(
+                      Minutes = double(),
+                      Intensity = double(),
+                      File = character(), 
+                      Detector = character());
+
+for (file in files.lcd) 
+{
+inputfile = paste(lcd.input.dir, file, sep = "/");
+
+# read data into data frame
+data = read_shimadzu_lcd(
+    path = inputfile, 
+    format_out = "data.frame", 
+    data_format = "long", 
+    read_metadata = TRUE);
+
+data.sample = data %>%
+    rename(Intensity = intensity, Minutes = rt, Detector = detector) %>%
+    mutate(File = file) %>%
+    mutate(Detector = if_else(Detector == "Detector A", true = "SPD-20A", false = "RID-10A")) %>%
+    mutate(Detector = if_else(Detector == "SPD-20A", true = paste(Detector, lambda, sep=" "), false = Detector)) %>%
+    select(Minutes, Intensity, File, Detector);
+    
+# print out chromatogram from this sample to file
+inputfile.base = str_replace(string=file, pattern=".lcd", replacement = "");
+chromatogram.file = paste(inputfile.base, ".txt", sep="");
+chromatogram.out = paste(txt.output.dir, chromatogram.file, sep="/");
+write.table(data.sample, file = chromatogram.out, row.names=FALSE, sep="\t", col.names=TRUE); 
+
+chromatograms.all = rbind(chromatograms.all, data.sample);
+}
+
+return(chromatograms.all);
+
+}
+      
+```
+
+# Methods
+
+Organize data
+
+```{r organize data}
+
+# select sample files for analysis.
+files.lcd = list.files(path = lcd.input.dir, pattern = ".lcd");
+
+# convert LCD files to txt files using chromconverter
+if (chrom_method == "method 1")
+{
+    chromatograms_all = convert_method1(files.lcd);
+}
+if (chrom_method == "method 2")
+{
+    chromatograms_all = convert_method2(files.lcd);
+}
+
+# add sample descriptions
+chromatograms.all.plot = left_join(chromatograms_all, sample.data.in, by = "File");
+
+
+```
+
+Plot full chromatograms and output as .png files
+
+```{r plot chromatograms for three detectors for each sample}
+
+# get list of files
+sample.list = unique(chromatograms.all.plot$File);
+
+for(my.sample in sample.list)
+{
+  # get file of interest
+  chromatogram.plot = chromatograms.all.plot %>%
+    filter(File == my.sample);
+
+  # define the file name and plot title
+  chromatogram.plot = chromatogram.plot %>%
+    mutate(Filename = str_replace(string=File, pattern="\\.lcd", replacement="")) %>%
+    unite("Description", File, Sample, sep=": ");
+
+  # plot chromatogram
+  my.plot = ggplot(chromatogram.plot, aes(x=Minutes, y=Intensity)) +
+    ggtitle(chromatogram.plot$Description)+
+    geom_point(size=0.1) +
+    xlab("Time") + 
+    ylab("Intensity") +
+    coord_cartesian(xlim=c(0,max(chromatogram.plot$Minutes)), 
+                    ylim=c(0, max(chromatogram.plot$Intensity)))+
+    scale_x_continuous(breaks=seq(0, max(chromatogram.plot$Minutes), 4))+
+    scale_y_continuous(breaks=seq(0, max(chromatogram.plot$Intensity), 
+                    max(chromatogram.plot$Intensity)/6))+
+    facet_wrap(~ Detector) +
+    theme_classic() +
+    mytheme;
+
+  plot.file = paste(unique(chromatogram.plot$Filename), ".png", sep="");
+  output.path = paste(plots.output.dir, plot.file, sep="/");
+  ggsave(filename = output.path, plot = my.plot);
+}
+  
+```
+
+# Conclusions
