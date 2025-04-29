@@ -20,6 +20,6 @@ Our Shimadzu HPLC software (Lab Solutions) outputs the chromatograms as .lcd fil
 
 -   Step 1: [Code](Code/01_chromatograms_test.qmd) to plot HPLC chromatograms using all three detectors. Chromatogram data is extracted from LCD files using [chromConverter](https://cran.rstudio.com/web/packages/chromConverter/index.html). Chromatograms outputed as .txt files and are printed as .png files.
 -   Step 2: [Code](Code/02_standards_test.qmd) to build linear models (LMs) correlate peak areas and compound concentrations in standard solutions. We will apply this model to calculate compound concentrations based on peak areas in the samples.
--   Step 3: [Code](/Code/03_quantifyCompounds_test.qmd) and to use linear models from step 2 to quantify compounds in test samples.
+-   Step 3: [Code](Code/03_quantifyCompounds_test.qmd) and to use linear models from step 2 to quantify compounds in test samples.
 
 -   [Notebook](Code/ChromConverter-LabSolutions/2024.08_standards_chromConverter-LabSolutions.html) and showing that Lab Solutions .lcd files that are converted to .txt using with Lab Solutions or chromConverter produce similar results.
