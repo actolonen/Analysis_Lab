@@ -3348,7 +3348,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Formate</td>
 <td style="text-align: left;">RID-10A</td>
 <td style="text-align: right;">0.0729200</td>
-<td style="text-align: right;">0.0729200</td>
+<td style="text-align: right;">2.905401</td>
 <td style="text-align: right;">16.50</td>
 <td style="text-align: right;">17.50</td>
 </tr>
@@ -3356,7 +3356,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Formate</td>
 <td style="text-align: left;">SPD-20A 210nm</td>
 <td style="text-align: right;">0.0291569</td>
-<td style="text-align: right;">0.0291569</td>
+<td style="text-align: right;">2.881856</td>
 <td style="text-align: right;">16.25</td>
 <td style="text-align: right;">17.25</td>
 </tr>
@@ -3364,7 +3364,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Acetate</td>
 <td style="text-align: left;">RID-10A</td>
 <td style="text-align: right;">0.0478122</td>
-<td style="text-align: right;">0.0478122</td>
+<td style="text-align: right;">2.882600</td>
 <td style="text-align: right;">17.90</td>
 <td style="text-align: right;">18.90</td>
 </tr>
@@ -3372,7 +3372,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Acetate</td>
 <td style="text-align: left;">SPD-20A 210nm</td>
 <td style="text-align: right;">0.0423899</td>
-<td style="text-align: right;">0.0423899</td>
+<td style="text-align: right;">2.842517</td>
 <td style="text-align: right;">17.70</td>
 <td style="text-align: right;">18.70</td>
 </tr>
@@ -3380,7 +3380,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Ethanol</td>
 <td style="text-align: left;">RID-10A</td>
 <td style="text-align: right;">0.0836556</td>
-<td style="text-align: right;">0.0836556</td>
+<td style="text-align: right;">2.751427</td>
 <td style="text-align: right;">26.40</td>
 <td style="text-align: right;">27.40</td>
 </tr>
@@ -3388,7 +3388,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Lactate</td>
 <td style="text-align: left;">RID-10A</td>
 <td style="text-align: right;">0.0280221</td>
-<td style="text-align: right;">0.0280221</td>
+<td style="text-align: right;">2.924671</td>
 <td style="text-align: right;">15.10</td>
 <td style="text-align: right;">16.00</td>
 </tr>
@@ -3396,7 +3396,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Lactate</td>
 <td style="text-align: left;">SPD-20A 210nm</td>
 <td style="text-align: right;">0.0284267</td>
-<td style="text-align: right;">0.0284267</td>
+<td style="text-align: right;">2.842601</td>
 <td style="text-align: right;">14.90</td>
 <td style="text-align: right;">15.70</td>
 </tr>
@@ -3404,7 +3404,7 @@ vertical-align: -.125em;
 <td style="text-align: left;">Glucose</td>
 <td style="text-align: left;">RID-10A</td>
 <td style="text-align: right;">0.0073595</td>
-<td style="text-align: right;">0.0073595</td>
+<td style="text-align: right;">1.608324</td>
 <td style="text-align: right;">10.80</td>
 <td style="text-align: right;">11.50</td>
 </tr>
@@ -3456,7 +3456,7 @@ vertical-align: -.125em;
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Description =</span> <span class="fu">str_replace_all</span>(<span class="at">string=</span>Description, <span class="at">pattern=</span><span class="st">&quot;NA&quot;</span>, <span class="at">replacement=</span><span class="st">&quot;&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Sample, File, Description);</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">left_join</span>(chrom.all, sample.info.in, <span class="at">by =</span> <span class="st">&quot;File&quot;</span>);</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>chrom.all <span class="ot">=</span> <span class="fu">left_join</span>(chrom.all, sample.info, <span class="at">by =</span> <span class="st">&quot;File&quot;</span>);</span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># print header of output</span></span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>chrom.all.table <span class="ot">=</span> <span class="fu">head</span>(chrom.all, <span class="dv">5</span>);</span>
@@ -3473,6 +3473,7 @@ vertical-align: -.125em;
 <th style="text-align: left;">File</th>
 <th style="text-align: left;">Detector</th>
 <th style="text-align: left;">Sample</th>
+<th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
@@ -3481,6 +3482,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">-0.600</td>
 <td style="text-align: left;">A1.lcd</td>
 <td style="text-align: left;">SPD-20A 260nm</td>
+<td style="text-align: left;">A1</td>
 <td style="text-align: left;">Sample A1</td>
 </tr>
 <tr class="even">
@@ -3488,6 +3490,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">-0.991</td>
 <td style="text-align: left;">A1.lcd</td>
 <td style="text-align: left;">SPD-20A 260nm</td>
+<td style="text-align: left;">A1</td>
 <td style="text-align: left;">Sample A1</td>
 </tr>
 <tr class="odd">
@@ -3495,6 +3498,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">-0.700</td>
 <td style="text-align: left;">A1.lcd</td>
 <td style="text-align: left;">SPD-20A 260nm</td>
+<td style="text-align: left;">A1</td>
 <td style="text-align: left;">Sample A1</td>
 </tr>
 <tr class="even">
@@ -3502,6 +3506,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">0.217</td>
 <td style="text-align: left;">A1.lcd</td>
 <td style="text-align: left;">SPD-20A 260nm</td>
+<td style="text-align: left;">A1</td>
 <td style="text-align: left;">Sample A1</td>
 </tr>
 <tr class="odd">
@@ -3509,6 +3514,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">0.758</td>
 <td style="text-align: left;">A1.lcd</td>
 <td style="text-align: left;">SPD-20A 260nm</td>
+<td style="text-align: left;">A1</td>
 <td style="text-align: left;">Sample A1</td>
 </tr>
 </tbody>
@@ -3538,8 +3544,8 @@ vertical-align: -.125em;
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>regressions.in <span class="ot">=</span> regressions.in <span class="sc">%&gt;%</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Peak.start =</span> <span class="fu">if_else</span>((Compound <span class="sc">==</span> <span class="st">&quot;Formate&quot;</span> <span class="sc">&amp;</span> Detector <span class="sc">==</span> <span class="st">&quot;SPD-20A 210nm&quot;</span>), <span class="at">true=</span><span class="fl">16.4</span>, <span class="at">false =</span> Peak.start)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Peak.start =</span> <span class="fu">if_else</span>((Compound <span class="sc">==</span> <span class="st">&quot;Formate&quot;</span> <span class="sc">&amp;</span> Detector <span class="sc">==</span> <span class="st">&quot;RID-10A&quot;</span>), <span class="at">true=</span><span class="fl">16.6</span>, <span class="at">false =</span> Peak.start));</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Peak_start =</span> <span class="fu">if_else</span>((Compound <span class="sc">==</span> <span class="st">&quot;Formate&quot;</span> <span class="sc">&amp;</span> Detector <span class="sc">==</span> <span class="st">&quot;SPD-20A 210nm&quot;</span>), <span class="at">true=</span><span class="fl">16.4</span>, <span class="at">false =</span> Peak_start)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Peak_start =</span> <span class="fu">if_else</span>((Compound <span class="sc">==</span> <span class="st">&quot;Formate&quot;</span> <span class="sc">&amp;</span> Detector <span class="sc">==</span> <span class="st">&quot;RID-10A&quot;</span>), <span class="at">true=</span><span class="fl">16.6</span>, <span class="at">false =</span> Peak_start));</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Plot peaks and calc concentrations</p>
@@ -3592,7 +3598,7 @@ vertical-align: -.125em;
 <span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">Detector =</span> my.detector, </span>
 <span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">Area =</span> area.compound, </span>
 <span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>      <span class="at">Concentration =</span> conc.compound, </span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">Description =</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Sample));</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">Description =</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Description));</span>
 <span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    quants.all <span class="ot">=</span> <span class="fu">rbind</span>(quants.all, quants.compound);</span>
 <span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    </span>
@@ -3601,7 +3607,7 @@ vertical-align: -.125em;
 <span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a><span class="co"># print out plots for sample of interest</span></span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>description.sample <span class="ot">=</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Sample);  </span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>description.sample <span class="ot">=</span> <span class="fu">unique</span>(chrom.sample<span class="sc">$</span>Description);  </span>
 <span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>plots.all <span class="ot">=</span> <span class="fu">grid.arrange</span>(<span class="at">grobs =</span> plots.list, <span class="at">top =</span> description.sample);</span>
 <span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>output.path <span class="ot">=</span> <span class="fu">paste</span>(plots.out, <span class="st">&quot;/&quot;</span>, my.sample, <span class="st">&quot;.png&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>);</span>
 <span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> output.path, <span class="at">plot =</span> plots.all); <span class="co"># out plots for each compound</span></span>

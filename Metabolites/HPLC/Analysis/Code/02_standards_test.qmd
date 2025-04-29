@@ -529,7 +529,7 @@ for (row in rows)  # foreach compound and detector
         rename(Compound = my_compound, Detector = my_detector) %>%
         select(Compound, Detector, Slope, Intercept);
     my_slope = lm.compound$Slope;
-    my_intercept = lm.compound$Slope;
+    my_intercept = lm.compound$Intercept;
 
     # add lm data to df
     target_lm = data.frame(Compound = my_compound, Detector = my_detector, Slope = my_slope, Intercept = my_intercept, Peak_start = peak_start, Peak_end = peak_end);
