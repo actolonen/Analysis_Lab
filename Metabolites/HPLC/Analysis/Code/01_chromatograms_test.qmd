@@ -14,7 +14,7 @@ This code extracts HPLC chromatograms from LCD files and outputs the chromatogra
 
 # Setup
 
-Libraries and config variables.
+Libraries
 
 ```{r setup, echo=FALSE, message=FALSE}
 
@@ -30,6 +30,17 @@ library(readxl);
 Sys.setenv(RETICULATE_PYTHON = "/home/tolonen/.conda/envs/fermlab2/bin/python") # Set desired python installation
 library(reticulate);
 
+
+```
+
+Flags/Config
+
+```{r Flags}
+
+# chromconverter method 
+#chrom_method = "method 1";
+chrom_method = "method 2";
+
 mytheme = theme(axis.text.x = element_text(size = 6), 
                 axis.text.y = element_text(size = 6), 
                 axis.title.x = element_text(size = 8), 
@@ -40,18 +51,11 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                 plot.title = element_text(size = 8),
                );
 
-# chromconverter method 
-#chrom_method = "method 1";
-chrom_method = "method 2";
-
-
 ```
 
-## File I/O
+File IO
 
-Directories/files used by this script.
-
-```{r file IO}
+```{r File IO}
 
 # input: directory to read sample information file
 info.file = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC/Analysis/Data/information_HPLC_DATE.xlsx";

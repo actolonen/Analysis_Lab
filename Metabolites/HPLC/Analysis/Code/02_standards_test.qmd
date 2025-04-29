@@ -25,7 +25,7 @@ The user must select one of two alternative methods to background-normalize the 
 
 Libaries
 
-```{r setup, echo=FALSE, message=FALSE}
+```{r setup, message=FALSE}
 
 rm(list = ls());
 
@@ -43,6 +43,16 @@ library(readxl);
 library(modeest); # calc mode
 library(DescTools); # AUC method
 
+```
+
+Flags/config
+
+```{r flags}
+
+# define method to calculate peak areas. 
+#peak.method = "mode";
+peak_method = "boundaries";
+
 mytheme = theme(axis.text.x = element_text(size = 6), 
                 axis.text.y = element_text(size = 6), 
                 axis.title.x = element_text(size = 8), 
@@ -53,17 +63,6 @@ mytheme = theme(axis.text.x = element_text(size = 6),
                 plot.title = element_text(size = 8),
                );
 
-
-
-```
-
-Flags
-
-```{r flags}
-
-# define method to calculate peak areas. 
-#peak.method = "mode";
-peak_method = "boundaries";
 
 ```
 
@@ -102,28 +101,9 @@ table.out = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Metabolites/HPLC
 
 ```
 
-Metabolite concentrations in standards samples.
-
-```{r standards metabolite concs}
-
-# Define the standards that will be used to quantify compounds.
-
-my.standards = standards %>%
-  filter(grepl("STD", Sample)) %>%
-  mutate(Concentration_mM = as.numeric(Concentration_mM)) %>%
-  mutate(Concentration_mM = round(Concentration_mM, 2)) %>%
-  select(Sample, Compound, Concentration_mM);
-
-table.standards = kable(my.standards, caption = "Table 1: Metabolite concentrations in standards");
-table.standards
-
-```
-
 # Functions
 
-## Background-normalize chromatograms
-
-Method 1: normalize using mode intensity
+Method 1: background-normalize chromatograms using mode intensity
 
 ```{r normalize chromatograms using mode intensity}
 
@@ -145,7 +125,7 @@ return(chroms.peak.norm);
 
 ```
 
-Method 2: normalize using peak boundaries
+Method 2: background-normalize chromatograms using peak boundaries
 
 ```{r normalize chromatograms using peak boundaries}
 
@@ -168,9 +148,7 @@ return(chroms.peak.norm);
 
 ```
 
-## Calc peak areas
-
-Calculate peak areas for a metabolite.
+Calculate peak areas for a compound
 
 ```{r calculate peak areas for compound of interest}
 
@@ -208,7 +186,7 @@ return(areas.concs);
 
 ```
 
-## Calc linear model
+Calculate linear model
 
 ```{r calculate linear model}
 
@@ -225,8 +203,6 @@ lm.compound = data.frame(my_compound, Slope, Intercept, peak_start, peak_end, my
 return(lm.compound);
 }
 ```
-
-## Plot peaks
 
 Plot peaks from chromatogram data.
 
@@ -251,7 +227,7 @@ return(plot.peaks)
 
 ```
 
-## Plot linear model
+Plot linear model
 
 ```{r plot linear model}
 
@@ -273,6 +249,22 @@ return(plot.lm);
 ```
 
 # Methods
+
+Table of compound concentrations in standards
+
+```{r standards metabolite concs}
+
+# Define the standards that will be used to quantify compounds.
+
+my.standards = standards %>%
+  filter(grepl("STD", Sample)) %>%
+  mutate(Concentration_mM = as.numeric(Concentration_mM)) %>%
+  mutate(Concentration_mM = round(Concentration_mM, 2)) %>%
+  select(Sample, Compound, Concentration_mM);
+
+table.standards = kable(my.standards, caption = "Table 1: Metabolite concentrations in standards");
+table.standards
+```
 
 Select LCD files of standards
 
