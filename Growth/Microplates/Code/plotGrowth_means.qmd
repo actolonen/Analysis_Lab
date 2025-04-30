@@ -1,5 +1,5 @@
 ---
-title: "Microbial growth in microplates (Bioscreen/Clario)"
+title: "Bioscreen growth experiment"
 author: "Fermlab"
 format: html
 editor: visual
@@ -10,25 +10,11 @@ embed-resources: TRUE
 
 # Introduction
 
-This notebook analyzes the growth of microbial cells in microplates. Functions are included that organize data from different plate readers:
-
--   Bioscreen
-
--   Clario
-
--   Tecan (in development)
-
-Input file = excel spreadsheet with 2 pages
-
-1.  Page 1 = "Informations". Plate map describing experiment with these columns. NOTE: empty wells are written as "empty" in all columns except Well.
-    1.  Well: microtiter plate well
-    2.  Strain
-    3.  Medium: growth medium
-    4.  Treatment: carbon source, etc
-    5.  Dilution: dilution of cells into microtiter plate. For example 1/20 = 0.05
-2.  Page 2 = "Raw data". Data from plate reader
+Description of growth experiment.
 
 # Setup
+
+Libraries
 
 ```{r setup, echo=FALSE, message=FALSE}
 
@@ -40,38 +26,47 @@ library(tidyverse);
 library(readxl);
 library(readr);
 library(gridExtra);
+library(plotly);
 
-mytheme = theme(axis.text.x = element_text(size = 6), 
-                axis.text.y = element_text(size = 6), 
-               axis.title.x = element_text(size = 6), 
-               axis.title.y = element_text(size = 6),
-               strip.text.x = element_text(size = 6),
-               #legend.position = "bottom", 
-               legend.text = element_text(size=4),
-               aspect.ratio =0.5);
+```
+
+Flags/Config
+
+```{r Flags and config}
 
 # Type of plate reader: select "Bioscreen" or "Clario"
-plate_reader = "Clario";
+plate_reader = "Bioscreen";
 
 # normalization method: 
 # "initial" = normalize OD600 by subtracting the reading at t=0h
 # "mean"  = subtract the mean OD600 reading at each time point
 norm_OD600 = "initial";
 
+mytheme = theme(axis.text.x = element_text(size = 6), 
+                axis.text.y = element_text(size = 6), 
+               axis.title.x = element_text(size = 6), 
+               axis.title.y = element_text(size = 6),
+               strip.text.x = element_text(size = 6),
+               legend.position = "bottom", 
+               legend.text = element_text(size=4),
+               aspect.ratio =0.5);
+
+color_vals = c("0" = "#BEBEBE", "1.5"="#68A2AD", "2"="#EEBC37");
+
 ```
 
-## File I/O
+File IO
 
 ```{r File IO}
 
 # input data
-file.in = "growthData_Clario.xlsx";
+file.in = "growthData_Bioscreen.xlsx";
 path.in = "/home/tolonen/Github/actolonen/Public/Analysis_Lab/Growth/Microplates/Data";
 data.in = paste(path.in, file.in, sep = "/");
 
 ```
 
-## Functions
+# Functions
 
 ### Functions to organize data
 
@@ -139,11 +134,11 @@ organize_bioscreen = function(data.in)
 {    
 # output is data.frame = [Hours, Well, OD600, Treatment]
 
-plate.map = read_excel(data.in, sheet = "Informations", col_names = TRUE, skip = 4);
+plate.map = read_excel(data.in, sheet = "Informations", col_names = TRUE, skip = 29);
 growth.data = read_excel(data.in, sheet = "Raw data", col_names = TRUE, skip = 2);
 
 # plate map variables
-first.well = "2";
+first.well = "1";
 last.well = "199";
 
 # parse plate.map
@@ -212,7 +207,7 @@ return(growth.cells);
 
 Function to normalize OD600 readings by subtracting mean OD600 at the same time point
 
-```{r norm OD by mean reading at the same time, eval=F}
+```{r norm OD by mean reading at the same time}
 
 # substract blank mean from OD measurements
 
@@ -259,7 +254,7 @@ table.growth
 
 ```
 
-## Plot Individual wells
+## Plots
 
 Plot blanks
 
@@ -287,15 +282,6 @@ grid.arrange(plot.blanks, ncol=1);
 
 ```
 
-Remove contaminated wells
-
-```{r remove contaminated wells based on plots in previous section}
-
-growth.all = growth.all %>%
-    filter(!Well %in% c("114", "104", "175"));
-
-```
-
 Normalize OD600 data: subtract blanks from wells with cells.
 
 ```{r normalize OD600 readings}
@@ -316,12 +302,12 @@ if (norm_OD600 == "initial")
 
 ```
 
-Plot growth in well with cells
+Plot growth: for each strain (panel) compare growth in each treatment (lines)
 
-```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of treatments with cells. Each curve is a well."}
+```{r plot Growth, fig.cap = "Fig 2. Growth (OD600) of each strain (panel) in each treatment (curves). Each curve is a well."}
 
-plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
-  geom_point(size=.05, color = "blue") +
+plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well, color=Treatment)) +
+  geom_point(size=.05) +
   geom_line(linewidth=0.1, color='black') +
   theme_bw() +
   xlab("Hours") + 
@@ -329,9 +315,10 @@ plot.cells = ggplot(growth.cells, aes(x=Hours, y=OD600, group=Well)) +
   coord_cartesian(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
-  facet_wrap (~Treatment, ncol=4)+
+  facet_wrap (~Strain, ncol=7)+
   scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
   scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
+  scale_color_manual(values = c(color_vals))+
   theme_classic()+
   mytheme;
 
@@ -340,39 +327,38 @@ grid.arrange(plot.cells, ncol=1);
 
 ```
 
-## Compare treatment means on same plot
-
-Calc treatment means
+Calculate treatment means for each strain
 
 ```{r calc treatment means}
 
 growth.cells = growth.cells %>%
-  group_by(Hours, Treatment) %>%
+  group_by(Hours, Treatment, Strain) %>%
   mutate(OD600_mean = mean(OD600)) %>%
   mutate(OD600_sd = sd(OD600)) %>%
 ungroup();
 
 ```
 
-Plot treatment means
+Plot growth: for each treatment (panel) compare growth of each strain (lines)
 
-```{r plot means, sd, fig.cap = "Fig 3. Growth (OD600) of treatments with cells. Plot shows treatment means +/-SD."}
+```{r plot means foreach strain, fig.cap = "Fig 3. Growth (OD600) of treatments with cells. Plots show strain means (curves) for each treatment (panels)"}
  
 plot.cells.means = ggplot(growth.cells, aes(
     x=Hours, 
     y=OD600_mean, 
+    group = Strain,
     ymin = OD600_mean - OD600_sd,
     ymax = OD600_mean + OD600_sd)) +
   geom_point(size=.05, color = "blue") +
   geom_line(linewidth=0.1, color='black') +
-  geom_errorbar(width = 0, color = "blue")+
+ # geom_errorbar(width = 0, color = "blue")+
   theme_bw() +
   xlab("Hours") + 
   ylab("OD(600)") +
   coord_cartesian(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
-  facet_wrap (~Treatment, ncol=4)+
+  facet_wrap (~Treatment, ncol=7)+
   scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 24))+
   scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
@@ -382,10 +368,9 @@ grid.arrange(plot.cells.means, ncol=1);
 
 ```
 
-Compare treatment means for each strain
+Plot growth means: for each strain (panel) compare growth in each treatment (lines)
 
-```{r growth compare means, fig.cap="Fig 4. Growth (OD600) of treatments with cells growing in different treatments. Plot shows treatment means."}
-
+```{r growth compare means, fig.cap="Fig 4. Growth (OD600) of treatments with cells growing in different treatments. Plot shows treatment means (curves) for each strain (panels)."}
 
 plot.cells_strains = ggplot(growth.cells, aes(
     x=Hours, 
@@ -397,7 +382,7 @@ plot.cells_strains = ggplot(growth.cells, aes(
   geom_point(size=.05) +
   geom_line(linewidth=0.1, color='black') +
   #geom_errorbar(width = 0, color = "blue")+
-  facet_wrap(~ Strain)+
+  facet_wrap(~ Strain, ncol=7)+
   theme_bw() +
   xlab("Hours") + 
   ylab("OD(600)") +
@@ -405,13 +390,59 @@ plot.cells_strains = ggplot(growth.cells, aes(
     xlim = c(0, max(growth.cells$Hours)), 
     ylim = c(-0.05,  max(growth.cells$OD600) + 0.1))+
   scale_x_continuous(breaks=seq(0, max(growth.cells$Hours), 12))+
-  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.1))+
+  scale_y_continuous(breaks=seq(0, max(growth.cells$OD600 + 0.1), 0.4))+
   theme_classic()+
   mytheme;
 
 grid.arrange(plot.cells_strains, ncol=1);
 
 
+
+```
+
+Calc max OD for each strain in each treatment
+
+```{r calc max ODs}
+
+# focus on data of interest
+growth_max = growth.cells %>%
+    dplyr::select(OD600_mean, Strain, Treatment) %>%
+    distinct();
+
+# calc max OD for each strain in each treatment
+growth_max = growth_max %>%
+    group_by(Strain, Treatment) %>%
+        mutate(OD600_max = max(OD600_mean)) %>%
+    ungroup %>%
+    dplyr::select(Strain, Treatment, OD600_max) %>%
+    distinct();
+
+```
+
+Plot max OD: for each strain in each treatment
+
+```{r plot max ODs, warning = F, fig.cap = "Fig 5: max OD600 for each strain in each treatment."}
+
+# remove WT 
+growth_max = growth_max %>%
+    filter(!Strain == "WT");
+
+plot_maxOD = ggplot(growth_max, aes(
+   x = Treatment, 
+   y = OD600_max, 
+   color = Treatment))+
+ geom_boxplot(outlier.size = 0)+
+ geom_jitter(aes(text = Strain), position=position_jitter(0.2))+
+ xlab("Treatment")+
+ ylab("max(OD600)")+
+ coord_cartesian(ylim=c(0, 0.6))+
+ scale_y_continuous(breaks=seq(0, 0.6, 0.1))+
+ scale_color_manual(values = c(color_vals))+
+ theme_classic()+
+ mytheme;
+
+plotly_maxOD = ggplotly(plot_maxOD, tooltip="text");
+plotly_maxOD
 
 ```
 
