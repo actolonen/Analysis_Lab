@@ -26,4 +26,4 @@
 
 ## *Yarrowia lipolytica* media
 
--   [MM29 complex medium](Recipes/recipe_YNB.md)
+-   [YNB medium](Recipes/recipe_YNB.md)
