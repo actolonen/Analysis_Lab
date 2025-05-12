@@ -12,7 +12,7 @@ Prepare 1L of YNB34 (20X)
 1. Dissolve 34 g of Yeast Nitrogen Base YNB34 (BD 233520) in 1L distilled water
 2. Autoclave / Filter
 
-Prepare 1L of NH4Cl 1M (50X)
+Prepare 1L of NH4Cl 250 g/L = 4.67 M (50X)
 1. Dissolve 250 g of NH4Cl in 1L distilled water
 2. Autoclave / Filter
 
