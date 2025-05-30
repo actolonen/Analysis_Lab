@@ -23,3 +23,7 @@
 ## Gut microbiome media
 
 -   [MM29 complex medium](Recipes/2024.02_recipe_MM29.pdf)
+
+## *Yarrowia lipolytica* media
+
+-   [YNB medium](Recipes/recipe_YNB.md)
