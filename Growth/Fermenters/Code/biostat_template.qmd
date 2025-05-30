@@ -10,7 +10,7 @@ embed-resources: TRUE
 
 # Introduction
 
-The goal of this experiment is to mesure the fermentation of glucose by C. phytofermentans. The F1 and F3 fermenters were run as follows:
+The this notebook analyses the culture parameters of a biostat experiment. The F1 and F3 fermenters were run as follows:
 
 1.  Medium: GS2 medium with 5 g/L glucose.
 2.  Temperature: 30C
