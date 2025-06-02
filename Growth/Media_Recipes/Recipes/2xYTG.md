@@ -12,7 +12,7 @@ Preparation 2xYTG (1 liter)
    
 -   Add 900 ml H2O
 
--   Adjust to pH 5.2 (ou pH 7)
+-   Adjust to pH 5.2
 
 -   Adjust volume to 1 L
 
