@@ -1,6 +1,6 @@
 # 2xYTG: Complex medium for growth of *Clostridium acetobutylicum*
 
-Preparation 2xYTG (1 liter)
+Prepare 1 liter of 2xYTG (see [Reference](https://sharebiology.com/2x-yt-medium/))
 
 -   16 g tryptone
 
