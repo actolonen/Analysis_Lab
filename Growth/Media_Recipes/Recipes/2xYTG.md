@@ -6,7 +6,7 @@ Preparation 2xYTG (1 liter)
 
 -   10 g yeast extract
 
--   4 g NaCl
+-   5 g NaCl
 
 -   5 g glucose
    
