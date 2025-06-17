@@ -17,7 +17,7 @@
 * 0.01 g NaCl
 * 2.2 g ammonium chloride
 * 20 g glucose
-* 1 ml of 100x vitamin solution
+* 1 ml of 1000x vitamin solution
 
 **Filter sterilize**
 
