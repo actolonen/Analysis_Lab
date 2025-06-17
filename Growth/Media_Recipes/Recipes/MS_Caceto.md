@@ -1,4 +1,4 @@
-MS medium: growth of Clostridium acetobutylicum [reference](https://journals.asm.org/doi/10.1128/jb.176.5.1443-1450.1994)
+MS medium: growth of Clostridium acetobutylicum ([Reference](https://journals.asm.org/doi/10.1128/jb.176.5.1443-1450.1994))
 
 **Prepare 25 ml of 1000x vitamin stock**
 * 0.2 g p-aminobenzoic acid (0.008 g/L final concentration)
