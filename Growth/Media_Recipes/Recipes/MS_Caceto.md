@@ -4,6 +4,7 @@ MS medium: growth of Clostridium acetobutylicum ([Reference](https://journals.as
 * 0.2 g p-aminobenzoic acid (0.008 g/L final concentration)
 * 0.001 g biotin (0.04 mg/L final concentration)
 * Dilute to 25 ml with sterile water
+* Filter sterilize
 
 **Prepare 1 liter of MS medium**
 * 0.5g KH2PO4
