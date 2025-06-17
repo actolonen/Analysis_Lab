@@ -13,6 +13,7 @@
 
 -   [2xYTG medium](Recipes/2xYTG.md)
 -   [CGM medium](Recipes/CGM.md)
+-   [MS medium](Recipes/MS_Caceto.md)
 
 ## *Flavobacterium johnsonaie* media
 
