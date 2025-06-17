@@ -17,10 +17,11 @@
 * 0.01 g NaCl
 * 2.2 g ammonium chloride
 * 20 g glucose
-* Add 2g cysteine HCl
 * dilute to 1 liter with water
-* 1 ml of 1000x vitamin solution
 * Adjust to pH 6
+* reduce medium with nitrogen bubbling
+* Add 2g cysteine HCl
+* 1 ml of 1000x vitamin solution
 
 **Filter sterilize**
 
