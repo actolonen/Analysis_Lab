@@ -1,6 +1,6 @@
 # SD-YE medium for growth of *Flavobacterium johnsoniae*
 
-Modified from SD medium recipte from Thierry Doan
+Modified from SD medium recipe by adding 0.125 g/L of yeast extract (YE)
 
 Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/article/10.1007/BF01571154)
 
