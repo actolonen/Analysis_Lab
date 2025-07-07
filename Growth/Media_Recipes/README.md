@@ -19,7 +19,7 @@
 
 -   [Complex media (CYE, PY2, MM, CF)](Recipes/complex_media_Fjohnsoniae.md)
 
--   [Defined medium (SD)](Recipes/defined_medium_Fjohnsonaie.md)
+-   [SD-YE medium](Recipes/defined_medium_Fjohnsonaie.md)
 
 ## Gut microbiome media
 
