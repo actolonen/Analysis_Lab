@@ -1,9 +1,10 @@
-# Defined medium for growth of *Flavobacterium johnsoniae*
+# SD-YE medium for growth of *Flavobacterium johnsoniae*
 
-Recipe from Thierry Doan
+Modified from SD medium recipte from Thierry Doan
 
 Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/article/10.1007/BF01571154)
 
+## Description of SD-YE medium
 | Reagent | Grams per Liter | Concentration | Product |
 |:--:|:--:|---:|---:|
 | NH4Cl | 1 | 0.1% | [A4514](https://www.sigmaaldrich.com/FR/en/product/sigald/a4514) |
@@ -14,10 +15,12 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 | NaH2PO4 | phosphate solution | x | [S3139](https://www.sigmaaldrich.com/FR/en/product/sigma/s3139) |
 | Na2HPO4 | phosphate solution | x | [S9763](https://www.sigmaaldrich.com/FR/en/product/sigald/s9763) |
 | Glucose | 20% solution | 0.4% | [G7021](https://www.sigmaaldrich.com/FR/en/product/sigma/g7021) |
+| Yeast extract | 0.125 | - | [8013-01-2](https://www.sigmaaldrich.com/FR/en/search/8013-01-2?focus=products&page=1&perpage=30&sort=relevance&term=8013-01-2&type=cas_number) |
 
-## Preparation of 1 liter of SD medium
 
-### Prepare 1M phosphate buffer pH 7.25 (50x solution) [Reference](https://www.novoprolabs.com/tools/buffer-preparations-and-recipes/sodium-phosphate-buffer)
+# Preparation of 1 liter of SD-YE medium
+
+## Prepare 1M phosphate buffer pH 7.25 (50x solution) [Reference](https://www.novoprolabs.com/tools/buffer-preparations-and-recipes/sodium-phosphate-buffer)
 
 1. Prepare 0.8 L of distilled water in a suitable container.
 2. Add 41.188 g of Sodium dihydrogen phosphate to the solution.
@@ -26,7 +29,7 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 5. Confirm pH = 7.25
 6. Sterilize by filtration (0.22 uM)
 
-### Prepare SD medium
+## Prepare SD-YE medium
 
 -   Prepare SD medium base (1 liter)
 
@@ -39,9 +42,30 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
     -   0.014 g FeSO4-7H2O
 
     -   0.012 g EDTA (use 0.5M EDTA pH8)
+ 
+    -   0.125 g yeast extract
 
 -   20 ml phosphate buffer pH 7.25
 
 -   Autoclave
 
--   Add 20 ml of 20% glucose solution
+# Preparation of 5 liters of SD-YE medium (Genemat)
+
+## Prepare 1L de tampon phosphate 1M pH 7.2 :
+* 1L KH2PO4 1M : 136,1g
+* 1L K2HPO4 1M : 174,2 g
+* Mélanger : 283 ml KH2PO4 + 717 ml K2HPO4 + 19 ml HCl 1M
+* confirm pH = 7.2
+
+### Prepare 5L medium SD-YE :
+* 20 g of glucose
+* 5 g NH4Cl
+* 2.5 ml of 1M MgSO4
+* 1 ml of 1M CaCl2
+* 69.5 mg of FeSO4*7H2O
+* 400 ul EDTA (Magali solution of 0.5 M EDTA pH 8)
+* 100 ml of 1M phosphate buffer
+* 0.625 g of yeast extract
+* bring volume to 5L with water
+
+* Add 20 ml of 20% glucose solution
