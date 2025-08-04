@@ -6,18 +6,20 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
 ## Manuals
 
--   [Column oven (CTO-20A)](Data/CTO-20A_IM_EN.pdf)
--   [Liquid chromatograph (LC-20AB)](Data/LC-20AB_IM_EN.pdf)
--   [Autosampler (SIL-20AC)](Data/SIL_20A_IM_VerA_ocr_EN.pdf)
--   [UV-VIS detector (SPD-20A)](Data/SPD-20A20AV_IM_EN.pdf)
--   [Aminex HPX-87H column](Data/LIT42D.PDF)
+-   [Column oven (CTO-20A)](Manuals/CTO-20A_IM_EN.pdf)
+-   [Liquid chromatograph (LC-20AB)](Manuals/LC-20AB_IM_EN.pdf)
+-   [Autosampler (SIL-20AC)](Manuals/SIL_20A_IM_VerA_ocr_EN.pdf)
+-   [UV-VIS detector (SPD-20A)](Manuals/SPD-20A20AV_IM_EN.pdf)
+-   [Aminex HPX-87H column](Manuals/LIT42D.PDF)
 
 ## Experimental procedure
 
--   Here is [Tom's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.09_protocolHPLC.pdf) to run the HPLC.
--   Here is [Magali's protocol](https://github.com/actolonen/Analysis_Lab/blob/main/Metabolites/HPLC/2024.10_protocole_HPLC_MB.docx) to run the HPLC.
+-   Here is [Tom's protocol](Protocols/2024.09_protocolHPLC.pdf) to run the HPLC.
+-   Here is [Magali's protocol](Protocols/2024.10_protocole_HPLC_MB.docx) to run the HPLC.
 
 ## HPLC Troubleshooting
+
+-   [Protocol](Protocols/RID-10A_IM_UsersManual_Rev0.pdf) to clean the lines with nitric acid and organic solvent.
 
 
 ## Compound detection by HPLC
