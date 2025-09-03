@@ -10,6 +10,8 @@ Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 -   [Liquid chromatograph (LC-20AB)](Manuals/LC-20AB_IM_EN.pdf)
 -   [Autosampler (SIL-20AC)](Manuals/SIL_20A_IM_VerA_ocr_EN.pdf)
 -   [UV-VIS detector (SPD-20A)](Manuals/SPD-20A20AV_IM_EN.pdf)
+-   [RID detector (RID-10A)](Manuals/rid10a.pdf)
+
 -   [Aminex HPX-87H column](Manuals/LIT42D.PDF)
 
 ## Experimental procedure
