@@ -2,7 +2,7 @@
 
 Here is an image of the Shimadzu HPLC at the Genoscope-CEA
 
-![](2024.03_HPLC.png)
+![](Protocols/2024.03_HPLC.png)
 
 ## Manuals
 
