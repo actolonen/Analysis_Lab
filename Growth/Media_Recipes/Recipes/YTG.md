@@ -15,6 +15,8 @@ Prepare 1 liter of 2xYTG (see [Reference](https://sharebiology.com/2x-yt-medium/
 -   Adjust to pH 5.2
 
 -   Adjust volume to 1 L
+  
+-   Add 1 ml of Resazurin 0.1%
 
 - Add 2g cysteine HCl
 
