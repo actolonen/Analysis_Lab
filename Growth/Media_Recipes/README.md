@@ -11,7 +11,7 @@
 
 ## Clostridium acetobutylicum medium
 
--   [2xYTG medium](Recipes/2xYTG.md)
+-   [YTG medium](Recipes/YTG.md)
 -   [CGM medium](Recipes/CGM.md)
 -   [MS medium](Recipes/MS_Caceto.md)
 
