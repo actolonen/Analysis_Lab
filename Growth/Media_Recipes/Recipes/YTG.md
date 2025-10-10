@@ -1,4 +1,6 @@
-# 2xYTG: Complex medium for growth of *Clostridium acetobutylicum*
+# Complex medium for growth of *Clostridium acetobutylicum*
+
+## 2xYTG 
 
 Prepare 1 liter of 2xYTG (see [Reference](https://sharebiology.com/2x-yt-medium/))
 
@@ -22,7 +24,7 @@ Prepare 1 liter of 2xYTG (see [Reference](https://sharebiology.com/2x-yt-medium/
 
 -   Autoclave or filter. The medium can be sterilized by autoclave or filtration. To store autoclaved media, close the bottle tightly to keep it reduced. If medium is filtered, transfer to the glove box to reduce.
 
-# 1xYTG: used for Genemat experiments
+## 1xYTG: used for Genemat experiments
 
 -   8 g tryptone
 
