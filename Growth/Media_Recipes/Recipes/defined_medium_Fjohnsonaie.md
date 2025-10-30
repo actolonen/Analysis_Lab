@@ -39,15 +39,15 @@ Composition of SD medium from [Chang and Pate, 1981](https://link.springer.com/a
 
     -   0.029 g CaCl2-2H2O (or use 1M solution)
 
-    -   0.014 g FeSO4-7H2O
+    -   0.014 g FeSO4-7H2O (use 2.5 mM solution with 2 mM EDTA solution)
 
-    -   0.012 g EDTA (use 0.5M EDTA pH8)
+    -   0.012 g EDTA (use 0.5M EDTA pH8 in 2.5 mM FeSO4-7H2O solution)
  
     -   0.125 g yeast extract
 
 -   20 ml phosphate buffer pH 7.25
 
--   Autoclave
+-   Autoclave (or use filtered solutions)
 
 # Preparation of 5 liters of SD-YE medium (Genemat)
 
